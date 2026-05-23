@@ -475,7 +475,7 @@ bitVector* bitVector::deserialize(const char *path){
     bitVector *bv = new bitVector();
     string s;
     getline(file, s);
-    for(char c : s) {
+    for (char c : s) {
         if (c == '1')
             bv->append1();
         else
