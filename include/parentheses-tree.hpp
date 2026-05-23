@@ -4,6 +4,11 @@
 class ParenthesesTree {
 private:
     bitVector T;
+    unsigned long long backward_search(size_t i, unsigned long long d);
+    unsigned long long forward_search(size_t i, unsigned long long d);
+    pair<unsigned long long, unsigned long long> fwdblock(size_t i, unsigned long long d);
+    unsigned long long fwd_search(size_t i, unsigned long long d);
+    unsigned long long excess(size_t i);
 
 public:
     // Here, size_t refers to a position on the bitvector
@@ -45,4 +50,5 @@ public:
     bool isancestor(size_t u, size_t v);
     size_t levelancestor(size_t v, unsigned long long d);
     size_t lca(size_t u, size_t v);
+    
 };
