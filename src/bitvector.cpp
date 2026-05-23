@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <fstream>
 using namespace std;
 
 #ifndef bitMask
@@ -448,4 +449,39 @@ unsigned long bitVector::naive_select0(unsigned long long i){
     }
     return -1;
 }
+
+void bitVector::serialize(const char *path) {
+    
+    FILE *arch = fopen(path, "w");
+    string s;
+    for (size_t i = 0; i < size(); i++) {
+        if ((*this)[i])
+            s += "1";
+        else
+            s += "0";
+    }
+    if (arch) {
+        fprintf(arch, "%s", s.data());
+        fclose(arch);
+    }
+}
+
+bitVector* bitVector::deserialize(const char *path){
+    ifstream file;
+    file.open(path);
+    if (!file.is_open()) {
+        return NULL;
+    }
+    bitVector *bv = new bitVector();
+    string s;
+    getline(file, s);
+    for (char c : s) {
+        if (c == '1')
+            bv->append1();
+        else
+            bv->append0();
+    }
+    return bv;
+}
+
 #undef bitMask
