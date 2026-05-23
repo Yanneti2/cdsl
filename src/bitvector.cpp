@@ -194,6 +194,24 @@ bitVector::~bitVector() {
     free(A);
 }
 
+bitVector &bitVector::operator=(bitVector &B) {
+    if (this == &B) {
+        return *this;
+    }
+
+    TYPE *new_A = (TYPE *) realloc(A, B.cap() * sizeof(TYPE));
+    if (!new_A)
+        throw bad_alloc();
+
+    for (unsigned long long i = 0; i < B.cap(); i++) 
+        new_A[i] = B.A[i];
+
+    this->A = new_A;
+    this->_cap = B.cap();
+    this->_size = B.size();
+    return *this;
+}
+
 // TODO: change this funtion to be a method of 'bitVector', does it really need to be a method?
 
 // allocates new space for the bitvector, returns 1 if sucess
