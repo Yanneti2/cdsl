@@ -26,21 +26,21 @@ class bitVector {
     // TODO: *a should be unsigned long???
 private:
     TYPE *A;   // The bitvector itself
-    unsigned long _cap;  // The number of words of A.
-    unsigned long _size;  // The lenght of the bit sequence (logical). 
-    JacobsonRank *rank; // The rank structure.
+    size_t _cap;  // The number of words of A.
+    size_t _size;  // The lenght of the bit sequence (logical). 
+    JacobsonRank *rank = NULL; // The rank structure.
 
 public:
     // Methods implemented post GPT (originals by stringers)
-    int grow(unsigned long ncap);
-    unsigned long size() const;
-    unsigned long cap() const;
+    void grow(size_t ncap);
+    size_t size() const;
+    size_t cap() const;
 
     // Methods implemented by GPT (originals and modded)
     bitVector();
-    bitVector(unsigned long size);
-    bitVector(unsigned long size, int init);
-    bitVector(unsigned long size, bool (*fn)(unsigned long));
+    bitVector(size_t size);
+    bitVector(size_t size, int init);
+    bitVector(size_t size, bool (*fn)(size_t));
     bitVector(string s);
     bitVector(long int num);
     ~bitVector();
@@ -51,39 +51,39 @@ public:
 
     void append0();
     void append1();
-    void set0(unsigned long i);
-    void set1(unsigned long i);
-    void extend(bitVector *B);
-    void put(bitVector *B, unsigned long i);
+    void set0(size_t i);
+    void set1(size_t i);
 
     bool operator==(bitVector B) const;
-    int  operator[](unsigned long i) const;
-    TYPE accessWord(unsigned long i) const;
-    TYPE accessWord(unsigned long i, unsigned wordSize) const;
-    bitVector *slice(unsigned long i, unsigned long k) const;
-
-    void put(bitVector *SRC, unsigned long k, unsigned long i);
-
-
-    void append(unsigned long number, unsigned long k);
+    int  operator[](size_t i) const;
+    TYPE accessWord(size_t i) const;
+    TYPE accessWord(size_t i, unsigned wordSize) const;
 
     void print() const;
 
-    unsigned long naive_rank1(unsigned long long i);
-    unsigned long naive_rank0(unsigned long long i);
-    unsigned long naive_select1(unsigned long long i);
-    unsigned long naive_select0(unsigned long long i);
-    unsigned long popcount();
+    size_t naive_rank1(size_t i);
+    size_t naive_rank0(size_t i);
+    size_t naive_select1(size_t i);
+    size_t naive_select0(size_t i);
+    size_t popcount();
 
-    unsigned long long select1(unsigned long long i);
-    unsigned long long select0(unsigned long long i);
+    size_t select1(size_t i);
+    size_t select0(size_t i);
     void JacobsonRank_build();
-    unsigned long long rank0(unsigned long long i);
-    unsigned long long rank1(unsigned long long i);
+    size_t rank0(size_t i);
+    size_t rank1(size_t i);
     void print_rank();
 
     void build_select0();
     void build_select1();
+
+    // The following methods are outdated and should be updated
+    void extend(bitVector *B);
+    void put(bitVector *B, unsigned long i);
+    bitVector *slice(unsigned long i, unsigned long k) const;
+    void put(bitVector *SRC, unsigned long k, unsigned long i);
+    void append(unsigned long number, unsigned long k);
+
 };
 
 #endif

@@ -31,8 +31,6 @@ using namespace std;
 #endif
 #endif
 
-#define ULL unsigned long long
-
 uint32_t bitMask32[] = {
     0xFFFFFFFF,0x7FFFFFFF,0x3FFFFFFF,0x1FFFFFFF,
     0x0FFFFFFF,0x07FFFFFF,0x03FFFFFF,0x01FFFFFF,
@@ -104,40 +102,7 @@ bitVector::bitVector(string s) {
     }
 }
 
-bitVector::bitVector(long int num) {
-
-    assert(sizeof(TYPE) * 8 == NBITS);
-
-    if(num <= 0){
-	_cap = 1;
-	_size = 0;
-    } else {
-   	_size = floor(log10(num) + 1); 
-	_cap = (_size + NBITS -1)/NBITS;
-	_cap = (_cap == 0) ? 1 : _cap;
-    }
-
-    A = (TYPE*) calloc(_cap, sizeof(TYPE));
-    if(!A) throw new bad_alloc();
-
-    if(_size!=0){
-	    stack<int> res; 
-
-	    for(unsigned long i = 0; i < _size; i++){
-		    int aux = num % 10;
-		    num /= 10;
-		    res.push(aux);
-	    }
-	    for(unsigned long j = 0; j < _size;j++){
-		    int temp = res.top();
-		    if(temp==0)this->set0(j);
-		    else if(temp==1)this->set1(j);
-		    res.pop();
-	    }
-    } 
-}
-
-bitVector::bitVector(unsigned long size) {
+bitVector::bitVector(size_t size) {
     
     assert(sizeof(TYPE) * 8 == NBITS);
 
@@ -151,7 +116,7 @@ bitVector::bitVector(unsigned long size) {
         throw new bad_alloc();
 }
 
-bitVector::bitVector(unsigned long size, int init) {
+bitVector::bitVector(size_t size, int init) {
 
     assert(sizeof(TYPE) * 8 == NBITS);
 
@@ -172,7 +137,7 @@ bitVector::bitVector(unsigned long size, int init) {
     A[_cap - 1] = ~bitMask(_size % NBITS);
 }
 
-bitVector::bitVector(unsigned long size, bool (*fn)(unsigned long)) {
+bitVector::bitVector(size_t size, bool (*fn)(size_t)) {
     assert(sizeof(TYPE) * 8 == NBITS);
 
     _cap = (size + NBITS - 1) / NBITS;
@@ -203,7 +168,7 @@ bitVector &bitVector::operator=(bitVector &B) {
     if (!new_A)
         throw bad_alloc();
 
-    for (unsigned long long i = 0; i < B.cap(); i++) 
+    for (size_t i = 0; i < B.cap(); i++) 
         new_A[i] = B.A[i];
 
     this->A = new_A;
@@ -215,20 +180,19 @@ bitVector &bitVector::operator=(bitVector &B) {
 // TODO: change this funtion to be a method of 'bitVector', does it really need to be a method?
 
 // allocates new space for the bitvector, returns 1 if sucess
-int bitVector::grow(unsigned long ncap) {
+void bitVector::grow(size_t ncap) {
     if (ncap <= _cap)
-    {
-        // If cap > new cap there is nothing to do.
-        return 1;
-    };
+        return;
+
     TYPE* AA = (TYPE*) realloc(A, ncap * sizeof(TYPE));
     if (!AA)
         throw bad_alloc();
-    for (unsigned long long i = _cap; i < ncap; i++) 
+
+    for (size_t i = _cap; i < ncap; i++) 
         AA[i] = 0;
-    A = AA;
-    _cap = ncap;
-    return 1;
+
+    this->A = AA;
+    this->_cap = ncap;
 }
 
 /**
@@ -236,7 +200,7 @@ int bitVector::grow(unsigned long ncap) {
 
    If i > |A| - 1 then the behavior is undefined.
 **/
-void bitVector::set1(unsigned long i) {
+void bitVector::set1(size_t i) {
     A[i / NBITS] |= (bitMask(i % NBITS) ^ bitMask(i % NBITS + 1));
 }
 
@@ -245,7 +209,7 @@ void bitVector::set1(unsigned long i) {
 
    If i > |A| - 1 then the behavior is undefined.
 **/
-void bitVector::set0(unsigned long i) {
+void bitVector::set0(size_t i) {
     A[i / NBITS] &= ~(bitMask(i % NBITS) ^ bitMask(i % NBITS + 1));
 }
 
@@ -254,7 +218,7 @@ void bitVector::set0(unsigned long i) {
 
    If i > |A|-1 then the behavior is undefined.
 **/
-int bitVector::operator[](unsigned long i) const{
+int bitVector::operator[](size_t i) const {
     return (A[i / NBITS] & (bitMask(i % NBITS) ^ bitMask(i % NBITS + 1))) ? 1 : 0;
 }
 
@@ -269,11 +233,11 @@ bool bitVector::operator==(bitVector B) const {
     return true;
 }
 
-TYPE bitVector::accessWord(unsigned long i) const {
+TYPE bitVector::accessWord(size_t i) const {
     return A[i];
 }
 
-TYPE bitVector::accessWord(unsigned long i, unsigned wordSize) const {
+TYPE bitVector::accessWord(size_t i, unsigned wordSize) const {
     unsigned long long start = i * wordSize;
     unsigned long long end = start + wordSize - 1;
     unsigned long long start_index = start / NBITS;
@@ -318,8 +282,8 @@ void bitVector::append1() {
     set1(_size++);
 }
 
-unsigned long bitVector::size() const { return _size; }
-unsigned long bitVector::cap() const { return _cap; }
+size_t bitVector::size() const { return _size; }
+size_t bitVector::cap() const { return _cap; }
 
 /**
     Coloca uma sequencia predefinida de bits ao final do bitvector.
@@ -384,86 +348,85 @@ void bitVector::put(bitVector* B, unsigned long i) {
 **/
 void bitVector::print() const {
     printf("size: %ld, cap: %ld\n", _size, _cap);
-    for (unsigned long long i=0; i< _size; i++) {
+    for (size_t i = 0; i < _size; i++) {
         printf("%d", (*this)[i]);
     }
     printf("\n\n");
 }
 
-unsigned long bitVector::popcount(){
-    unsigned long pop_count = 0; 
-    for(unsigned long i = 0; i < _size; i++){
+size_t bitVector::popcount(){
+    size_t pop_count = 0; 
+    for(size_t i = 0; i < _size; i++){
         pop_count += std::__popcount(accessWord(i));
     }
     return pop_count;
 }
 
-unsigned long bitVector::naive_rank1(unsigned long long i){
-    unsigned pop_count = 0;
-    unsigned long j;
+size_t bitVector::naive_rank1(size_t i){
+    size_t pop_count = 0;
+    size_t j;
     for(j = 0; j < i / NBITS; j++){
-        //unsigned pop_count = std::__popcount(B->accessWord(chunk2, chunk2_size) & ~bitMask(i % chunk2_size));
-        // & ~bitMask(i%B->size())
         pop_count += std::__popcount(accessWord(j));
     }
-    // pop_count += std::__popcount(accessWord(_size - i));
     pop_count += std::__popcount(accessWord(j) & ~bitMask(i % NBITS));
     return pop_count;
 }
 
-unsigned long bitVector::naive_rank0(unsigned long long i){
+size_t bitVector::naive_rank0(size_t i) {
     return i - naive_rank1(i); 
 }
 
-ULL bitVector::select1(ULL i){
+size_t bitVector::select1(size_t i) {
     return rank->select1(this, i);
 }
 
-ULL bitVector::select0(ULL i){
+size_t bitVector::select0(size_t i){
     return rank->select0(this, i);
 }
     
-void bitVector::JacobsonRank_build(){
-    //if(rank){delete rank;}
+void bitVector::JacobsonRank_build() {
+    if (rank)
+        delete rank;
+
     rank = new JacobsonRank(this);
 }
 
-unsigned long long bitVector::rank0(unsigned long long i){
+size_t bitVector::rank0(size_t i) {
     return rank->rank0(this, i);
 }
 
-unsigned long long bitVector::rank1(unsigned long long i){
+size_t bitVector::rank1(size_t i) {
     return rank->rank1(this, i);
 }
 
-void bitVector::print_rank(){
+void bitVector::print_rank() {
     rank->print();
 }
 
-void bitVector::build_select0(){
+void bitVector::build_select0() {
     rank->build_select0(this);
 }
 
-void bitVector::build_select1(){
+void bitVector::build_select1() {
     rank->build_select1(this);
 }
 
-unsigned long bitVector::naive_select1(unsigned long long i){
-    unsigned long pop_count = 0;
-    unsigned long j;
-    for(j = 0; j < _size; j++){
-        if(pop_count == i) return j;
-        pop_count += (*this) [j];
+size_t bitVector::naive_select1(size_t i){
+    size_t pop_count = 0;
+    size_t j;
+    for (j = 0; j < _size; j++) {
+        if (pop_count == i) return j;
+        pop_count += (*this)[j];
     }
     return -1;
 }
 
-unsigned long bitVector::naive_select0(unsigned long long i){
-    unsigned long counter = 0;
-    unsigned long j = 0;
-    for(j = 0;  j < _size; j++){
-        if((j - counter) == i) return j;
-        counter += (*this) [j];
+size_t bitVector::naive_select0(size_t i) {
+    size_t counter = 0;
+    size_t j;
+    for (j = 0; j < _size; j++) {
+        if ((j - counter) == i) return j;
+        counter += (*this)[j];
     }
     return -1;
 }
@@ -472,7 +435,7 @@ void bitVector::serialize(const char *path) {
     
     FILE *arch = fopen(path, "w");
     string s;
-    for (size_t i = 0; i < size(); i++) {
+    for (size_t i = 0; i < _size; i++) {
         if ((*this)[i])
             s += "1";
         else
