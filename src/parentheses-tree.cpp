@@ -5,7 +5,7 @@
 #include "parentheses-tree.hpp"
 #include <vector>
 #include <stdio.h>
-
+#include<stdlib.h>
 
 #define ULI unsigned long int
 
@@ -20,74 +20,123 @@
  * 		1110100111110101000100111011001010000100
  */
 
-// BP compact representation using c++ vector lib
-void ParenthesisTree::dfs_bt2(vector<int>& V, Tree::Node* node){
-	if (!node){
-		V.push_back(0);
-		return;
-	}else{
-		V.push_back(1);
-		dfs_bt2(V,node->left);
-		dfs_bt2(V,node->right);
-		V.push_back(0);
-	}
-}
+// BP compact representation using c++ vector lib of a binary tree
+//ParenthesesTree::ParenthesesTree(vector<int>& V, Tree::Node* node){
+//	if (!node){
+//		return;
+//	}else{
+//		V.push_back(1);
+//		dfs_bt2(V,node->left);
+//		dfs_bt2(V,node->right);
+//		V.push_back(0);
+//	}
+//}
+
+// Explicit BP representation from a Existent Binary Tree
+//ParenthesesTree::ParenthesesTree(vector<char>& V, Tree::Node* node){
+//	if (!node){
+//		return;
+//	}else{
+//		V.push_back('(');
+//		dfs_bt2(V,node->left);
+//		dfs_bt2(V,node->right);
+//		V.push_back(')');
+//	}
+//}
 
 // Binary compressed representation for a general binary tree
- void ParenthesisTree::dfs_bt(Tree::Node* node){
+void ParenthesesTree::bt_build(Tree::Node* node){
 	if (!node){
-		T->append0();
 		return;
 	}else{
-		T->append1();
-		dfs_bt(T,node->left);
-		dfs_bt(T,node->right);
-		T->append0();
+		B->append1();
+		bt_build(B,node->left);
+		bt_build(B,node->right);
+		B->append0();
 	}
 }
 
 // Binary compressed representation of a general tree (BP in binary)
- void ParenthesisTree::dfs_gt(Gtree::gNode* node){
+void ParenthesesTree::gt_build(Gtree::gNode* node){
 	if (!node){
-		T->append0();
 		return;	
 	}else{
-		T->append1();
-		for(ULI i=0; i<node->Children.size(); i++)dfs_gt(T,node->Children[i]);	
-		T->append0();
+		B->append1();
+		for(ULI i=0; i<node->Children.size(); i++)gt_build(B,node->Children[i]);	
+		B->append0();
 	}	
 }
 
 // Balanced Parenthesis Explicit Build for General Trees
- void ParenthesisTree::bp_build(vector<char>& B, Gtree::gNode* node){
-	if (!node){
-		B.push_back(')');
-		return;	
-	}else{
-		B.push_back('(');
-		for(ULI i=0;i<node->Children.size();i++)bp_build(B,node->Children[i]);
-		B.push_back(')');
-	}	
+//ParenthesesTree::ParenthesesTree(vector<char>& V, Gtree::gNode* node){
+//	if (!node){
+//		return;	
+//	}else{
+//		V.push_back('(');
+//		for(ULI i=0;i<node->Children.size();i++)bp_build(V,node->Children[i]);
+//		V.push_back(')');
+//	}	
+
+
+// Balanced Parenthesis build for General Trees
+//ParenthesesTree::ParenthesesTree(vector<int>& V, Gtree::gNode* node){
+//	if (!node){
+//		return;	
+//	}else{
+//		V.push_back(1);
+//		for(ULI i=0;i<node->Children.size();i++)bp_build(V,node->Children[i]);
+//		V.push_back(0);
+//	}	
+//}/}
+
+// Balanced Parentheses build for string == "(()())"
+ParenthesesTree::ParenthesesTree(string s){
+	this->T = bitVector();
+	for(unsigned long i=0; i<s.size(); i++){
+		if (s[i] == '(')T.append1();
+		else if (s[i] == ')')T.append0();
+	}
 }
 
-// The number of opening minus closing parenthesis in B[1,i]
-// undefined behavior for out of bounds i value or if the bitvector is not a BP
-unsigned long long ParenthesesTree::excess(size_t i)
+// Constructor for a General Tree
+ParenthesesTree::ParenthesesTree(Gtree t){
+	this->T = bitVector();
+	gt_build(&T, t.getRoot());
+}
+
+// Constructor for a Binary Tree
+ParenthesesTree::ParenthesesTree(Tree t){
+	this->T = bitVector();
+	bt_build(&T, t.getRoot());
+}
+
+// Constructor for a Bitvector
+ParenthesesTree::ParenthesesTree(bitVector B){
+	this->T = B;
+}
+
+/* 
+ * The number of opening minus closing parenthesis in B[1,i]
+ * undefined behavior for out of bounds i value or if the bitvector is not a BP
+*/
+unsigned long long ParenthesesTree::excess(unsigned long long i)
 {
-    return 2 * B->naive_rank1(i) - i;
+    return 2 * this->T.naive_rank1(i) - i;
 }
 
 // returns true if bp and false if not bp 
-bool ParenthesesTree::is_bp(bitVector& B){
+bool ParenthesesTree::is_bp(){
+	bitVector B = this->T;
+	ParenthesesTree pt = ParenthesesTree(B);
 	unsigned long size = B.size();
 	if(size <= 0 || B[0]==0 || size % 2 != 0) return false;
-	if(B[size-1]==0 && excess(&B,size-1)==1){
-		unsigned long select0 = 0;
-		unsigned long select1 = 0;
+	if(B[size-1]==0 && pt.excess(size-1)==1){
+		unsigned long c0 = 0;
+		unsigned long c1 = 0;
 		for(unsigned long i = 0; i < size; i++){
-			if(B[i]==0)select0+=1;
-			else if(B[i]==1)select1+=1;
-			if(select0 > select1)return false;	
+			if(B[i]==0)c0+=1;
+			else if(B[i]==1)c1+=1;
+			if(c0 > c1)return false;	
 		}	
 		return true;
 	}
@@ -96,18 +145,18 @@ bool ParenthesesTree::is_bp(bitVector& B){
 
 // Searches for the greatest j < i | excess(B, j) == excess(B,i) + d
 // if not found, returns 0 (should i change this behavior?)
-unsigned long long ParenthesesTree::backward_search(size_t i, unsigned long long d)
+unsigned long long ParenthesesTree::backward_search(unsigned long long i, unsigned long long d)
 {
     if (i == 0)
     {
         return 0;
     }
 
-    unsigned long long target_depth = excess(B, i) + d;
+    unsigned long long target_depth = excess(i) + d;
 
     for (unsigned long long j = i - 1; j > 0; j--)
     {
-        if(excess(B,j) == target_depth)
+        if(excess(j) == target_depth)
         {
             return j;
         }
@@ -115,8 +164,6 @@ unsigned long long ParenthesesTree::backward_search(size_t i, unsigned long long
 
     return 0;
 }
-
-
 
 unsigned long long ParenthesesTree::forward_search(size_t i, unsigned long long d) {
 	    if (i == 0)
@@ -225,15 +272,56 @@ pair<unsigned long long, unsigned long long> ParenthesesTree::fwdblock(size_t i,
 	return 0;
 }
 
-unsigned long long ParenthesesTree::close(size_t i) {
+
+// Returns the position of the closing parenthesis of the opening one at i.
+unsigned long long ParenthesesTree::close(unsigned long long i) {
     return forward_search(i, 0) - 1;
 }
 
-unsigned long long ParenthesesTree::open(size_t i) {
+// Returns the position of the opening parentheses of the closing one at i.
+unsigned long long ParenthesesTree::open(unsigned long long i) {
     return backward_search(i, -1);
 }
 
 // returns the rightmost position k, k < i and 1-indexed, of the closest k'th segment that contains the position i
-unsigned long long ParenthesesTree::enclose(size_t i) {
+unsigned long long ParenthesesTree::enclose(unsigned long long i) {
     return backward_search(i, -1);
 }
+
+// Returns the bitVector associated to this BP instance
+bitVector& ParenthesesTree::getBv(){ return this->T; }
+
+// returns the position of the direct/first parent of node in v'th index
+size_t ParenthesesTree::parent(size_t v){
+	if(v <= 0 || !is_bp())return -1;
+	return enclose(v);
+}
+
+// if next element == 0 => true, else false
+bool ParenthesesTree::isleaf(size_t v){
+	if(T[v+1])return false;
+	return true;
+}
+
+// returns the index of the deepest node in the subtree of v
+size_t ParenthesesTree::deepestnode(size_t v){
+	// returns the maximum excess forward	
+	return v;
+}
+
+// returns the number os nodes inside a subtree with root = v counting v (inclusive) 
+size_t ParenthesesTree::subtree(size_t v){
+	return(close(v) -  v + 1)/2;
+}
+
+// Need to implement rank10 for this next operations: 
+//
+// Proc leafnum(T,v)
+// 	return leafrank(T, close(B,v)) − leafrank(T,v)
+//
+// Proc leafrank(T,v)
+// 	return rank10(B,v) + 1
+//
+// Proc leafselect(T, i)
+// 	return select10(B, i)
+//

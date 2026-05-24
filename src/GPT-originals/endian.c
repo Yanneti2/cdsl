@@ -1,6 +1,6 @@
 // Guilherme P. Telles
 
-#include "utils.h"
+#include "endian.h"
 #include <stdint.h>
 
 // returns 0 if your system is little-endian and 1 if bigendian

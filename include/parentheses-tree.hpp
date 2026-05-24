@@ -50,5 +50,6 @@ public:
     bool isancestor(size_t u, size_t v);
     size_t levelancestor(size_t v, unsigned long long d);
     size_t lca(size_t u, size_t v);
-    
+
+    bitVector& getBv(){ return this->T; }
 };

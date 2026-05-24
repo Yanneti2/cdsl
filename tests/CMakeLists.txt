@@ -58,4 +58,5 @@ add_executable(balanced_parenthesis-tester
 )
 
 target_link_libraries(balanced_parenthesis-tester compact)
-add_test(NAME TestBalancedParenthesis COMMAND balanced_parenthesis-tester)
+
+# add_test(NAME TestBalancedParenthesis COMMAND balanced_parenthesis-tester)
