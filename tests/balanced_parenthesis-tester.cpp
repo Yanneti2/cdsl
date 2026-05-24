@@ -223,8 +223,85 @@ int main(int argc, char *argv[])
     //---------------------------
     //     Parent Operation     |
     //---------------------------
-   
-    
+    //    Pos = 012345678901234567890123456789012345
+    //   Tree = (()(()(()()))()(())()((()())(()())))
+    // Excess = 012123234343212123212123434323434321
+    //
+    ParenthesesTree PT1("(()(()(()()))()(())()((()())(()())))");
 
+    assert(PT1.parent(1) == 0);
+    assert(PT1.parent(3) == 0);
+    assert(PT1.parent(13) == 0);
+    assert(PT1.parent(15) == 0);
+    assert(PT1.parent(19) == 0);
+    assert(PT1.parent(21) == 0);
+    assert(PT1.parent(4) == 3);
+    assert(PT1.parent(6) == 3);
+    assert(PT1.parent(28) == 21);
+
+    assert(PT1.isleaf(1));
+    assert(PT1.isleaf(19));
+    assert(PT1.isleaf(29));
+    assert(PT1.isleaf(31));
+    assert(!PT1.isleaf(0));
+    assert(!PT1.isleaf(3));
+    assert(!PT1.isleaf(15));
+    assert(!PT1.isleaf(22));
+
+    assert(PT1.subtree(1) == 1);
+    assert(PT1.subtree(0) == 18);
+    assert(PT1.subtree(15) == 2);
+    assert(PT1.subtree(21) == 7);
+    assert(PT1.subtree(3) == 5);
+    assert(PT1.subtree(7) == 1);
+
+    assert(PT1.leafrank(1) == 1);
+    assert(PT1.leafrank(3) == 2);
+    assert(PT1.leafrank(6) == 3);
+    assert(PT1.leafrank(7) == 3);
+    assert(PT1.leafrank(15) == 6);
+    assert(PT1.leafrank(35) == 12);
+
+    assert(PT1.leafnum(0) == 11);
+    assert(PT1.leafnum(3) == 3);
+    assert(PT1.leafnum(22) == 2);
+
+    assert(PT1.leafselect(1) == 1);
+    assert(PT1.leafselect(2) == 4);
+    assert(PT1.leafselect(11) == 31);
+
+    //    Pos = 012345678901234567890123456789012345
+    //   Tree = (()(()(()()))()(())()((()())(()())))
+    // Excess = 012123234343212123212123434323434321
+
+    assert(PT1.children(0) == 6);
+    assert(PT1.children(1) == 0);
+    assert(PT1.children(3) == 2);
+    assert(PT1.children(6) == 2);
+    assert(PT1.children(21) == 2);
+    assert(PT1.children(15) == 1);
+
+    assert(PT1.childrank(1) == 1);
+    assert(PT1.childrank(3) == 2);
+    assert(PT1.childrank(13) == 3);
+    assert(PT1.childrank(21) == 6);
+
+    assert(PT1.lchild(0) == 21);
+    assert(PT1.lchild(1) == -1);
+    assert(PT1.lchild(3) == 6);
+    assert(PT1.lchild(22) == 25);
+
+    assert(PT1.isancestor(0, 1));
+    assert(PT1.isancestor(0, 3));
+    assert(PT1.isancestor(0, 4));
+    assert(PT1.isancestor(0, 6));
+    assert(PT1.isancestor(0, 19));
+    assert(PT1.isancestor(0, 21));
+    assert(PT1.isancestor(3, 4));
+    assert(PT1.isancestor(28, 31));
+    assert(PT1.isancestor(21, 28));
+    assert(PT1.isancestor(21, 31));
+    assert(!PT1.isancestor(1, 3));
+    assert(!PT1.isancestor(1, 28));
     return 0;
 }
