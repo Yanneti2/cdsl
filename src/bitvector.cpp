@@ -157,7 +157,8 @@ bitVector::~bitVector() {
     free(A);
 }
 
-bitVector &bitVector::operator=(bitVector &B) {
+// some duplicate error
+bitVector &bitVector::operator=(const bitVector &B) {
     if (this == &B) {
         return *this;
     }

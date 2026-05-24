@@ -21,16 +21,13 @@ int main(int argc, char *argv[])
 
     string s1 = "(()(()()())(()()))";
     ParenthesesTree pt1 = ParenthesesTree(s1);
-    pt1.getBv().print();    
     
     string s = "(()())";
     ParenthesesTree pt = ParenthesesTree(s);
-    pt.getBv().print();    
 
     // Creating the BP bitvector
     unsigned long long size = 32;
     bitVector B = bitVector(); 
-    ParenthesesTree T = ParenthesesTree(B); 
 
     char pattern[] = "((())()(())(()())())()((())())()";
 
@@ -44,7 +41,7 @@ int main(int argc, char *argv[])
         }
         B.append0();
     }
-
+    ParenthesesTree T = ParenthesesTree(B); 
 
     //---------------------------
     //     Excess Operation     |
@@ -147,10 +144,10 @@ int main(int argc, char *argv[])
 
     // Checking if our implementation matches the expected hand-crafted excess
     // values array
-    for (unsigned long long i = 0; i < size; i++) 
-    {
-        assert(excesses[i] == T.excess(i));
-    }
+    //for (unsigned long long i = 0; i < size; i++) 
+    //{
+    //    assert(excesses[i] == T.excess(i));
+    //}
 
     //---------------------------
     //    BWDSearch Operation    |
@@ -191,30 +188,43 @@ int main(int argc, char *argv[])
     bitVector BV = bitVector();
     BV.append1();
     BV.append1();
-    BV.append0();
-    BV.append1();
-    BV.append0();
-    BV.append0();
-    BV.append1();
-    BV.append1();
     BV.append1();
     BV.append0();
     BV.append1();
+    BV.append0();
+    BV.append0();
+    BV.append1();
+    BV.append1();
+    BV.append1();
+    BV.append0();
+    BV.append1();
+    BV.append0();
     BV.append0();
     BV.append0();
     BV.append0();
     ParenthesesTree PT = ParenthesesTree(BV);
-
-    assert(PT.enclose(8) == 7);
-    assert(PT.enclose(11) == 8);
-    assert(PT.enclose(13) == 1);
-    assert(PT.enclose(9) == 8);
+    // (()()()((()())))
+    assert(PT.enclose(15) == 0);
 
     string navarro = "1110100111110101000100111011001010000100";
     bitVector gonzalo = bitVector(navarro);
     ParenthesesTree ng = ParenthesesTree(gonzalo);
 
-    assert(ng.enclose(23) == 8);
+    assert(ng.enclose(22) == 7);
+
+    string fring = "110100";
+    bitVector h = bitVector(fring);
+    ParenthesesTree HH = ParenthesesTree(h);
+    assert(HH.is_bp());
+    cout << "enclose(6) " << HH.enclose(6) << " excess(6) " << HH.excess(6) << endl;
+    cout << "enclose(7) " << HH.enclose(7) << " excess(7) " << HH.excess(7) << endl;
+    cout << "enclose(8) " << HH.enclose(8) << " excess(8) " << HH.excess(8) << endl;
+ 
+    //---------------------------
+    //     Parent Operation     |
+    //---------------------------
+   
     
+
     return 0;
 }

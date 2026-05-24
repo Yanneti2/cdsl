@@ -97,8 +97,4 @@ int main(void){
     string s = "11010011101000";
     bitVector* string = new bitVector(s);
     string->print();
-
-    long int b = 11010011101000;
-    bitVector* integers = new bitVector(b);
-    integers->print(); 
 }

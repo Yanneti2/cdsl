@@ -44,7 +44,7 @@ public:
     bitVector(string s);
     bitVector(long int num);
     ~bitVector();
-    bitVector &operator=(bitVector &B);
+    bitVector &operator=(const bitVector &B);
 
     static bitVector* deserialize(const char* path);
     void serialize(const char* path);
