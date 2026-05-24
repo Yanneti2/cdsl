@@ -159,7 +159,7 @@ bitVector::~bitVector() {
     free(A);
 }
 
-bitVector &bitVector::operator=(bitVector &B) {
+bitVector &bitVector::operator=(const bitVector &B) {
     if (this == &B) {
         return *this;
     }
