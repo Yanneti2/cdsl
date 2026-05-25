@@ -32,7 +32,6 @@ int main(int argc, char *argv[])
         B.append0();
     }
 
-
     //---------------------------
     //     Excess Operation     |
     //---------------------------
