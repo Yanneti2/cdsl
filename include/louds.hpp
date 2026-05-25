@@ -11,6 +11,11 @@ public:
     LOUDS(Gtree *T);
     ~LOUDS();
 
+    size_t succ0(size_t v);
+    size_t succ1(size_t v);
+    size_t pred0(size_t v);
+    size_t pred1(size_t v);
+
     size_t root();
 
     size_t fchild(size_t v);

@@ -53,15 +53,44 @@ LOUDS::~LOUDS() {
 /**
  *
  */
-size_t LOUDS::root() {
+size_t LOUDS::succ0(size_t v) {
+    return T.select0(T.rank0(v) + 1) - 1; 
+}
 
+/**
+ *
+ */
+size_t LOUDS::succ1(size_t v) {
+    return T.select1(T.rank1(v) + 1) - 1;
+}
+
+/**
+ *
+ */
+size_t LOUDS::pred0(size_t v) {
+    return T.select0(T.rank0(v)) - 1;
+}
+
+/**
+ *
+ */
+size_t LOUDS::pred1(size_t v) {
+    return T.select1(T.rank1(v)) - 1;
+}
+
+/**
+ *
+ */
+size_t LOUDS::root() {
+    return 2;
 }
 
 /**
  *
  */
 size_t LOUDS::fchild(size_t v) {
-
+    if (!T[v]) return -1;
+    return T.select0(T.rank1(v + 1));
 }
 
 /**
@@ -75,21 +104,22 @@ size_t LOUDS::lchild(size_t v) {
  *
  */
 size_t LOUDS::child(size_t v, unsigned long long t) {
-
+    if (!T[v]) return -1;
+    return T.select0(T.rank1(v + t));
 }
 
 /**
  *
  */
 unsigned long long LOUDS::children(size_t v) {
-
+    return succ0(v) - v;
 }
 
 /**
  *
  */
 unsigned long long LOUDS::childrank(size_t v) {
-
+    return v - pred0(v);
 }
 
 /**
@@ -124,12 +154,13 @@ bool LOUDS::isleaf(size_t v) {
  *
  */
 unsigned long long LOUDS::nodemap(size_t v) {
-
+    return T.rank0(v) - 1;
 }
 
 /**
  *
  */
 size_t LOUDS::nodeselect(unsigned long long i) {
+    return T.select0(i + 1);
 
 }
