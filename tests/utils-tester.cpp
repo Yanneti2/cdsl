@@ -9,12 +9,7 @@ using namespace std;
 
 // printa um decimal em binario
 void double_to_binary(double number, int double_size){
-    // Source - https://stackoverflow.com/a/32260892
-    // Posted by Marco A., modified by community. See post 'Timeline' for change history
-    // Retrieved 2026-03-30, License - CC BY-SA 3.0
-
     uint8_t *array = (uint8_t*)(&number);
-
     for (int i = 0; i < double_size; ++i) {
     uint8_t byte = array[i];
     for (int j = 0; j < 8; ++j) {
@@ -99,7 +94,7 @@ int main (void){
     std::cout << "Same num in Binary: " << std::endl;
     double_to_binary(num4_reversed, 32);
 
-    // Testomg the reversechar
+    // Test on the reversechar
     char abc = 'b';
     std::bitset<8> ch(abc);
     std::cout << std::endl << std::endl << "'b' in binary: " << ch << '\n';
