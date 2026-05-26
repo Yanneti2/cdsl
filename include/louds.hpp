@@ -1,5 +1,7 @@
-#include "bitvector.h"
 #include "general_tree.h"
+#include "binary_tree.h"
+#include "bitvector.h"
+#include <string>
 
 class LOUDS {
 private:
@@ -7,9 +9,13 @@ private:
 
 public:
     // Here, size_t refers to a position on the bitvector
-    LOUDS(const char *s);
-    LOUDS(Gtree *T);
-    ~LOUDS();
+    LOUDS(string s);
+    LOUDS(Gtree* G);
+    LOUDS(Tree* BT);
+
+    bool is_louds(string s);
+    bool is_louds();
+    void print();
 
     size_t succ0(size_t v);
     size_t succ1(size_t v);
