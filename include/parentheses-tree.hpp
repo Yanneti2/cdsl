@@ -51,6 +51,7 @@ public:
 
     unsigned long long depth(size_t v);
     unsigned long long height(size_t v);
+    size_t rMq_naive(size_t i, size_t j);
     size_t deepestnode(size_t v);
 
     size_t subtree(size_t v);

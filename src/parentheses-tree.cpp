@@ -1,11 +1,14 @@
+#include "parentheses-tree.hpp"
+#include "general_tree.h"
 #include "binary_tree.h"
 #include "bitvector.h"
-#include "general_tree.h"
 #include "huffman.h"
-#include "parentheses-tree.hpp"
-#include <vector>
+#include <stdlib.h>
+#include <iostream>
 #include <stdio.h>
-#include<stdlib.h>
+#include <vector>
+
+using namespace std;
 
 #define ULI unsigned long int
 
@@ -164,14 +167,14 @@ unsigned long long ParenthesesTree::backward_search(size_t i, unsigned long long
 }
 
 unsigned long long ParenthesesTree::forward_search(size_t i, unsigned long long d) {
-	    if (i == 0)
-    {
-        return 0;
-    }
+    //if (i == 0)
+    //{
+    //    return 0;
+    //}
 
     unsigned long long target_depth = excess(i) + d;
 
-    for (unsigned long long j = i + 1; j < T.size(); j++)
+    for (unsigned long long j = i + 1; j <= T.size(); j++)
     {
         if(excess(j) == target_depth)
         {
@@ -430,15 +433,29 @@ bool ParenthesesTree::isleaf(size_t v){
 	return true;
 }
 
+// Computes M, the maximum excess in B[i, j]. Once we determine M, a method analogous to fwdsearch(i − 1, M) finds the first position where excess M occurs.
+size_t ParenthesesTree::rMq_naive(size_t i, size_t j){
+	if(i > j)return -1;
+	unsigned long long M = excess(i);
+	for(size_t h = i; h <= j; h++){
+		unsigned long long cur_excess = excess(h);
+		if(cur_excess > M)M = cur_excess;
+	}
+	size_t pos = i - 1;
+	while(1){
+		if(excess(pos) == M)return pos-1;
+		pos+=1;
+	}
+}
+
 // returns the index of the deepest node in the subtree of v
 size_t ParenthesesTree::deepestnode(size_t v){
-	// returns the maximum excess forward	
-	return v;
+	return rMq_naive(v, close(v));
 }
 
 // returns the number os nodes inside a subtree with root = v counting v (inclusive) 
 size_t ParenthesesTree::subtree(size_t v){
-	return((close(v) - v + 1)/2);
+	return((close(v) +1 - v)/2);
 }
 
 // Iterates linearly in a bitvector and returns the rank10 in position i

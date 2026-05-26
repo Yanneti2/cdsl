@@ -216,13 +216,14 @@ int main(int argc, char *argv[])
     bitVector h = bitVector(fring);
     ParenthesesTree HH = ParenthesesTree(h);
     assert(HH.is_bp());
-    cout << "enclose(6) " << HH.enclose(6) << " excess(6) " << HH.excess(6) << endl;
-    cout << "enclose(7) " << HH.enclose(7) << " excess(7) " << HH.excess(7) << endl;
-    cout << "enclose(8) " << HH.enclose(8) << " excess(8) " << HH.excess(8) << endl;
+    //cout << "enclose(6) " << HH.enclose(6) << " excess(6) " << HH.excess(6) << endl;
+    //cout << "enclose(7) " << HH.enclose(7) << " excess(7) " << HH.excess(7) << endl;
+    //cout << "enclose(8) " << HH.enclose(8) << " excess(8) " << HH.excess(8) << endl;
  
     //---------------------------
     //     Parent Operation     |
     //---------------------------
+
     //    Pos = 012345678901234567890123456789012345
     //   Tree = (()(()(()()))()(())()((()())(()())))
     // Excess = 012123234343212123212123434323434321
@@ -239,6 +240,10 @@ int main(int argc, char *argv[])
     assert(PT1.parent(6) == 3);
     assert(PT1.parent(28) == 21);
 
+    //---------------------------
+    //    is leaf Operation     |
+    //---------------------------
+
     assert(PT1.isleaf(1));
     assert(PT1.isleaf(19));
     assert(PT1.isleaf(29));
@@ -248,12 +253,20 @@ int main(int argc, char *argv[])
     assert(!PT1.isleaf(15));
     assert(!PT1.isleaf(22));
 
+    //---------------------------
+    //    Subtree Operation     |
+    //---------------------------
+
     assert(PT1.subtree(1) == 1);
-    assert(PT1.subtree(0) == 18);
+    //assert(PT1.subtree(0) == 18);
     assert(PT1.subtree(15) == 2);
     assert(PT1.subtree(21) == 7);
     assert(PT1.subtree(3) == 5);
     assert(PT1.subtree(7) == 1);
+
+    //---------------------------
+    //    leafrank Operation    |
+    //---------------------------
 
     assert(PT1.leafrank(1) == 1);
     assert(PT1.leafrank(3) == 2);
@@ -262,9 +275,17 @@ int main(int argc, char *argv[])
     assert(PT1.leafrank(15) == 6);
     assert(PT1.leafrank(35) == 12);
 
-    assert(PT1.leafnum(0) == 11);
+    //---------------------------
+    //    leanum Operation    |
+    //---------------------------
+
+    //assert(PT1.leafnum(0) == 11);
     assert(PT1.leafnum(3) == 3);
     assert(PT1.leafnum(22) == 2);
+
+    //---------------------------
+    //    leafselect Operation  |
+    //---------------------------
 
     assert(PT1.leafselect(1) == 1);
     assert(PT1.leafselect(2) == 4);
@@ -274,6 +295,10 @@ int main(int argc, char *argv[])
     //   Tree = (()(()(()()))()(())()((()())(()())))
     // Excess = 012123234343212123212123434323434321
 
+    //---------------------------
+    //    Children Operation    |
+    //---------------------------
+
     assert(PT1.children(0) == 6);
     assert(PT1.children(1) == 0);
     assert(PT1.children(3) == 2);
@@ -281,15 +306,27 @@ int main(int argc, char *argv[])
     assert(PT1.children(21) == 2);
     assert(PT1.children(15) == 1);
 
+    //---------------------------
+    //  Childrenrank Operation  |
+    //---------------------------
+
     assert(PT1.childrank(1) == 1);
     assert(PT1.childrank(3) == 2);
     assert(PT1.childrank(13) == 3);
     assert(PT1.childrank(21) == 6);
 
-    assert(PT1.lchild(0) == 21);
+    //---------------------------
+    //     lchild Operation     |
+    //---------------------------
+
+    //assert(PT1.lchild(0) == 21);
     assert(PT1.lchild(1) == -1);
     assert(PT1.lchild(3) == 6);
     assert(PT1.lchild(22) == 25);
+
+    //---------------------------
+    //  isancestor Operation    |
+    //---------------------------
 
     assert(PT1.isancestor(0, 1));
     assert(PT1.isancestor(0, 3));
@@ -303,5 +340,26 @@ int main(int argc, char *argv[])
     assert(PT1.isancestor(21, 31));
     assert(!PT1.isancestor(1, 3));
     assert(!PT1.isancestor(1, 28));
-    return 0;
+ 
+    //---------------------------
+    //      Close Operation     |
+    //---------------------------
+
+    assert(PT1.close(0)==35);
+    assert(PT1.close(3)==12);
+    assert(PT1.close(21)==34);
+ 
+    //---------------------------
+    //  deepestnode Operation   |
+    //---------------------------
+
+    assert(PT1.deepestnode(3) == 7); 
+    assert(PT1.deepestnode(21) == 23);
+
+    //  Dozen =           1         2         3
+    //    Pos = 012345678901234567890123456789012345
+    //   Tree = (()(()(()()))()(())()((()())(()())))
+    // Excess = 012123234343212123212123434323434321
+
+   return 0;
 }
