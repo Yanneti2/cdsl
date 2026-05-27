@@ -29,6 +29,7 @@ public:
     size_t child(size_t v, unsigned long long t);
     unsigned long long children(size_t v);
     unsigned long long childrank(size_t v);
+    unsigned long long size();
 
     size_t parent(size_t v);
     size_t nsibling(size_t v);

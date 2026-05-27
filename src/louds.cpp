@@ -141,7 +141,10 @@ size_t LOUDS::succ1(size_t v) {
  *
  */
 size_t LOUDS::pred0(size_t v) {
-    return T.select0(T.rank0(v)) - 1;
+    int a = T.naive_rank0(v);
+    int b = T.naive_select0(a);
+    cout << "\nPRED0 " << a << " " << b << "\n";
+    return b;
 }
 
 /**
@@ -170,6 +173,7 @@ size_t LOUDS::fchild(size_t v) {
  *
  */
 size_t LOUDS::lchild(size_t v) {
+    return 17;
 
 }
 
@@ -199,28 +203,33 @@ unsigned long long LOUDS::childrank(size_t v) {
  *
  */
 size_t LOUDS::parent(size_t v) {
-
+	if (v <= 2) return 0;
+    unsigned long long NodeNum =  T.naive_rank0(v); // número do nó
+    unsigned long long NodeBeg = T.naive_select1(NodeNum); // acha o 1 correspondente ao nó
+	cout << "parent " << NodeNum << NodeBeg << "\n";
+    return pred0(NodeBeg);
 }
 
 /**
  *
  */
 size_t LOUDS::nsibling(size_t v) {
-
+    return 17;
 }
 
 /**
  *
  */
 size_t LOUDS::psibling(size_t v) {
-
+    return 17;
 }
 
 /**
  *
  */
 bool LOUDS::isleaf(size_t v) {
-
+    if (v < 2) return false;
+    return T[v] == 0;
 }
 
 /**
@@ -228,6 +237,10 @@ bool LOUDS::isleaf(size_t v) {
  */
 unsigned long long LOUDS::nodemap(size_t v) {
     return T.rank0(v) - 1;
+}
+
+unsigned long long LOUDS::size() {
+    return T.size();
 }
 
 /**
