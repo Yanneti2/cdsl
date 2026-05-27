@@ -498,3 +498,82 @@ unsigned long long ParenthesesTree::leafnum(size_t v) {
 size_t ParenthesesTree::leafselect(unsigned long long i) {
  	return select10(i);
 }
+
+//returns next sibling of a node v
+size_t ParenthesesTree::nsibling(size_t v){
+    size_t sibling = close(v) + 1;
+    if(T[sibling] == 1){return sibling;}
+    return -1;
+}
+
+//returns past sibling of a node v
+size_t ParenthesesTree::psibling(size_t v){
+    size_t sibling = open(open(v) - 1);
+    if(T[sibling] == 0){return sibling;}
+    return -1;
+}
+
+size_t ParenthesesTree::psibling(size_t v){
+    return child(parent(v), childrank(v) + 1);
+}
+
+//Iterates the BP and returns the rank1 of v. 
+unsigned long long ParenthesesTree::preorder(size_t v){
+    if (v == 0) {return -1;}
+    size_t root = this->root();
+
+    unsigned long long aux = 1;
+    size_t i;
+    // unsigned long long excess = 0;
+    for (i = root + 1; i < v - 1; i++) {
+        aux += T[i]; //? 1 : -1;
+
+        // if (excess == 1 && T[i])
+        //     aux++;
+    }
+    return i - aux;
+}
+
+//in O(n), returns the position of i-th node in BP;
+size_t ParenthesesTree::preorderselect(unsigned long long i){
+    //use a mask full of 1's and invert (probably use xor (?)) BP sequence, like 101110 turns into 010001
+    //then we can make preorder just adding things up, without any comparison
+
+    if(i <= 0){return -1;}
+    size_t node = this->root();
+
+    unsigned long long aux = 1;
+    unsigned long long pos = 0;
+    while(aux != i){
+        node++;
+        pos++;
+        if(T[node] == 0){aux++;}
+    }
+    return pos;
+} 
+
+unsigned long long ParenthesesTree::postorder(size_t v){
+    return preorder(close(v));
+}
+
+size_t ParenthesesTree::postorderselect(unsigned long long i){
+    return open(preorderselect(i));
+}
+
+unsigned long long ParenthesesTree::depth(size_t v){
+    if(v == 0 ){return -1;}
+    size_t root = this->root();
+
+    unsigned long long aux = 1;
+    size_t i;
+
+    for(i = root + 1; i < v - 1; i++){
+        aux += T[i];
+    }
+    
+    return 2*(aux) - v; 
+}
+
+unsigned long long ParenthesesTree::height(size_t v){
+    return depth(deepestnode(v) - depth(v));
+}
