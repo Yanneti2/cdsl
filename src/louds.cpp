@@ -87,7 +87,7 @@ bool LOUDS::is_louds(string s){
 	if(s.size() < 2 || (s.size() > 2 && s.size() % 2 == 0))return false;
 	if(!(s[0] =='1' && s[1] =='0'))return false;
 	bitVector dummy = bitVector(s);
-	if(dummy.naive_rank0(dummy.size()) - dummy.naive_rank1(dummy.size()) != 1)return false;
+	if(dummy.rank0(dummy.size()) - dummy.naive_rank1(dummy.size()) != 1)return false;
 	int counter = 0;
 	for(unsigned long i = 2; i <= dummy.size(); i++){
 		if(counter == -1)return false;
@@ -141,9 +141,8 @@ size_t LOUDS::succ1(size_t v) {
  *
  */
 size_t LOUDS::pred0(size_t v) {
-    int a = T.naive_rank0(v);
-    int b = T.naive_select0(a);
-    cout << "\nPRED0 " << a << " " << b << "\n";
+    int a = T.rank0(v);
+    int b = T.select0(a);
     return b;
 }
 
@@ -204,9 +203,8 @@ unsigned long long LOUDS::childrank(size_t v) {
  */
 size_t LOUDS::parent(size_t v) {
 	if (v <= 2) return 0;
-    unsigned long long NodeNum =  T.naive_rank0(v); // número do nó
-    unsigned long long NodeBeg = T.naive_select1(NodeNum); // acha o 1 correspondente ao nó
-	cout << "parent " << NodeNum << NodeBeg << "\n";
+    unsigned long long NodeNum =  T.rank0(v); // número do nó
+    unsigned long long NodeBeg = T.select1(NodeNum); // acha o 1 correspondente ao nó
     return pred0(NodeBeg);
 }
 
@@ -240,7 +238,7 @@ unsigned long long LOUDS::nodemap(size_t v) {
 }
 
 unsigned long long LOUDS::size() {
-    return T.size();
+    return T.size() / 2;
 }
 
 /**
@@ -248,5 +246,4 @@ unsigned long long LOUDS::size() {
  */
 size_t LOUDS::nodeselect(unsigned long long i) {
     return T.select0(i + 1);
-
 }
