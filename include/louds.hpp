@@ -5,7 +5,7 @@
 
 class LOUDS {
 private:
-    bitVector T;
+    BitVector T;
 
 public:
     // Here, size_t refers to a position on the bitvector

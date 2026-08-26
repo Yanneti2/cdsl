@@ -14,7 +14,7 @@ using namespace std;
 
 /* Balanced Parentheses tree representationf using closing and opening parenthesis
  * The idea is, when we arrive at a node for the first time, during a dfs, we 
- * append an opening parenthesis (1) to the resulting bitVector B. When we finally
+ * append an opening parenthesis (1) to the resulting BitVector B. When we finally
  * leave that subtree of a node, we append a closing parenthesis (0) to B.
  * 
  * bp_build and dfs_gt respective outputs:
@@ -94,7 +94,7 @@ void ParenthesesTree::gt_build(Gtree::gNode* node){
 
 // Balanced Parentheses build for string == "(()())"
 ParenthesesTree::ParenthesesTree(string s){
-	this->T = bitVector();
+	this->T = BitVector();
 	for(unsigned long i=0; i<s.size(); i++){
 		if (s[i] == '(')T.append1();
 		else if (s[i] == ')')T.append0();
@@ -103,18 +103,18 @@ ParenthesesTree::ParenthesesTree(string s){
 
 // Constructor for a General Tree
 ParenthesesTree::ParenthesesTree(Gtree t){
-	this->T = bitVector();
+	this->T = BitVector();
 	gt_build(t.getRoot());
 }
 
 // Constructor for a Binary Tree
 ParenthesesTree::ParenthesesTree(Tree t){
-	this->T = bitVector();
+	this->T = BitVector();
 	bt_build(t.getRoot());
 }
 
 // Constructor for a Bitvector
-ParenthesesTree::ParenthesesTree(bitVector& B){
+ParenthesesTree::ParenthesesTree(BitVector& B){
 	this->T = B;
 }
 
@@ -289,8 +289,8 @@ unsigned long long ParenthesesTree::enclose(unsigned long long i) {
     return backward_search(i, -1);
 }
 
-// Returns the bitVector associated to this BP instance
-bitVector &ParenthesesTree::getBv() { return this->T; }
+// Returns the BitVector associated to this BP instance
+BitVector &ParenthesesTree::getBv() { return this->T; }
 
 /**
  * Returns the root node of the tree.
@@ -375,7 +375,7 @@ unsigned long long ParenthesesTree::childrank(size_t v) {
  * Returns the identifier of node v.
  */
 unsigned long long ParenthesesTree::nodemap(size_t v) {
-    return T.rank1(v);
+    return T.naive_rank1(v);
 }
 
 /**
@@ -383,7 +383,7 @@ unsigned long long ParenthesesTree::nodemap(size_t v) {
  */
 size_t ParenthesesTree::nodeselect(unsigned long long i) {
     // if (i == 0) return 0; This depends on select implementation
-    return T.select1(i);
+    return T.naive_select1(i);
 }
 
 /**

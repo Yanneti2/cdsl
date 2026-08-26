@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     // Teste de operacoes Put & Slice  |
     //----------------------------------
 
-    bitVector BV = bitVector();
+    BitVector BV = BitVector();
 
     for (int j = 0; j < 8; j++)
     {
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
         else BV.append0();
     }
     BV.print();
-    bitVector BV2 = bitVector();
+    BitVector BV2 = BitVector();
     for (int j = 0; j < 8; j++) {
         BV2.append1();
     }
@@ -37,11 +37,11 @@ int main(int argc, char *argv[])
     //----------------------------------
 
     string s = "11010011101000";
-    bitVector* string = new bitVector(s);
+    BitVector* string = new BitVector(s);
     assert(string.naive_rank1(s.size()) == 7);
     assert(string.naive_rank0(s.size()) == 7);
 
-    bitVector* string2 = new bitVector(s);
+    BitVector* string2 = new BitVector(s);
 
     //---------------------------
     //		Operators	|

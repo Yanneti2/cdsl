@@ -2,7 +2,7 @@ add_library(compact
         bitvector.cpp
         parentheses-tree.cpp
         huffman.cpp
-        jacobsonrank.cpp
+        bitvectorj.cpp
         louds.cpp
 )
 

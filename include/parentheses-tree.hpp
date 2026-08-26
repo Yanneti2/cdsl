@@ -4,14 +4,14 @@
 
 class ParenthesesTree {
 private:
-    bitVector T;
+    BitVector T;
 
 public:
     // Here, size_t refers to a position on the bitvector
     ParenthesesTree(string s);
     ParenthesesTree(Gtree t);
     ParenthesesTree(Tree t);
-    ParenthesesTree(bitVector& B);
+    ParenthesesTree(BitVector& B);
     
     // Private func range start ==============
     void bt_build(Tree::Node* node);
@@ -68,5 +68,5 @@ public:
     unsigned long long rank10(size_t i);
     size_t select10(unsigned long long i);
 
-    bitVector& getBv();
+    BitVector& getBv();
 };

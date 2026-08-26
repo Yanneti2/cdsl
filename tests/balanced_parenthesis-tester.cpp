@@ -2,7 +2,7 @@
  * 
  * These behaviour makes so that the enclosing of tha last position of the BV return 1, not 0.
  *
- * I suggest a remodel in this operations, comment that was made before my interview in this file, so that it returns the exact 0-indexed position of the bitVector.
+ * I suggest a remodel in this operations, comment that was made before my interview in this file, so that it returns the exact 0-indexed position of the BitVector.
  */
 
 #include "bitvector.h"
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 
     // Creating the BP bitvector
     unsigned long long size = 32;
-    bitVector B = bitVector(); 
+    BitVector B = BitVector(); 
 
     char pattern[] = "((())()(())(()())())()((())())()";
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     //---------------------------
 
     // B1 == ()()() == 101010
-    bitVector B1 = bitVector();
+    BitVector B1 = BitVector();
     for(int i = 0; i < 3; i++){
 	    B1.append1();
 	    B1.append0();
@@ -82,14 +82,14 @@ int main(int argc, char *argv[])
     assert(T1.is_bp());
 
     // B2 = ((())) == 111000
-    bitVector B2 = bitVector();
+    BitVector B2 = BitVector();
     for(int i = 0; i < 3; i++)B2.append1();
     for(int i = 0; i < 3; i++)B2.append0();
     ParenthesesTree T2 = ParenthesesTree(B2);
     assert(T2.is_bp());
 
     // B3 = (()()() == 1101010
-    bitVector B3 = bitVector();
+    BitVector B3 = BitVector();
     B3.append1();
     for(int i = 0; i < 3; i++){
 	    B3.append1();
@@ -99,43 +99,43 @@ int main(int argc, char *argv[])
     assert(!T3.is_bp());
 
     // B4 == ) == 0
-    bitVector B4 = bitVector();
+    BitVector B4 = BitVector();
     B4.append0();
     ParenthesesTree T4 = ParenthesesTree(B4);
     assert(!T4.is_bp());
 
     // B5 = empty
-    bitVector B5 = bitVector();
+    BitVector B5 = BitVector();
     ParenthesesTree T5 = ParenthesesTree(B5);
     assert(!T5.is_bp());
 
     // B6 == ())(() == 100110
     string arantes = "100110";
-    bitVector B6 = bitVector(arantes);
+    BitVector B6 = BitVector(arantes);
     ParenthesesTree T6 = ParenthesesTree(B6);
     assert(!T6.is_bp());
 
     // B7 == )))))((((( == 0000011111
     string arantes2 = "0000011111";
-    bitVector B7 = bitVector(arantes2);
+    BitVector B7 = BitVector(arantes2);
     ParenthesesTree T7 = ParenthesesTree(B7);
     assert(!T7.is_bp());
 
     // B8 == ((()())((((()()()))())((()(())()())))()) 
     string a = "1110100111110101000100111011001010000100";
-    bitVector B8 = bitVector(a);
+    BitVector B8 = BitVector(a);
     ParenthesesTree T8 = ParenthesesTree(B8);
     assert(T8.is_bp());
 
     // B9 == () == 10
-    bitVector B9 = bitVector();
+    BitVector B9 = BitVector();
     B9.append1();
     B9.append0();
     ParenthesesTree T9 = ParenthesesTree(B9);
     assert(T9.is_bp());
 
     // B10 == ((( == 111
-    bitVector B10 = bitVector();
+    BitVector B10 = BitVector();
     B10.append1();
     B10.append1();
     B10.append1();
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
     //    Enclose Operation    |
     //---------------------------
 
-    // 1110100111110101000100111011001010000100 Original bitVector
+    // 1110100111110101000100111011001010000100 Original BitVector
     //
     // ((()())((((()()()))())((()(())()())))()) Parenthesis Analogy
     //
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
     //
     // encloses(23) == 8
 
-    bitVector BV = bitVector();
+    BitVector BV = BitVector();
     BV.append1();
     BV.append1();
     BV.append1();
@@ -207,13 +207,13 @@ int main(int argc, char *argv[])
     assert(PT.enclose(15) == 0);
 
     string navarro = "1110100111110101000100111011001010000100";
-    bitVector gonzalo = bitVector(navarro);
+    BitVector gonzalo = BitVector(navarro);
     ParenthesesTree ng = ParenthesesTree(gonzalo);
 
     assert(ng.enclose(22) == 7);
 
     string fring = "110100";
-    bitVector h = bitVector(fring);
+    BitVector h = BitVector(fring);
     ParenthesesTree HH = ParenthesesTree(h);
     assert(HH.is_bp());
     //cout << "enclose(6) " << HH.enclose(6) << " excess(6) " << HH.excess(6) << endl;

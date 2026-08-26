@@ -10,7 +10,7 @@ using namespace std;
 
 /* Level-Order Unary Degree Sequence (LOUDS) is a compact tree representation that traverses the
  * tree in BFS-order and, for each new node v with c children, appends 1^c 0's to a given 
- * bitVector B. These c + 1 bits are called description of a node v, and B[1,2n+1].
+ * BitVector B. These c + 1 bits are called description of a node v, and B[1,2n+1].
  */
 
 /**
@@ -27,7 +27,7 @@ LOUDS::LOUDS(string s){
 
 /**
  * Starts with '10' plus the previous description so that it prevents some border cases
- * This functions populates a bitVector for a given explicit form tree previously initialized
+ * This functions populates a BitVector for a given explicit form tree previously initialized
  */
 LOUDS::LOUDS(Gtree* G){
  	T.append1(); T.append0();
@@ -53,7 +53,7 @@ LOUDS::LOUDS(Gtree* G){
 
 /*
  * Starts with '10' plus the previous description so that it prevents some border cases
- * This functions populates a bitVector for a given explicit form tree previously initialized
+ * This functions populates a BitVector for a given explicit form tree previously initialized
  */
 LOUDS::LOUDS(Tree* BT){
  	T.append1(); T.append0();
@@ -86,8 +86,8 @@ LOUDS::LOUDS(Tree* BT){
 bool LOUDS::is_louds(string s){
 	if(s.size() < 2 || (s.size() > 2 && s.size() % 2 == 0))return false;
 	if(!(s[0] =='1' && s[1] =='0'))return false;
-	bitVector dummy = bitVector(s);
-	if(dummy.rank0(dummy.size()) - dummy.naive_rank1(dummy.size()) != 1)return false;
+	BitVector dummy = BitVector(s);
+	if(dummy.naive_rank0(dummy.size()) - dummy.naive_rank1(dummy.size()) != 1)return false;
 	int counter = 0;
 	for(unsigned long i = 2; i <= dummy.size(); i++){
 		if(counter == -1)return false;
@@ -114,7 +114,7 @@ bool LOUDS::is_louds(){
 }
 
 /*
- * Prints the bitVector associated to the current LOUDS tree
+ * Prints the BitVector associated to the current LOUDS tree
  */
 void LOUDS::print(){
 	for(unsigned long long i = 0; i < T.size(); i++){
@@ -127,22 +127,22 @@ void LOUDS::print(){
  *
  */
 size_t LOUDS::succ0(size_t v) {
-    return T.select0(T.rank0(v) + 1) - 1; 
+    return T.naive_select0(T.naive_rank0(v) + 1) - 1; 
 }
 
 /**
  *
  */
 size_t LOUDS::succ1(size_t v) {
-    return T.select1(T.rank1(v) + 1) - 1;
+    return T.naive_select1(T.naive_rank1(v) + 1) - 1;
 }
 
 /**
  *
  */
 size_t LOUDS::pred0(size_t v) {
-    int a = T.rank0(v);
-    int b = T.select0(a);
+    int a = T.naive_rank0(v);
+    int b = T.naive_select0(a);
     return b;
 }
 
@@ -150,7 +150,7 @@ size_t LOUDS::pred0(size_t v) {
  *
  */
 size_t LOUDS::pred1(size_t v) {
-    return T.select1(T.rank1(v)) - 1;
+    return T.naive_select1(T.naive_rank1(v)) - 1;
 }
 
 /**
@@ -165,7 +165,7 @@ size_t LOUDS::root() {
  */
 size_t LOUDS::fchild(size_t v) {
     if (!T[v]) return -1;
-    return T.select0(T.rank1(v + 1));
+    return T.naive_select0(T.naive_rank1(v + 1));
 }
 
 /**
@@ -181,7 +181,7 @@ size_t LOUDS::lchild(size_t v) {
  */
 size_t LOUDS::child(size_t v, unsigned long long t) {
     if (!T[v]) return -1;
-    return T.select0(T.rank1(v + t));
+    return T.naive_select0(T.naive_rank1(v + t));
 }
 
 /**
@@ -203,8 +203,8 @@ unsigned long long LOUDS::childrank(size_t v) {
  */
 size_t LOUDS::parent(size_t v) {
 	if (v <= 2) return 0;
-    unsigned long long NodeNum =  T.rank0(v); // número do nó
-    unsigned long long NodeBeg = T.select1(NodeNum); // acha o 1 correspondente ao nó
+    unsigned long long NodeNum =  T.naive_rank0(v); // número do nó
+    unsigned long long NodeBeg = T.naive_select1(NodeNum); // acha o 1 correspondente ao nó
     return pred0(NodeBeg);
 }
 
@@ -234,7 +234,7 @@ bool LOUDS::isleaf(size_t v) {
  *
  */
 unsigned long long LOUDS::nodemap(size_t v) {
-    return T.rank0(v) - 1;
+    return T.naive_rank0(v) - 1;
 }
 
 unsigned long long LOUDS::size() {
@@ -245,5 +245,5 @@ unsigned long long LOUDS::size() {
  *
  */
 size_t LOUDS::nodeselect(unsigned long long i) {
-    return T.select0(i + 1);
+    return T.naive_select0(i + 1);
 }
