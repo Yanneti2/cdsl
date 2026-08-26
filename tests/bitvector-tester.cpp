@@ -6,7 +6,7 @@
 
 using namespace std;
 
-int main(int argc char *argvp[])
+int main(int argc, char *argv[])
 {
     //----------------------------------
     // Teste de operacoes Put & Slice  |
@@ -25,9 +25,11 @@ int main(int argc char *argvp[])
         BV2.append1();
     }
     std::cout << "BV2:" << std::endl;
-    BV2->print();
-    BV.put(BV2, 4);
-    std::cout << "BV2 putted into [4] of BV:" << std::endl;
+    BV2.print();
+
+    // Put does not exist anymore
+    // BV.put(BV2, 4);
+    // std::cout << "BV2 putted into [4] of BV:" << std::endl;
     BV.print();
 
     //----------------------------------

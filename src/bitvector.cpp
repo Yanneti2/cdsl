@@ -8,7 +8,6 @@
     Uma funcao para appendar um long e/ou uma string a um bitvector.
 */
 
-#include <stack>
 #include <string>
 #include <stdint.h>
 #include <stdio.h>
@@ -19,7 +18,6 @@
 #include "../include/jacobsonrank.h"
 
 #include <cmath>
-#include <iostream>
 #include <fstream>
 using namespace std;
 
@@ -159,6 +157,7 @@ bitVector::~bitVector() {
     free(A);
 }
 
+// some duplicate error
 bitVector &bitVector::operator=(const bitVector &B) {
     if (this == &B) {
         return *this;
