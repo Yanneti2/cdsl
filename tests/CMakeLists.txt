@@ -59,3 +59,9 @@ add_executable(balanced_parenthesis-tester
 
 target_link_libraries(balanced_parenthesis-tester compact)
 add_test(NAME TestBalancedParenthesis COMMAND balanced_parenthesis-tester)
+
+add_executable(louds-tester
+	louds-tester.cpp
+)
+
+target_link_libraries(louds-tester compact)
