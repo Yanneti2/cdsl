@@ -7,7 +7,7 @@ using namespace std;
 BinaryTree::BinaryTree(){
 	this->root = new Node('$',0.0);
 	// null
-}	
+}
 
 // frees the memory of the existing now old tree
 BinaryTree::~BinaryTree(){

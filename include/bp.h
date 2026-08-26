@@ -20,4 +20,5 @@ unsigned long long excess(bitVector* B, unsigned long long i);
 bool is_bp(bitVector& B);
 unsigned long long backward_search(bitVector* B, unsigned long long i, unsigned long long d);
 unsigned long long enclose(bitVector* B, unsigned long long i);
+
 #endif

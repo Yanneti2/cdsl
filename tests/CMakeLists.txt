@@ -6,14 +6,12 @@ add_executable(binary_tree-tester
 
 target_link_libraries(binary_tree-tester compact)
 
-add_executable(bitvectorRRR-tester
-        bitvectorRRR-tester.cpp
-)
+#add_executable(bitvectorRRR-tester
+#        bitvectorRRR-tester.cpp
+#)
 
-target_link_libraries(bitvectorRRR-tester libgpt)
-target_compile_definitions(bitvectorRRR-tester PRIVATE DEBUG)
-
-
+#target_link_libraries(bitvectorRRR-tester)
+#target_compile_definitions(bitvectorRRR-tester PRIVATE DEBUG)
 
 add_executable(huffman-tester
         huffman-tester.cpp
