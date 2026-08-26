@@ -1,28 +1,17 @@
-#include "../include/bitvector.h"
+#include "bitvector.h"
 #include <iostream>
 #include <map>
-#define ULL unsigned long long
-
-//mudar o freq para não utilizar ponteiros
+#include "wtnode.h"
 
 class WaveletTree {
-private:
-    uint64_t len; // b
-    WaveletTree *d;
-    WaveletTree *l;
-    WaveletTree *r;
-    bitVector *freq;
-    string alpha = ""; // alphabet
+    private:
 
-public:
-    WaveletTree(string S, WaveletTree* dad = NULL);
-    ULL rank();
-    ~WaveletTree();
-
-    //mudancas feitas
-    char access(ULL i);
-    void teste();
-    ULL select_c(char c,  ULL j);
-    ULL rank_c(char c, ULL i);
+    public:
+    WaveletTreeNode* root;
+    std::string alpha;
+    WaveletTree(std::string S, WaveletTreeNode* r);
+    char Acess(unsigned long long i);
+    unsigned long long rankc(char c, unsigned long long i);
+    unsigned long long selectc(char c,  unsigned long long i, WaveletTreeNode* Node);
     void print();
 };
