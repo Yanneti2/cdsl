@@ -1,88 +1,69 @@
-#include <cstdint>
-#include "nlohmann/json.hpp"
-
-#include "../include/jacobsonrank.h"
-
 #ifndef BITVECTOR
 #define BITVECTOR
 
-// TODO: check system word size and use word size accordingly
-#if INTPTR_MAX == INT64_MAX
+#include <cstdint>
+#include <cstdlib>
+#include <string>
+
+#define NBITS __WORDSIZE
+
+#if NBITS == 64
 #define IS64BIT
-#define NBITS 64
 #define TYPE uint64_t
-#elif INTPTR_MAX == INT32_MAX
+#elif NBITS == 32
 #define IS32BIT
-#define NBITS 32
 #define TYPE uint32_t
 #else
 #error "Not a known processor"
 #endif
 
-using namespace std;
-
-class JacobsonRank;
-
-class bitVector {
-    // TODO: *a should be unsigned long???
+class BitVector {
 private:
-    TYPE *A;   // The bitvector itself
-    unsigned long _cap;  // The number of words of A.
-    unsigned long _size;  // The lenght of the bit sequence (logical). 
-    float ratio;        // The growing factor.
-    JacobsonRank *rank; // The rank structure.
+    TYPE *A;       // The bitvector itself
+    size_t _cap;   // The number of words of A.
+    size_t _size;  // The lenght of the bit sequence (logical). 
 
 public:
-    // Methods implemented post GPT (originals by stringers)
-    int grow(unsigned long ncap);
+    void grow(size_t ncap);
     size_t size() const;
     size_t cap() const;
-    nlohmann::json JSONSerialize();
-    string JSONDeserialize(nlohmann::json j);
-    // Methods implemented by GPT (originals and modded)
-    bitVector(unsigned long capacity = 1, float growth_ratio = 2);
-    ~bitVector();
-    bool issameSize(bitVector B) const;
+
+    BitVector();
+    BitVector(size_t size);
+    BitVector(size_t size, int init);
+    BitVector(size_t size, bool (*fn)(size_t));
+    BitVector(std::string s);
+    ~BitVector();
+    BitVector &operator=(const BitVector &B);
+
+    static BitVector *deserialize(const char *path);
+    void serialize(const char *path);
+
     void append0();
     void append1();
-    void set0(unsigned long i);
-    void set1(unsigned long i);
-    void extend(bitVector *B);
-    void put(bitVector *B, unsigned long i);
-    bitVector operator>>(unsigned long i) const;
-    bitVector operator<<(unsigned long i) const;
-    bitVector operator&(bitVector B) const;
-    bitVector operator|(bitVector B) const;
-    bitVector operator~() const;
-    bitVector operator^(bitVector B) const;
-    bool operator==(bitVector B) const;
-    int  operator[](unsigned long i) const;
-    TYPE accessWord(unsigned long i) const;
-    TYPE accessWord(unsigned long i, unsigned wordSize) const;
-    bitVector *slice(unsigned long i, unsigned long k) const;
+    void set0(size_t i);
+    void set1(size_t i);
 
-    void put(bitVector *SRC, unsigned long k, unsigned long i);
-
-
-    void append(unsigned long number, unsigned long k);
+    bool operator==(const BitVector &B) const;
+    int  operator[](size_t i) const;
+    TYPE accessWord(size_t i) const;
+    TYPE accessWord(size_t i, unsigned wordSize) const;
 
     void print() const;
 
-    unsigned long naive_rank1(unsigned long long i);
-    unsigned long naive_rank0(unsigned long long i);
-    unsigned long naive_select1(unsigned long long i);
-    unsigned long naive_select0(unsigned long long i);
-    unsigned long popcount();
+    size_t naive_popcount() const;
+    size_t naive_rank0(size_t i) const;
+    size_t naive_rank1(size_t i) const;
+    size_t naive_select0(size_t i) const;
+    size_t naive_select1(size_t i) const;
 
-    unsigned long long select1(unsigned long long i);
-    unsigned long long select0(unsigned long long i);
-    void JacobsonRank_build();
-    unsigned long long rank0(unsigned long long i);
-    unsigned long long rank1(unsigned long long i);
-    void print_rank();
+    // The following methods are outdated and should be updated
+    void extend(BitVector *B);
+    void put(BitVector *B, unsigned long i);
+    BitVector *slice(unsigned long i, unsigned long k) const;
+    void put(BitVector *SRC, unsigned long k, unsigned long i);
+    void append(unsigned long number, unsigned long k);
 
-    void build_select0();
-    void build_select1();
 };
 
 #endif

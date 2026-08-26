@@ -1,6 +1,6 @@
 
 #include <cinttypes>
-#include "mask10.h"
+#include "masks/mask10.h"
 
 // Masks for ones followed by zeros:
 const uint64_t mask10[65] = {

@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include <stdexcept>
 
-#include "bitvectorRRR.h"
-#include "mask01.h"
-#include "mask10.h"
+#include "GPT-originals/bitvectorRRR.h"
+#include "masks/mask01.h"
+#include "masks/mask10.h"
 
 using namespace std;
 

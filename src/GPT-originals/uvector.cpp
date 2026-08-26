@@ -5,8 +5,8 @@
 
 #include <cstdio>
 
-#include "uvector.h"
-#include "mask01.h"
+#include "GPT-originals/uvector.h"
+#include "masks/mask01.h"
 
 using namespace std;
 
@@ -27,6 +27,12 @@ uvector::uvector(uint64_t size, int width) {
 uvector::~uvector() {
 
   delete [] V;
+}
+
+
+
+uint64_t uvector::size() {
+  return vsize;
 }
 
 

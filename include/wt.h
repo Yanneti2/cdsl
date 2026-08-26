@@ -1,17 +1,14 @@
-#include <cstdlib>
-#include <iostream>
-#include "..\include\bitvector.h"
+#include "wtnode.h"
 
 class WaveletTree {
-private:
-    WaveletTree *d;
-    WaveletTree *l;
-    WaveletTree *r;
-    bitVector freq;
+    private:
 
-public:
-    WaveletTree(string S, WaveletTree* dad = NULL);
-    unsigned long long select();
-    unsigned long long rank();
-    ~WaveletTree();
+    public:
+    WaveletTreeNode* root;
+    std::string alpha;
+    WaveletTree(std::string S, WaveletTreeNode* r);
+    char Acess(unsigned long long i);
+    unsigned long long rankc(char c, unsigned long long i);
+    unsigned long long selectc(char c,  unsigned long long i, WaveletTreeNode* Node);
+    void print();
 };
