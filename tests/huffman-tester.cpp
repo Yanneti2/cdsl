@@ -26,11 +26,11 @@ int main (void) {
 	// esperado: b 0.2, r 0.2, a 0.4, c 0.1, d 0.1, 
 	string str = "bracadabra";
 	auto start = std::chrono::high_resolution_clock::now();
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> rel = probabilities_frequency(str,true);	
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> rel = probabilities_frequency(str,true);	
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> ms_double = end - start;
 	cout << "T1 probabilities calculation time: " << ms_double << endl;
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> temp(rel);
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> temp(rel);
 	while (!temp.empty()){
 		cout << temp.top()->data << " " << temp.top()->frequency << endl;
 		temp.pop();
@@ -39,11 +39,11 @@ int main (void) {
 	
 	string s = "bananaabacate";
 	start = std::chrono::high_resolution_clock::now();
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> rel1 = probabilities_frequency(s,true);
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> rel1 = probabilities_frequency(s,true);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "T2 probabiities calculation time: " << ms_double << endl;
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> temp1(rel1); 
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> temp1(rel1); 
 	while (!temp1.empty())
 	{
 		cout << temp1.top()->data << " " << temp1.top()->frequency << endl;
@@ -53,11 +53,11 @@ int main (void) {
 
 	string gonzalo = "abracadabra";
 	start = std::chrono::high_resolution_clock::now();
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> navarro = probabilities_frequency(gonzalo,true);
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> navarro = probabilities_frequency(gonzalo,true);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "T3 probabilities calculation time: " << ms_double << endl;
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> temp2(navarro); 
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> temp2(navarro); 
 	while (!temp2.empty()){
 		cout << temp2.top()->data << " " << temp2.top()->frequency << endl;
 		temp2.pop();
@@ -66,11 +66,11 @@ int main (void) {
 
 	string teste1 = "aaaaaaa"; 
 	start = std::chrono::high_resolution_clock::now();
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> teste11 = probabilities_frequency(teste1,true);
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> teste11 = probabilities_frequency(teste1,true);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste1 probabilities calculation time: " << ms_double << endl;
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> temp3(teste11); 
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> temp3(teste11); 
 	while (!temp3.empty()){
 		cout << temp3.top()->data << " " << temp3.top()->frequency << endl;
 		temp3.pop();
@@ -79,11 +79,11 @@ int main (void) {
 
 	string teste2 = "a$b$$c$$$";
 	start = std::chrono::high_resolution_clock::now();
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> teste22 = probabilities_frequency(teste2,true);
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> teste22 = probabilities_frequency(teste2,true);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste2 probabilities calculation time: " << ms_double << endl;
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> temp4(teste22); 
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> temp4(teste22); 
 	while (!temp4.empty()){
 		cout << temp4.top()->data << " " << temp4.top()->frequency << endl;
 		temp4.pop();
@@ -92,11 +92,11 @@ int main (void) {
 
 	string teste3 = string(10000, 'a') + string(1, 'b') + string(1, 'c') + string(1, 'd') + string(1, 'e');
 	start = std::chrono::high_resolution_clock::now();
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> teste33 = probabilities_frequency(teste3,true);
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> teste33 = probabilities_frequency(teste3,true);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste3 probabilities calculation time: " << ms_double << endl;
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> temp5(teste33); 
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> temp5(teste33); 
 	while (!temp5.empty()){
 		cout << temp5.top()->data << " " << temp5.top()->frequency << endl;
 		temp5.pop();
@@ -106,11 +106,11 @@ int main (void) {
 	string teste4 = ""; 
 	for(int c = 32; c <= 126; c++) teste4 += string(100, (char)c);
 	start = std::chrono::high_resolution_clock::now();
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> teste44 = probabilities_frequency(teste4,true);
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> teste44 = probabilities_frequency(teste4,true);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste4 probabilities calculation time: " << ms_double << endl;
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> temp6(teste44); 
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> temp6(teste44); 
 	while (!temp6.empty()){
 		cout << temp6.top()->data << " " << temp6.top()->frequency << endl;
 		temp6.pop();
@@ -119,11 +119,11 @@ int main (void) {
 
 	string teste5 = string(1000000, 'y') + string(1, 'x');
 	start = std::chrono::high_resolution_clock::now();
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> teste55 = probabilities_frequency(teste5,true);
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> teste55 = probabilities_frequency(teste5,true);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste5 probabilities calculation time: " << ms_double << endl;
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> temp7(teste55); 
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> temp7(teste55); 
 	while (!temp7.empty()){
 		cout << temp7.top()->data << " " << temp7.top()->frequency << endl;
 		temp7.pop();
@@ -133,11 +133,11 @@ int main (void) {
 	ifstream f("../tests/input_1M.txt");
 	string teste6((istreambuf_iterator<char>(f)), istreambuf_iterator<char>());	
 	start = std::chrono::high_resolution_clock::now();
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> teste66 = probabilities_frequency(teste6,true);
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> teste66 = probabilities_frequency(teste6,true);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste6 probabilities calculation time: " << ms_double << endl;
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> temp8(teste66); 
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> temp8(teste66); 
 	while (!temp8.empty()){
 		cout << temp8.top()->data << " " << temp8.top()->frequency << endl;
 		temp8.pop();
@@ -147,7 +147,7 @@ int main (void) {
 	// HUFFAN BUILD AND ENCODING TEST:
 
 	start = std::chrono::high_resolution_clock::now();
-	Tree::Node* root = build_huffman(rel);
+	BinaryTree::Node* root = build_huffman(rel);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout <<  "T1 build time: " << ms_double << endl;
@@ -161,7 +161,7 @@ int main (void) {
 	cout<<endl;
 
 	start = std::chrono::high_resolution_clock::now();
-	Tree::Node* root1 = build_huffman(rel1);
+	BinaryTree::Node* root1 = build_huffman(rel1);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "T2 build time: "<< ms_double << endl;
@@ -175,7 +175,7 @@ int main (void) {
 	cout << endl;
 
 	start = std::chrono::high_resolution_clock::now();
-	Tree::Node* root2 = build_huffman(navarro);
+	BinaryTree::Node* root2 = build_huffman(navarro);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "T3 build time: " << ms_double << endl;
@@ -189,7 +189,7 @@ int main (void) {
 	cout << endl;
 
 	start = std::chrono::high_resolution_clock::now();
-	Tree::Node* root3 = build_huffman(teste11);
+	BinaryTree::Node* root3 = build_huffman(teste11);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste1 build time: " << ms_double << endl;
@@ -203,7 +203,7 @@ int main (void) {
 	cout << endl;
 
 	start = std::chrono::high_resolution_clock::now();
-	Tree::Node* root4 = build_huffman(teste22);
+	BinaryTree::Node* root4 = build_huffman(teste22);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste2 build time: " << ms_double << endl;
@@ -217,7 +217,7 @@ int main (void) {
 	cout << endl;
 
 	start = std::chrono::high_resolution_clock::now();
-	Tree::Node* root5 = build_huffman(teste33);
+	BinaryTree::Node* root5 = build_huffman(teste33);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste3 build time: " << ms_double << endl;
@@ -231,7 +231,7 @@ int main (void) {
 	cout << endl;
 
 	start = std::chrono::high_resolution_clock::now();
-	Tree::Node* root6 = build_huffman(teste44);
+	BinaryTree::Node* root6 = build_huffman(teste44);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste4 build time: " << ms_double << endl;
@@ -245,7 +245,7 @@ int main (void) {
 	cout << endl;
 
 	start = std::chrono::high_resolution_clock::now();
-	Tree::Node* root7 = build_huffman(teste55);
+	BinaryTree::Node* root7 = build_huffman(teste55);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste5 build time: " << ms_double << endl;
@@ -259,7 +259,7 @@ int main (void) {
 	cout << endl;
 
 	start = std::chrono::high_resolution_clock::now();
-	Tree::Node* root8 = build_huffman(teste66);
+	BinaryTree::Node* root8 = build_huffman(teste66);
 	end = std::chrono::high_resolution_clock::now();
 	ms_double = end - start;
 	cout << "teste6 build time: " << ms_double << endl;
@@ -278,7 +278,7 @@ int main (void) {
 	vector<unsigned long int> vvv1;
 	vector<double>vvv2;
 	while(!rel.empty()){
-		Tree::Node* atual = rel.top();
+		BinaryTree::Node* atual = rel.top();
 		rel.pop();
 		double freq = atual->frequency;
 		unsigned long int size = t[atual->data].size();
@@ -291,7 +291,7 @@ int main (void) {
 	vector<unsigned long int> vv1;
 	vector<double>vv2;
 	while(!rel1.empty()){
-		Tree::Node* atual = rel1.top();
+		BinaryTree::Node* atual = rel1.top();
 		rel1.pop();
 		double freq = atual->frequency;
 		unsigned long int size = t1[atual->data].size();
@@ -304,7 +304,7 @@ int main (void) {
 	vector<unsigned long int> v1;
 	vector<double>v2;
 	while(!navarro.empty()){
-		Tree::Node* atual = navarro.top();
+		BinaryTree::Node* atual = navarro.top();
 		navarro.pop();
 		double freq = atual->frequency;
 		unsigned long int size = t2[atual->data].size();
@@ -317,7 +317,7 @@ int main (void) {
 	vector<unsigned long int> v3;
 	vector<double>v33;
 	while(!teste11.empty()){
-		Tree::Node* atual = teste11.top();
+		BinaryTree::Node* atual = teste11.top();
 		teste11.pop();
 		double freq = atual->frequency;
 		unsigned long int size = t3[atual->data].size();
@@ -330,7 +330,7 @@ int main (void) {
 	vector<unsigned long int> v4;
 	vector<double>v44;
 	while(!teste22.empty()){
-		Tree::Node* atual = teste22.top();
+		BinaryTree::Node* atual = teste22.top();
 		teste22.pop();
 		double freq = atual->frequency;
 		unsigned long int size = t4[atual->data].size();
@@ -343,7 +343,7 @@ int main (void) {
 	vector<unsigned long int> v5;
 	vector<double>v55;
 	while(!teste33.empty()){
-		Tree::Node* atual = teste33.top();
+		BinaryTree::Node* atual = teste33.top();
 		teste33.pop();
 		double freq = atual->frequency;
 		unsigned long int size = t5[atual->data].size();
@@ -356,7 +356,7 @@ int main (void) {
 	vector<unsigned long int> v6;
 	vector<double>v66;
 	while(!teste44.empty()){
-		Tree::Node* atual = teste44.top();
+		BinaryTree::Node* atual = teste44.top();
 		teste44.pop();
 		double freq = atual->frequency;
 		unsigned long int size = t6[atual->data].size();
@@ -369,7 +369,7 @@ int main (void) {
 	vector<unsigned long int> v7;
 	vector<double>v77;
 	while(!teste55.empty()){
-		Tree::Node* atual = teste55.top();
+		BinaryTree::Node* atual = teste55.top();
 		teste55.pop();
 		double freq = atual->frequency;
 		unsigned long int size = t7[atual->data].size();
@@ -382,7 +382,7 @@ int main (void) {
 	vector<unsigned long int> v8;
 	vector<double>v88;
 	while(!teste66.empty()){
-		Tree::Node* atual = teste66.top();
+		BinaryTree::Node* atual = teste66.top();
 		teste66.pop();
 		double freq = atual->frequency;
 		unsigned long int size = t8[atual->data].size();

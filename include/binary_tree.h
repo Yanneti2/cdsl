@@ -1,7 +1,7 @@
 #ifndef ESTRUTURAS_DE_DADOS_COMPACTAS_BINARY_TREE_H
 #define ESTRUTURAS_DE_DADOS_COMPACTAS_BINARY_TREE_H
 
-class Tree{
+class BinaryTree {
 	public:
 		struct Node {
 			Node* left;
@@ -18,8 +18,8 @@ class Tree{
 		    }
 		};
 
-		Tree();
-		~Tree();
+		BinaryTree();
+		~BinaryTree();
 		Node* create_node(char data, double freq);
 		void print_tree(Node* root);
 		Node* getRoot();

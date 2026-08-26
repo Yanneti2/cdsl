@@ -11,11 +11,11 @@ using namespace std;
 
 double worst_case_entropy(double setSize);
 
-priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> probabilities_frequency(string S, bool prob);
+priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> probabilities_frequency(string S, bool prob);
 
-Tree::Node* build_huffman(priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> heap);
+BinaryTree::Node* build_huffman(priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> heap);
 
-void huffman_coding(Tree::Node* root, map<char,string>& arr, string curr);
+void huffman_coding(BinaryTree::Node* root, map<char,string>& arr, string curr);
 
 double average_length_codes(vector<unsigned long int> v1,vector<double> v2);
 

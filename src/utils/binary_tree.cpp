@@ -4,13 +4,13 @@
 using namespace std;
 
 // builds a new Tree initializating the root
-Tree::Tree(){
+BinaryTree::BinaryTree(){
 	this->root = new Node('$',0.0);
 	// null
 }	
 
 // frees the memory of the existing now old tree
-Tree::~Tree(){
+BinaryTree::~BinaryTree(){
 	if (!this->root) return;
 	queue<Node*> q;
 	q.push(root);
@@ -26,18 +26,18 @@ Tree::~Tree(){
 	}
 }
 // Returns 0 if not empty and 1 if empty
-bool Tree::isEmpty(Node* root){ if (root) return 0; else return 1; } 
+bool BinaryTree::isEmpty(Node* root){ if (root) return 0; else return 1; } 
 
 // Return the root of the given existen Tree
-Tree::Node* Tree::getRoot(){ return this->root; }
+BinaryTree::Node* BinaryTree::getRoot(){ return this->root; }
 
 // Create and returns a new node
-Tree::Node* Tree::create_node(char data, double freq){
+BinaryTree::Node* BinaryTree::create_node(char data, double freq){
 	return new Node(data,freq);	
 }
 
 // Prints the Tree in BFS order
-void Tree::print_tree(Node* root){
+void BinaryTree::print_tree(Node* root){
 	if (!root) return;
 	queue<Node*> q;
 	q.push(root);

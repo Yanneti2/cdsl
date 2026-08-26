@@ -26,15 +26,15 @@ using namespace std;
 double worst_case_entropy(double setSize){ return log2(setSize); }
 
 // function that receives a strings and return a map of that strings chars probabilities
-priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> probabilities_frequency(string S, bool prob){
-	Tree::Node* table[256] = {};
+priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> probabilities_frequency(string S, bool prob){
+	BinaryTree::Node* table[256] = {};
 	double size = S.size();
 	for(char c : S){
 		unsigned char index = (unsigned char) c;
 		if(table[index])table[index]->frequency+=1.0;
-		else table[index] = new Tree::Node(c,1.0);
+		else table[index] = new BinaryTree::Node(c,1.0);
 	}
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> pq;
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> pq;
 	for(int i = 0; i<256;i++){
 		if(table[i]){
 			if(prob)table[i]->frequency/=size;
@@ -45,13 +45,13 @@ priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> probabiliti
 }
 
 // Builds a Huffman tree and returns its root
-Tree::Node* build_huffman(priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> heap){
+BinaryTree::Node* build_huffman(priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> heap){
 	while(heap.size() > 1){
-		Tree::Node* lc = heap.top();
+		BinaryTree::Node* lc = heap.top();
 		heap.pop();
-		Tree::Node* rc = heap.top();
+		BinaryTree::Node* rc = heap.top();
 		heap.pop();
-		Tree::Node* aux = new Tree::Node('$', lc->frequency + rc->frequency);
+		BinaryTree::Node* aux = new BinaryTree::Node('$', lc->frequency + rc->frequency);
 		aux->left = lc;
 		aux->right = rc;
 		heap.push(aux);
@@ -60,7 +60,7 @@ Tree::Node* build_huffman(priority_queue<Tree::Node*, vector<Tree::Node*>, Tree:
 }
 
 // travels a huffman tree and encode the nodes
-void huffman_coding(Tree::Node* root, map<char,string>& arr, string curr){
+void huffman_coding(BinaryTree::Node* root, map<char,string>& arr, string curr){
 	if(!root)return;
 	if(!root->left && !root->right){ 
 		if(curr!="")arr.insert({root->data,curr});
