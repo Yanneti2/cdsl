@@ -1,0 +1,89 @@
+
+===============================================================
+OS TESTES A SEGUIR USARAM CHUNK SIZE: logN e logN*logN
+
+
+ALEM DISSO, ELES USARAM A ESTRUTURA AUXILIAR DE SELECT
+===============================================================
+
+
+
+Tempo de construção da estrutura de select1 de ordem 3: 0.012289 ms
+Tempo de 400 operações select1: 0.03618 ms
+
+Tempo de construção da estrutura de select1 de ordem 4: 0.120741 ms
+Tempo de 4000 operações select1: 0.420588 ms
+
+Tempo de construção da estrutura de select1 de ordem 5: 1.01167 ms
+Tempo de 40000 operações select1: 1.83281 ms
+
+Tempo de construção da estrutura de select1 de ordem 6: 9.75326 ms
+Tempo de 400000 operações select1: 10.1695 ms
+
+Tempo de construção da estrutura de select1 de ordem 7: 96.3147 ms
+Tempo de 4000000 operações select1: 59.9209 ms
+
+Tempo de construção da estrutura de select1 de ordem 8: 742.063 ms
+Tempo de 40000000 operações select1: 717.506 ms
+
+Tempo de construção da estrutura de select1 de ordem 9: 7353.36 ms
+Tempo de 400000000 operações select1: 7178.83 ms
+
+
+
+
+Tempo de construção da estrutura de select0 de ordem 3: 0.007375 ms
+Tempo de 400 operações select0: 0.026466 ms
+
+Tempo de construção da estrutura de select0 de ordem 4: 0.067315 ms
+Tempo de 4000 operações select0: 0.222677 ms
+
+Tempo de construção da estrutura de select0 de ordem 5: 0.676002 ms
+Tempo de 40000 operações select0: 2.88037 ms
+
+Tempo de construção da estrutura de select0 de ordem 6: 6.69992 ms
+Tempo de 400000 operações select0: 33.6368 ms
+
+Tempo de construção da estrutura de select0 de ordem 7: 67.0972 ms
+Tempo de 4000000 operações select0: 376.818 ms
+
+Tempo de construção da estrutura de select0 de ordem 8: 670.871 ms
+Tempo de 40000000 operações select0: 4589.29 ms
+
+Tempo de construção da estrutura de select0 de ordem 9: 6710.28 ms
+Tempo de 400000000 operações select0: 103285 ms
+
+
+
+
+Tempo de 400 operações rank1: 0.008774 ms
+
+Tempo de 4000 operações rank1: 0.087459 ms
+
+Tempo de 40000 operações rank1: 0.819874 ms
+
+Tempo de 400000 operações rank1: 9.29591 ms
+
+Tempo de 4000000 operações rank1: 100.11 ms
+
+Tempo de 40000000 operações rank1: 1095.26 ms
+
+Tempo de 400000000 operações rank1: 25225.9 ms
+
+
+
+
+Tempo de 400 operações rank0: 0.008801 ms
+
+Tempo de 4000 operações rank0: 0.08882 ms
+
+Tempo de 40000 operações rank0: 0.849545 ms
+
+Tempo de 400000 operações rank0: 9.37703 ms
+
+Tempo de 4000000 operações rank0: 100.103 ms
+
+Tempo de 40000000 operações rank0: 1096.25 ms
+
+Tempo de 400000000 operações rank0: 25526.1 ms
+

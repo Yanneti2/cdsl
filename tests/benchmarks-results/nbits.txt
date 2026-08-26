@@ -1,0 +1,75 @@
+
+===============================================================
+OS TESTES A SEGUIR USARAM CHUNK SIZE: NBITS e NBITS*NBITS
+
+
+ALEM DISSO, ELES NAO USARAM A ESTRUTURA AUXILIAR DE SELECT
+===============================================================
+
+
+
+Tempo de 400 operações select1: 0.060392 ms
+
+Tempo de 4000 operações select1: 0.723047 ms
+
+Tempo de 40000 operações select1: 3.04834 ms
+
+Tempo de 400000 operações select1: 11.6853 ms
+
+Tempo de 4000000 operações select1: 118.754 ms
+
+Tempo de 40000000 operações select1: 1045.12 ms
+
+Tempo de 400000000 operações select1: 11353 ms
+
+
+
+
+Tempo de 400 operações select0: 0.042503 ms
+
+Tempo de 4000 operações select0: 0.479302 ms
+
+Tempo de 40000 operações select0: 5.51308 ms
+
+Tempo de 400000 operações select0: 62.7127 ms
+
+Tempo de 4000000 operações select0: 735.234 ms
+
+Tempo de 40000000 operações select0: 9167.48 ms
+
+Tempo de 400000000 operações select0: 150781 ms
+
+
+
+
+Tempo de 400 operações rank1: 0.008302 ms
+
+Tempo de 4000 operações rank1: 0.08261 ms
+
+Tempo de 40000 operações rank1: 0.836172 ms
+
+Tempo de 400000 operações rank1: 8.42276 ms
+
+Tempo de 4000000 operações rank1: 83.7438 ms
+
+Tempo de 40000000 operações rank1: 938.488 ms
+
+Tempo de 400000000 operações rank1: 23115.5 ms
+
+
+
+
+Tempo de 400 operações rank0: 0.00841 ms
+
+Tempo de 4000 operações rank0: 0.082087 ms
+
+Tempo de 40000 operações rank0: 0.822959 ms
+
+Tempo de 400000 operações rank0: 8.38459 ms
+
+Tempo de 4000000 operações rank0: 83.7304 ms
+
+Tempo de 40000000 operações rank0: 933.908 ms
+
+Tempo de 400000000 operações rank0: 23252.1 ms
+
