@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Wl,--dependency-file=CMakeFiles/jacobsonrank-tester.dir/link.d "CMakeFiles/jacobsonrank-tester.dir/jacobsonrank-tester.cpp.o" -o jacobsonrank-tester  ../src/libcompact.a ../src/utils/libutils.a

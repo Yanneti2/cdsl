@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Wl,--dependency-file=CMakeFiles/ll2-tester.dir/link.d "CMakeFiles/ll2-tester.dir/ll2-tester.cpp.o" -o ll2-tester  ../src/utils/libutils.a

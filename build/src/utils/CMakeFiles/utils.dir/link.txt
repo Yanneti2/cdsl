@@ -1,2 +1,0 @@
-/usr/bin/ar qc libutils.a CMakeFiles/utils.dir/stack.cpp.o CMakeFiles/utils.dir/queue.cpp.o CMakeFiles/utils.dir/ll2.cpp.o CMakeFiles/utils.dir/dll.cpp.o CMakeFiles/utils.dir/general_tree.cpp.o CMakeFiles/utils.dir/binary_tree.cpp.o
-/usr/bin/ranlib libutils.a

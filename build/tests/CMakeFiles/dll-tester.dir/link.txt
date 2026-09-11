@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Wl,--dependency-file=CMakeFiles/dll-tester.dir/link.d "CMakeFiles/dll-tester.dir/dll-tester.cpp.o" -o dll-tester  ../src/utils/libutils.a
