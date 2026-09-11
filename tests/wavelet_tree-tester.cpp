@@ -1,6 +1,8 @@
-#include "..\include\wt.h"
+#include "wt.h"
+
 #include <iostream>
 #include <chrono>
+
 using namespace std;
 
 int main(void){

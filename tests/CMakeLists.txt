@@ -43,6 +43,11 @@ add_executable(ll2-tester
 )
 target_link_libraries(ll2-tester utils)
 
+add_executable(wt-tester
+        wt-tester.cpp
+)
+target_link_libraries(wt-tester compact)
+
 # TODO: Fix this
 # add_executable(utils-tester
 #         utils-tester.cpp
@@ -51,10 +56,10 @@ target_link_libraries(ll2-tester utils)
 # target_link_libraries(utils-tester libgpt compact)
 
 
-add_executable(balanced_parenthesis-tester
-    balanced_parenthesis-tester.cpp
-)
+# add_executable(balanced_parenthesis-tester
+#     balanced_parenthesis-tester.cpp
+# )
 
-target_link_libraries(balanced_parenthesis-tester compact)
+# target_link_libraries(balanced_parenthesis-tester compact)
 
 # add_test(NAME TestBalancedParenthesis COMMAND balanced_parenthesis-tester)

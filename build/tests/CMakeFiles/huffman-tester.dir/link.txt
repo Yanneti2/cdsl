@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/huffman-tester.dir/link.d "CMakeFiles/huffman-tester.dir/huffman-tester.cpp.o" -o huffman-tester  ../src/libcompact.a ../src/utils/libutils.a

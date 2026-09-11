@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompact.a CMakeFiles/compact.dir/bitvector.cpp.o CMakeFiles/compact.dir/huffman.cpp.o CMakeFiles/compact.dir/jacobsonrank.cpp.o CMakeFiles/compact.dir/wt.cpp.o
+/usr/bin/ranlib libcompact.a

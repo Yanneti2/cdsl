@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Wl,--dependency-file=CMakeFiles/bitvector-tester.dir/link.d "CMakeFiles/bitvector-tester.dir/bitvector-tester.cpp.o" -o bitvector-tester  ../src/libcompact.a ../src/utils/libutils.a
