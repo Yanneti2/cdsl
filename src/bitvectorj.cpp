@@ -68,10 +68,14 @@ size_t binary_search(T *V, T target, size_t beginning, size_t end, size_t factor
     }
 }
 
-// g++ -D _nbits, _log, _nbits512
-BitVectorJ::BitVectorJ() {
-    const size_t _size = size();
+BitVectorJ::BitVectorJ() : BitVector() {};
+BitVectorJ::BitVectorJ(size_t size) : BitVector(size) {};
+BitVectorJ::BitVectorJ(size_t size, int init) : BitVector(size, init) {};
+BitVectorJ::BitVectorJ(size_t size, bool (*fn)(size_t)) : BitVector(size, fn) {};
+BitVectorJ::BitVectorJ(std::string s) : BitVector(s) {};
+BitVectorJ::BitVectorJ(const BitVector &B) : BitVector(B) {};
 
+void BitVectorJ::init() {
     #ifdef _nbits
     chunk1_size = NBITS * NBITS;
     chunk2_size = NBITS;
@@ -81,12 +85,12 @@ BitVectorJ::BitVectorJ() {
     chunk2_size = NBITS;
 
     #else
-    const long double logN = log2((long double) _size);
+    const long double logN = log2((long double) size());
     chunk1_size = ceil(logN) * floor(logN);
     chunk2_size = chunk1_size / ceil(logN);
     #endif
 
-    layer1_size = (_size + chunk1_size - 1) / chunk1_size + 1;
+    layer1_size = (size() + chunk1_size - 1) / chunk1_size + 1;
     chunk2_per_chunk1 = chunk1_size / chunk2_size;
     layer2_size = chunk2_per_chunk1 * (layer1_size - 1);
 
@@ -106,6 +110,12 @@ BitVectorJ::BitVectorJ() {
         layer2_counter += pop_count;
     }
     layer1[layer1_size - 1] = layer1_counter;
+
+    init_status = true;
+}
+
+bool BitVectorJ::is_initialized() const {
+    return init_status;
 }
 
 BitVectorJ::~BitVectorJ() {
