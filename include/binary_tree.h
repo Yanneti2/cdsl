@@ -26,7 +26,7 @@ class BinaryTree {
 		bool getMarked();
 		bool isEmpty(Node* root);
 
-	private:
+	protected:
 		Node* root;
 };
 
