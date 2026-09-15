@@ -4,11 +4,13 @@ add_library(compact
         huffman.cpp
         bitvectorj.cpp
         louds.cpp
+        RRR.cpp
+        huffman.cpp
 )
 
 target_include_directories(compact PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
-add_subdirectory(GPT-originals)
+# add_subdirectory(GPT-originals)
 add_subdirectory(utils)
 
 target_link_libraries(compact PRIVATE utils)

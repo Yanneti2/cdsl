@@ -7,10 +7,10 @@
 
 #define ULI unsigned long int
 
-/* Balanced Parentheses tree representationf using closing and opening parenthesis
+/* Balanced Parentheses Binarytree representationf using closing and opening parenthesis
  * The idea is, when we arrive at a node for the first time, during a dfs, we 
  * append an opening parenthesis (1) to the resulting bitVector B. When we finally
- * leave that subtree of a node, we append a closing parenthesis (0) to B.
+ * leave that subBinarytree of a node, we append a closing parenthesis (0) to B.
  * 
  * bp_build and dfs_gt respective outputs:
  *
@@ -19,7 +19,7 @@
  */
 
 // BP compact representation using c++ vector lib
-void dfs_bt2(vector<int>& V, Tree::Node* node){
+void dfs_bt2(vector<int>& V, BinaryTree::Node* node){
 	if (!node){
 		V.push_back(0);
 		return;
@@ -31,8 +31,8 @@ void dfs_bt2(vector<int>& V, Tree::Node* node){
 	}
 }
 
-// Binary compressed representation for a general binary tree
-void dfs_bt(bitVector* B, Tree::Node* node){
+// Binary compressed representation for a general binary Binarytree
+void dfs_bt(bitVector* B, BinaryTree::Node* node){
 	if (!node){
 		B->append0();
 		return;
@@ -44,7 +44,7 @@ void dfs_bt(bitVector* B, Tree::Node* node){
 	}
 }
 
-// Binary compressed representation of a general tree (BP in binary)
+// Binary compressed representation of a general Binarytree (BP in binary)
 void dfs_gt(bitVector* B, Gtree::gNode* node){
 	if (!node){
 		B->append0();
@@ -56,7 +56,7 @@ void dfs_gt(bitVector* B, Gtree::gNode* node){
 	}	
 }
 
-// Balanced Parenthesis Explicit Build for General Trees
+// Balanced Parenthesis Explicit Build for General BinaryTrees
 void bp_build(vector<char>& B, Gtree::gNode* node){
 	if (!node){
 		B.push_back(')');

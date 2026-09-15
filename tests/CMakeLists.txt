@@ -14,6 +14,8 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 # target_compile_definitions(bitvectorRRR-tester PRIVATE DEBUG)
 
 
+#target_link_libraries(bitvectorRRR-tester)
+#target_compile_definitions(bitvectorRRR-tester PRIVATE DEBUG)
 
 add_executable(huffman-tester
         huffman-tester.cpp

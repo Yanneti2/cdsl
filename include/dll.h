@@ -1,12 +1,8 @@
-//
-// Created by kgm on 4/8/26.
-//
-
-#ifndef ESTRUTURAS_DE_DADOS_COMPACTAS_DLL_H
-#define ESTRUTURAS_DE_DADOS_COMPACTAS_DLL_H
-
 #include <iostream>
 #include <cstddef>
+
+#ifndef DLL_H
+#define DLL_H
 
 class DoubleLinkedList {
 public:
@@ -45,14 +41,14 @@ public:
     // delete an element at the end of the list O(1)
     void pop();
 
-// gets the element at index and prints it O(n)
+    // gets the element at index and prints it O(n)
 
-// pode ser O(1) se  guardar o index de cada elemento na lista
+    // pode ser O(1) se  guardar o index de cada elemento na lista
 
-// If you want to get the element at index, and index is in the
-// first half of the list, search forward from the head. If it's
-// in the second half, search backward from the tail. This can cut
-// your maximum search time in half O(n/2)
+    // If you want to get the element at index, and index is in the
+    // first half of the list, search forward from the head. If it's
+    // in the second half, search backward from the tail. This can cutW
+    // your maximum search time in half O(n/2)
     void get(size_t index) const;
 
     // set an element of data x to data = y
@@ -70,4 +66,4 @@ public:
     long size() const { return m_size; }
 };
 
-#endif //ESTRUTURAS_DE_DADOS_COMPACTAS_DLL_H
+#endif

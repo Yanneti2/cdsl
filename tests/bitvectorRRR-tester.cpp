@@ -1,3 +1,4 @@
+#include "GPT-originals/bitvectorRRR.h"
 
 #include <iostream>
 //using std::cout;
@@ -13,7 +14,6 @@ using namespace std;
 
 
 int main(void) {
-
 
   int n = 120;
   bitvectorRRR* B = new bitvectorRRR(n);

@@ -20,12 +20,10 @@
 #include "uvector.h"
 #include "bitsequence.h"
 
-
 using namespace std;
 
 
 class bitvectorRRR {
-
  private:
   uint64_t* V;
   uint64_t vsize;  // The number of bits in V.

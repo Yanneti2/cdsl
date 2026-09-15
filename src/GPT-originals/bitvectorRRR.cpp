@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdexcept>
 
-#include "GPT-originals/bitvectorRRR.h"
+#include "bitvectorRRR.h"
 #include "masks/mask01.h"
 #include "masks/mask10.h"
 

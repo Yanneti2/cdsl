@@ -1,5 +1,5 @@
-#include "../include/jacobsonrank.h"
-#include "../include/bitvector.h"
+#include "jacobsonrank.h"
+#include "bitvector.h"
 #include <iostream>
 
 #ifndef bitMask

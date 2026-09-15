@@ -1,25 +1,33 @@
-#ifndef ESTRUTURAS_DE_DADOS_COMPACTAS_HUFFMAN
-#define ESTRUTURAS_DE_DADOS_COMPACTAS_HUFFMAN
-
 #include "binary_tree.h"
 #include "bitvector.h"
+
 #include <string>
 #include <vector>
 #include <queue>
 #include <map>
+
 using namespace std;
 
-double worst_case_entropy(double setSize);
+#ifndef HUFFMAN_TREE_H
+#define HUFFMAN_TREE_H
 
-priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> probabilities_frequency(string S, bool prob);
+#define ULL unsigned long long
 
-Tree::Node* build_huffman(priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> heap);
+priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> probabilities_frequency(string S);
 
-void huffman_coding(Tree::Node* root, map<char,string>& arr, string curr);
+class HuffmanTree : public BinaryTree {
+    BinaryTree::Node *T;    
+public:
+    double worst_case_entropy(double setSize);
 
-double average_length_codes(vector<unsigned long int> v1,vector<double> v2);
+    HuffmanTree(string S);
 
-double minimum_average_code_length(vector<double> v2);
+    void huffman_coding(BinaryTree::Node *root, map<char,string>& arr, string curr);
+    void huffman_coding(BinaryTree::Node *root, map<char,bitVector*>& arr, bitVector* Bv);
+
+    double average_length_codes(vector<ULL> v1,vector<double> v2);
+    
+    double minimum_average_code_length(vector<double> v2);
+};
 
 #endif
-
