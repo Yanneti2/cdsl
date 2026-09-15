@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Wl,--dependency-file=CMakeFiles/wt-tester.dir/link.d "CMakeFiles/wt-tester.dir/wt-tester.cpp.o" -o wt-tester  ../src/libcompact.a ../src/utils/libutils.a
