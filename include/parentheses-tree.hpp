@@ -10,11 +10,11 @@ public:
     // Here, size_t refers to a position on the bitvector
     ParenthesesTree(string s);
     ParenthesesTree(Gtree t);
-    ParenthesesTree(Tree t);
+    ParenthesesTree(BinaryTree t);
     ParenthesesTree(BitVector& B);
     
     // Private func range start ==============
-    void bt_build(Tree::Node* node);
+    void bt_build(BinaryTree::Node* node);
     void gt_build(Gtree::gNode* node);
     bool is_bp();
 

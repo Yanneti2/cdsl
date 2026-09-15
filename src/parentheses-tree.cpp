@@ -48,7 +48,7 @@ using namespace std;
 //}
 
 // Binary compressed representation for a general binary tree
-void ParenthesesTree::bt_build(Tree::Node* node){
+void ParenthesesTree::bt_build(BinaryTree::Node* node){
 	if (!node){
 		return;
 	}else{
@@ -108,7 +108,7 @@ ParenthesesTree::ParenthesesTree(Gtree t){
 }
 
 // Constructor for a Binary Tree
-ParenthesesTree::ParenthesesTree(Tree t){
+ParenthesesTree::ParenthesesTree(BinaryTree t){
 	this->T = BitVector();
 	bt_build(t.getRoot());
 }

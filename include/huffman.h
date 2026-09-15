@@ -23,7 +23,7 @@ public:
     HuffmanTree(string S);
 
     void huffman_coding(BinaryTree::Node *root, map<char,string>& arr, string curr);
-    void huffman_coding(BinaryTree::Node *root, map<char,bitVector*>& arr, bitVector* Bv);
+    void huffman_coding(BinaryTree::Node *root, map<char,BitVector*>& arr, BitVector* Bv);
 
     double average_length_codes(vector<ULL> v1,vector<double> v2);
     

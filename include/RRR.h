@@ -17,18 +17,18 @@ private:
     uint16_t K_per_block;
 
     uint16_t *offsets;
-    vector<vector<TYPE>> lookuptable;
+    std::vector<std::vector<TYPE>> lookuptable;
 
 public:
-    RRR(bitVector *B, bool fixSizeToWordSize = false);
+    RRR(BitVector *B, bool fixSizeToWordSize = false);
     ~RRR();
     unsigned long long rank0(unsigned long long i);
     unsigned long long rank1(unsigned long long i);
     void print();
 
-    void build_select(bitVector *B);
-    unsigned long long select0(bitVector *B, unsigned long long i);
-    unsigned long long select1(bitVector *B, unsigned long long i);
+    void build_select(BitVector *B);
+    unsigned long long select0(BitVector *B, unsigned long long i);
+    unsigned long long select1(BitVector *B, unsigned long long i);
 };
 
 #endif

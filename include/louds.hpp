@@ -10,8 +10,8 @@ private:
 public:
     // Here, size_t refers to a position on the bitvector
     LOUDS(string s);
-    LOUDS(Gtree* G);
-    LOUDS(Tree* BT);
+    LOUDS(Gtree *G);
+    LOUDS(BinaryTree *BT);
 
     bool is_louds(string s);
     bool is_louds();

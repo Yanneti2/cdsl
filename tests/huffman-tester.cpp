@@ -29,7 +29,7 @@ void run_test(const string& label, const string& S) {
     for (char c : S) freq[c] += 1.0;
     double size = S.size();
 
-    vector<unsigned long int> lens;
+    vector<unsigned long long> lens;
     vector<double> probs;
     for (auto& kv : freq) {
         kv.second /= size;
@@ -76,8 +76,8 @@ int main(void) {
     // run_test("teste6", teste6);
 
     HuffmanTree hfhf(teste3);
-    bitVector* B = new bitVector();
-    map<char,bitVector*> codes;
+    BitVector* B = new BitVector();
+    map<char, BitVector *> codes;
     hfhf.huffman_coding(hfhf.getRoot(), codes, B);
 
     for (auto const& kv : codes) {

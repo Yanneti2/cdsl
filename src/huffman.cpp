@@ -60,24 +60,24 @@ HuffmanTree::HuffmanTree(string S) {
 }
 
 // travels a ht and encode the nodes into its respetifully bitvector
-void HuffmanTree::huffman_coding(BinaryTree::Node *root, map<char,bitVector*>& arr, bitVector* B){
+void HuffmanTree::huffman_coding(BinaryTree::Node *root, map<char,BitVector*>& arr, BitVector* B){
 	if (!root) return;
 	if ((!root->left) && (!root->right)){
 		if(B->size() != 0) {
 			arr.insert({root->data, B});
 		}
 		else {
-			bitVector* dmy = new bitVector();
+			BitVector* dmy = new BitVector();
 			dmy->append0();
 			arr.insert({root->data, dmy});
 		}
 		return;
 	}
-	bitVector* BL = new bitVector();
+	BitVector* BL = new BitVector();
 	BL->extend(B);
 	BL->append0();
 	
-	bitVector* BR = new bitVector();
+	BitVector* BR = new BitVector();
 	BR->extend(B);
 	BR->append1();
 
