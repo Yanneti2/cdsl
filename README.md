@@ -12,11 +12,11 @@ as well as papers from the original works cited in that book and more recently p
 **Requirements:** CMake 3.28+
 
 ```bash
-git clone https://github.com/Yanneti2/Estruturas-de-dados-Compactas.git
-cd Estruturas-de-dados-Compactas
+git clone https://github.com/Yanneti2/cdsl.git
+cd cdsl
 mkdir build && cd build
 cmake ..
 make
 ```
 
-For more information, access the [project documentation](https://github.com/Yanneti2/Estruturas-de-dados-Compactas/wiki).
+For more information, access the [project documentation](https://github.com/Yanneti2/cdsl/wiki).
