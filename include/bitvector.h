@@ -28,17 +28,17 @@ public:
     size_t size() const;
     size_t cap() const;
 
-    BitVector();
-    BitVector(size_t size);
-    BitVector(size_t size, int init);
-    BitVector(size_t size, bool (*fn)(size_t));
-    BitVector(std::string s);
-    BitVector(const BitVector &B);
-    ~BitVector();
+    explicit BitVector();
+    explicit BitVector(size_t size);
+    explicit BitVector(size_t size, int init);
+    explicit BitVector(size_t size, bool (*fn)(size_t));
+    explicit BitVector(std::string s);
+    explicit BitVector(const BitVector &B);
+    virtual ~BitVector();
     BitVector &operator=(const BitVector &B);
 
     static BitVector *deserialize(const char *path);
-    void serialize(const char *path);
+    void serialize(const char *path) const;
 
     void append0();
     void append1();

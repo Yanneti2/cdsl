@@ -397,7 +397,7 @@ size_t BitVector::naive_select1(size_t i) const {
     return -1;
 }
 
-void BitVector::serialize(const char *path) {
+void BitVector::serialize(const char *path) const {
     
     FILE *arch = fopen(path, "w");
     std::string s;
