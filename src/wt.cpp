@@ -7,6 +7,8 @@
 #include <queue>
 #include <map>
 
+#define ULL unsigned long long
+
 std::map<char, bool> HashingWT(string S) {
     std::map<char, bool> chars = {};
     for(uint32_t i = 0; i < S.size(); i++)
@@ -15,166 +17,160 @@ std::map<char, bool> HashingWT(string S) {
     return chars;
 }
 
-bitVector* get_left_right_ss(string S, string* LSS, string* RSS){
-    map<char, bool> alphabet = HashingWT(S);
-    std::string alpha = "";
-    for (auto i = alphabet.begin(); i != alphabet.end(); i++) {
-        alpha += i->first;                         
+string get_alphabet(map<char,bool> chars){
+    string alphabet;
+    for (auto i = chars.begin(); i != chars.end(); i++){
+        alphabet += i->first;                         
     }
-    uint32_t len = alpha.size() - 1;
-    sort(alpha.begin(), alpha.end());
-    bitVector *vector = new bitVector((unsigned long) ((S.size() + NBITS - 1)/NBITS), 2);
-    uint32_t mid = len / 2;
-
-    for (uint32_t i = 0; i < S.size(); i++) {
-        if (alpha[mid] >= S[i]) {
-            vector->append0();
-            LSS->push_back(S[i]);
-        }
-        else {
-            vector->append1();
-            RSS->push_back(S[i]);
-        }
-    }
-    return vector;
+    return alphabet;
 }
 
-wtNode* build(string S, wtNode* dad){
-    wtNode* cur = new wtNode{.d=dad, .l=nullptr, .r=nullptr, .freq=nullptr};
+wtNode* WaveletTree::buildWT(string S, wtNode* dad)
+{
+    wtNode* cur_node = new wtNode();
+    cur_node->dad = dad;
+    cur_node->rchild = cur_node->lchild = nullptr;
 
-    map<char, bool> alphabet = HashingWT(S);
-    std::string alpha = "";
-    for (auto i = alphabet.begin(); i != alphabet.end(); i++) {
-        alpha += i->first;                         
+    map<char,bool> chars = HashingWT(S);
+    string alphabet = get_alphabet(chars);
+
+    if (alphabet.size() <= 1) {
+        cur_node->symbol = alphabet[0];   
+        return cur_node;
     }
-    
-    if (alpha.length() == 1) {
-        return cur;
-    }
+
+    ULL mid = (alphabet.size() - 1) / 2;
+    sort(alphabet.begin(), alphabet.end());
 
     string LSS, RSS;
-    bitVector* B = get_left_right_ss(S,&LSS,&RSS);
+    bitVector vector = bitVector((unsigned long) ((S.size() + NBITS - 1)/NBITS), 2);
 
-    cur->freq = B;
+    for (ULL i = 0; i < S.size(); i++)
+    {
+        if (alphabet[mid] >= S[i]) {
+            vector.append0();
+            LSS += S[i];
+        }
+        else {
+            vector.append1();
+            RSS += S[i];
+        }
+    }
+    cur_node->freq = vector;
+    // vector.JacobsonRank_build();
 
-    if(LSS.size()) {
-        cur->l = build(LSS, cur);
-    }
-    if(RSS.size()) {
-        cur->r = build(RSS, cur);
-    }
-    return cur;
+    if(LSS.size()) cur_node->lchild = buildWT(LSS, cur_node);
+    if(RSS.size()) cur_node->rchild = buildWT(RSS, cur_node);
+
+    return cur_node;
 }
 
-WaveletTree::WaveletTree(string S, wtNode* dad) {
-    map<char, bool> alphabet = HashingWT(S);
-    std::string alpha = "";
-    for (auto i = alphabet.begin(); i != alphabet.end(); i++) {
-        alpha += i->first;                         
-    }
-
-    this->alpha = alpha;
-    this->root = dad;
-
-    if (alpha.size() == 1){
-        dad->l = nullptr;
-        dad->r = nullptr;
-        dad->d = nullptr;
+WaveletTree::WaveletTree(string S){
+    if (S.size() == 0) {
+        this->root = nullptr;
         return;
     }
-
-    string LSS,RSS;
-    bitVector* B = get_left_right_ss(S, &LSS, &RSS);
-
-    dad->freq = B;
-    dad->r = build(RSS, dad);
-    dad->l = build(LSS, dad);
-
-    return;
+    map<char,bool> chars = HashingWT(S);
+    this->alphabet = get_alphabet(chars);
+    this->root = buildWT(S,nullptr);
 }
 
-// WaveletTree::WaveletTree(string S, WaveletTree* r) {
-//     this->root = r;
-//     map<char, bool> alphabet = HashingWT(S);
-//     for (auto i = alphabet.begin(); i != alphabet.end(); i++) {
-//         this->alpha += i->first;                         
-//     }
-//     sort(alpha.begin(), alpha.end());
-// }
+wtNode* WaveletTree::getRoot(){
+    return this->root;
+}
 
-char WaveletTree::access(unsigned long long i) {
+char WaveletTree::access(ULL i) {
     wtNode* CurN = this->root;
-    unsigned long long end = this->alpha.size() - 1;
-    unsigned long long beg = 0;
-    unsigned long long CurI = i;
+    ULL end = this->alphabet.size() - 1;
+    ULL beg = 0;
+    ULL CurI = i;
 
     while (end != beg) {
-        if((*CurN->freq)[CurI] == 0){
-            CurI = CurN->freq->rank0(CurI);
-            CurN = CurN->l;
+        if((CurN->freq)[CurI] == 0){
+            CurI = CurN->freq.naive_rank0(CurI);
+            CurN = CurN->lchild;
             end = (beg + end)/2;
         }
         else {
-            CurI = CurN->freq->rank1(CurI);
-            CurN = CurN->r;
+            CurI = CurN->freq.naive_rank1(CurI);
+            CurN = CurN->rchild;
             beg = (beg + end)/2 + 1;
         }
     }
-    return this->alpha[beg];
+    return CurN->symbol;
 }
 
-unsigned long long WaveletTree::rankc(char c, unsigned long long i) {
+ULL WaveletTree::rankc(char c, ULL i) {
     wtNode* CurN = this->root;
-    unsigned long long CurI = i;
-    unsigned long long beg = 0;
-    unsigned long long end = this->root->freq->size();
+    ULL CurI = i;
+    ULL beg = 0;
+    ULL end = this->alphabet.size() - 1;
 
     while(beg != end) {
-        unsigned long long mid = (beg + end)/2;
-        if(c <= alpha[mid]) {
-            CurI = CurN->freq->rank0(CurI);
-            CurN = CurN->l;
+        ULL mid = (beg + end)/2;
+        if(c <= alphabet[mid]) {
+            CurI = CurN->freq.naive_rank0(CurI);
+            CurN = CurN->lchild;
             end = mid;
         }
         else {
-            CurI = CurN->freq->rank1(CurI);
-            CurN = CurN->r;
+            CurI = CurN->freq.naive_rank1(CurI);
+            CurN = CurN->rchild;
             beg = mid + 1;
         }
     }
     return CurI;
 }
 
-unsigned long long WaveletTree::selectc(char c,  unsigned long long i, wtNode* node){
-    unsigned long long beg = 0;
-    unsigned long long end = node->freq->size();
-    unsigned long long CharI;
+ULL WaveletTree::selectc(char c,  ULL i, wtNode* node){
+    ULL beg = 0;
+    ULL end = this->alphabet.size();
+    ULL CharI;
 
     if(beg == end)
         return i;
         
-    unsigned long long mid = (beg + end)/2;
-    if(c <= alpha[mid]) {
-        i = this->selectc(c, i, node->l);
-        return node->freq->naive_select0(i);
+    ULL mid = (beg + end)/2;
+    if(c <= alphabet[mid]) {
+        i = this->selectc(c, i, node->lchild);
+        return node->freq.naive_select0(i);
     }
     else {
-        i = this->selectc(c, i, node->r);
-        return node->freq->naive_select1(i);
+        i = this->selectc(c, i, node->rchild);
+        return node->freq.naive_select1(i);
     }
 }
 
 void WaveletTree::print() {
 	queue<wtNode*> q;
 	q.push(this->root);
-    cout<< this->alpha <<endl <<endl;
+    cout<< this->alphabet << endl << endl;
 	while(!q.empty()){
 		wtNode* cur = q.front();
 		q.pop();
-		if(cur->freq)cur->freq->print();
-		if(cur->l)q.push(cur->l);
-		if(cur->r)q.push(cur->r);
+		// if(cur->freq.size() > 0){
+        //     for (ULL i = 0; i < cur->freq.size(); i++){
+        //         cout << (cur->freq)[i];
+        //     }cout << endl;
+        // }
+        if(cur->symbol)cout << cur->symbol << endl;
+        else cur->freq.print();
+		if(cur->lchild)q.push(cur->lchild);
+		if(cur->rchild)q.push(cur->rchild);
 	}
 }
 
-// lembrar de fazer o destrutor de uma wt com queue
+WaveletTree::~WaveletTree(){
+    if (!this->root)return;
+
+    queue<wtNode*> q;
+    q.push(this->root);
+
+    while(!q.empty()){
+        wtNode* cur_node = q.front();
+        q.pop();
+        if(cur_node->lchild) q.push(cur_node->lchild);
+        if(cur_node->rchild) q.push(cur_node->rchild);
+        delete cur_node;
+    }
+}

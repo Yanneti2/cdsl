@@ -149,6 +149,26 @@ bool bitVector::operator==(bitVector B) const {
     return true;
 }
 
+bitVector& bitVector::operator=(const bitVector& other)
+{
+    if (this == &other) return *this;
+
+    free(A);
+
+    _size = other._size;
+    _cap = other._cap;
+    ratio = other.ratio;
+
+    A = (TYPE*) calloc(_cap, sizeof(TYPE));
+
+    if (!A)
+        throw std::bad_alloc();
+        
+    for (unsigned long i = 0; i < _cap; i++)
+        A[i] = other.A[i];
+    return *this;
+}
+
 TYPE bitVector::accessWord(unsigned long i) const {
     return A[i];
 }

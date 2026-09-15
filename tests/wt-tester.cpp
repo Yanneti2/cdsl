@@ -8,8 +8,7 @@ using namespace std;
 int main (void){
 	// CONSTRUCTION AND ACCESS TESTS:
 
-	wtNode* root = new wtNode();
-	WaveletTree* wt = new WaveletTree("mississippi", root);
+	WaveletTree* wt = new WaveletTree("mississippi");
 
 	cout << endl <<"Print Function: " << endl << endl;
 	wt->print(); 
@@ -22,10 +21,10 @@ int main (void){
 
 	// SELECT TESTS:
 
-	cout << "Select(S,3): " << wt->selectc('s', 4, root) << endl;	
-	cout << "Select(I,10); " << wt->selectc('i', 4, root) << endl << endl;
+	cout << "Select(S,3): " << wt->selectc('s', 4, wt->getRoot()) << endl;	
+	cout << "Select(I,10); " << wt->selectc('i', 4, wt->getRoot()) << endl << endl;
 
-	// wt->~wt();
+	wt->~WaveletTree();
 
 	return 0;
 }

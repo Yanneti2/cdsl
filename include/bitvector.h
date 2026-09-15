@@ -56,6 +56,7 @@ public:
     bitVector operator~() const;
     bitVector operator^(bitVector B) const;
     bool operator==(bitVector B) const;
+    bitVector& operator=(const bitVector& other);
     int  operator[](unsigned long i) const;
     TYPE accessWord(unsigned long i) const;
     TYPE accessWord(unsigned long i, unsigned wordSize) const;
