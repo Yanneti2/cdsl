@@ -33,6 +33,7 @@ public:
     BitVector(size_t size, int init);
     BitVector(size_t size, bool (*fn)(size_t));
     BitVector(std::string s);
+    BitVector(const BitVector &B);
     ~BitVector();
     BitVector &operator=(const BitVector &B);
 

@@ -145,6 +145,19 @@ BitVector::BitVector(size_t size, bool (*fn)(size_t)) {
     }
 }
 
+BitVector::BitVector(const BitVector &B) {
+    _cap = B.cap();
+    _size = B.size();
+
+    A = (TYPE *) malloc(B.cap() * sizeof(TYPE));
+
+    if (!A)
+        throw std::bad_alloc();
+
+    for (size_t i = 0; i < B.cap(); i++) 
+        A[i] = B.A[i];
+}
+
 BitVector::~BitVector() {
     free(A);
 }
