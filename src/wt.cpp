@@ -1,5 +1,5 @@
-#include "bitvector.h"
-#include "wt.h"
+#include "bitvector.hpp"
+#include "wt.hpp"
 
 #include <algorithm>
 #include <iostream>

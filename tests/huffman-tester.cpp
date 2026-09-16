@@ -1,6 +1,5 @@
-#include "huffman.h"
+#include "huffman.hpp"
 
-#include <bits/stdc++.h>
 #include <iostream>
 #include <fstream>
 #include <chrono>

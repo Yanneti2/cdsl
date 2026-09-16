@@ -5,8 +5,8 @@
  * I suggest a remodel in this operations, comment that was made before my interview in this file, so that it returns the exact 0-indexed position of the BitVector.
  */
 
-#include "bitvector.h"
-#include "parentheses-tree.hpp"
+#include "bitvector.hpp"
+#include "parentheses_tree.hpp"
 #include <cassert>
 #include <iostream>
 #include <string>

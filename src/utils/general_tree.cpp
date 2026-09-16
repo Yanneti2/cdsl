@@ -1,5 +1,5 @@
-#include "../../include/binary_tree.h" 
-#include "../../include/general_tree.h"
+#include "binary_tree.hpp" 
+#include "general_tree.hpp"
 #include <queue>
 #include <vector>
 using namespace std;

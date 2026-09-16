@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "bitvector.h"
+#include "bitvector.hpp"
 #include <cassert>
 #include <iostream>
 

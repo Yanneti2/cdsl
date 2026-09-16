@@ -1,5 +1,5 @@
 #include "endian.h"
-#include "bitvector.h"
+#include "bitvector.hpp"
 #include <vector>
 #include <cmath>
 

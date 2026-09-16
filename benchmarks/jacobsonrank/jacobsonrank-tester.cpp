@@ -1,4 +1,4 @@
-#include "bitvector.h"
+#include "bitvectorj.hpp"
 #include <iostream>
 #include <chrono>
 #include <cstring>
@@ -74,9 +74,9 @@ int main(int argc, char *argv[]) {
     for (unsigned long long order = 3; order < 10; order += 1) {
         srand(time(0));
         unsigned long long size = pow(10, order);
-        bitVector B1(size, randomize_bit);
+        BitVectorJ B1(size, randomize_bit);
 
-        B1.JacobsonRank_build();
+        B1.init();
 
         #ifdef selectstructure
         if (select0) {

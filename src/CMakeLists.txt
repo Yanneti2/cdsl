@@ -1,6 +1,6 @@
 add_library(compact
         bitvector.cpp
-        parentheses-tree.cpp
+        parentheses_tree.cpp
         huffman.cpp
         bitvectorj.cpp
         louds.cpp

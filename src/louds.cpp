@@ -1,6 +1,6 @@
-#include "general_tree.h"
-#include "binary_tree.h"
-#include "bitvector.h"
+#include "general_tree.hpp"
+#include "binary_tree.hpp"
+#include "bitvector.hpp"
 #include "louds.hpp"
 #include <iostream>
 #include <string>

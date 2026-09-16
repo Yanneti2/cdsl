@@ -1,4 +1,4 @@
-#include "../include/RRR.h"
+#include "RRR.h"
 #include <iostream>
 
 #ifndef bitMask

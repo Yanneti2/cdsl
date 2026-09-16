@@ -1,4 +1,4 @@
-#include "bitvector.h"
+#include "bitvector.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <cassert>

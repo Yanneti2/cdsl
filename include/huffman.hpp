@@ -1,5 +1,5 @@
-#include "binary_tree.h"
-#include "bitvector.h"
+#include "binary_tree.hpp"
+#include "bitvector.hpp"
 
 #include <string>
 #include <vector>

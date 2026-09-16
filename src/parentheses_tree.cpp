@@ -1,8 +1,8 @@
-#include "parentheses-tree.hpp"
-#include "general_tree.h"
-#include "binary_tree.h"
-#include "bitvector.h"
-#include "huffman.h"
+#include "parentheses_tree.hpp"
+#include "general_tree.hpp"
+#include "binary_tree.hpp"
+#include "bitvector.hpp"
+#include "huffman.hpp"
 #include <stdlib.h>
 #include <iostream>
 #include <stdio.h>
