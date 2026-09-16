@@ -68,10 +68,6 @@ add_executable(louds-tester
 
 target_link_libraries(louds-tester compact)
 
-add_executable(ll2-tester
-        ll2-tester.cpp
-)
-target_link_libraries(ll2-tester utils)
 
 add_executable(wt-tester
         wt-tester.cpp
