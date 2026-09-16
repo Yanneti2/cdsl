@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include "bitvector.h"
 #include <cassert>
+#include <iostream>
 
 #ifndef bitMask
 #ifdef IS32BIT
@@ -378,21 +379,23 @@ size_t BitVector::naive_rank1(size_t i) const {
 }
 
 size_t BitVector::naive_select0(size_t i) const {
-    size_t counter = 0;
-    size_t j;
-    for (j = 0; j < _size; j++) {
-        if ((j - counter) == i) return j;
-        counter += (*this)[j];
+    if (i == 0) return 0;
+
+    size_t pop_count = 0;
+    for (size_t j = 0; j < _size; j++) {
+        pop_count += !(*this)[j];
+        if (pop_count == i) return j + 1;
     }
     return -1;
 }
 
 size_t BitVector::naive_select1(size_t i) const {
+    if (i == 0) return 0;
+
     size_t pop_count = 0;
-    size_t j;
-    for (j = 0; j < _size; j++) {
-        if (pop_count == i) return j;
+    for (size_t j = 0; j < _size; j++) {
         pop_count += (*this)[j];
+        if (pop_count == i) return j + 1;
     }
     return -1;
 }
