@@ -6,6 +6,7 @@ add_library(compact
         louds.cpp
         RRR.cpp
         huffman.cpp
+        wt.cpp
 )
 
 target_include_directories(compact PUBLIC ${CMAKE_SOURCE_DIR}/include)
