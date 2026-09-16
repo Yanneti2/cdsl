@@ -1,3 +1,6 @@
+/*
+  A sequence of bits.
+*/
 
 
 #ifndef BITSH

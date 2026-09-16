@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
     // std::cout << "BV2 putted into [4] of BV:" << std::endl;
     BV.print();
 
+<<<<<<< HEAD
     //----------------------------------
     // 		Constructors	       |
     //----------------------------------
@@ -49,4 +50,13 @@ int main(int argc, char *argv[])
 
     assert(string==string2);
     assert(string[4]==string2[4]);
+=======
+    bitVector* a = new bitVector(1,2.0);
+    for(int i = 0; i < 5; i++){
+	    a->append0();
+	    a->append1();
+    } // 0101010101
+    // Select1(5) = 9 Select0(4) = 6
+    cout << "Naive Select1(5): " << a->naive_select1(5) << endl << "Naive Select0(4): " <<a->naive_select0(4) << endl << endl;
+>>>>>>> 24-wavelet-trees-implementation
 }

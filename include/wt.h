@@ -1,14 +1,32 @@
-#include "wtnode.h"
+#include "bitvector.h"
+
+#include <iostream>
+#include <map>
+
+using namespace std;
+
+typedef struct wtNode{
+    wtNode *dad;
+    wtNode *lchild;
+    wtNode *rchild;
+    BitVector freq;
+    char symbol; //leaf
+}wtNode;
 
 class WaveletTree {
-    private:
+    protected:
+    wtNode* root;
+    string alphabet;
 
     public:
-    WaveletTreeNode* root;
-    std::string alpha;
-    WaveletTree(std::string S, WaveletTreeNode* r);
-    char Acess(unsigned long long i);
+    wtNode* getRoot();
+    WaveletTree(string S);
+    wtNode* buildWT(string S, wtNode* dad);
+
+    char access(unsigned long long i);
     unsigned long long rankc(char c, unsigned long long i);
-    unsigned long long selectc(char c,  unsigned long long i, WaveletTreeNode* Node);
+    unsigned long long selectc(char c,  unsigned long long i, wtNode* Node);
+
     void print();
+    ~WaveletTree();
 };

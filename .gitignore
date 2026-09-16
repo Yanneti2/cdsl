@@ -1,3 +1,6 @@
 build/
 .ccls*
 *.exe
+*.o
+*.out
+build

@@ -10,7 +10,6 @@
 #include "binary_tree.h"
 #include "bitvector.h"
 #include "huffman.h"
-
 #include <bits/stdc++.h>
 #include <iostream>
 #include <string>
