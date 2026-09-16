@@ -33,26 +33,24 @@ wtNode* WaveletTree::buildWT(string S, wtNode* dad)
 
     map<char,bool> chars = HashingWT(S);
     string alphabet = get_alphabet(chars);
+    cur_node->alphabet = alphabet;
 
-    if (alphabet.size() <= 1) {
-        cur_node->symbol = alphabet[0];   
-        return cur_node;
-    }
+    if (alphabet.size() <= 1) return cur_node;
 
     ULL mid = (alphabet.size() - 1) / 2;
     sort(alphabet.begin(), alphabet.end());
 
     string LSS, RSS;
-    BitVector vector = BitVector((unsigned long) ((S.size() + NBITS - 1)/NBITS), 2);
+    BitVector* vector = new BitVector();
 
     for (ULL i = 0; i < S.size(); i++)
     {
         if (alphabet[mid] >= S[i]) {
-            vector.append0();
+            vector->append0();
             LSS += S[i];
         }
         else {
-            vector.append1();
+            vector->append1();
             RSS += S[i];
         }
     }
@@ -70,8 +68,6 @@ WaveletTree::WaveletTree(string S){
         this->root = nullptr;
         return;
     }
-    map<char,bool> chars = HashingWT(S);
-    this->alphabet = get_alphabet(chars);
     this->root = buildWT(S,nullptr);
 }
 
@@ -81,40 +77,40 @@ wtNode* WaveletTree::getRoot(){
 
 char WaveletTree::access(ULL i) {
     wtNode* CurN = this->root;
-    ULL end = this->alphabet.size() - 1;
+    ULL end = this->root->alphabet.size() - 1;
     ULL beg = 0;
     ULL CurI = i;
 
     while (end != beg) {
-        if((CurN->freq)[CurI] == 0){
-            CurI = CurN->freq.naive_rank0(CurI);
+        if((*CurN->freq)[CurI] == 0){
+            CurI = CurN->freq->naive_rank0(CurI);
             CurN = CurN->lchild;
             end = (beg + end)/2;
         }
         else {
-            CurI = CurN->freq.naive_rank1(CurI);
+            CurI = CurN->freq->naive_rank1(CurI);
             CurN = CurN->rchild;
             beg = (beg + end)/2 + 1;
         }
     }
-    return CurN->symbol;
+    return CurN->alphabet[0];
 }
 
 ULL WaveletTree::rankc(char c, ULL i) {
     wtNode* CurN = this->root;
     ULL CurI = i;
     ULL beg = 0;
-    ULL end = this->alphabet.size() - 1;
+    ULL end = this->root->alphabet.size() - 1;
 
     while(beg != end) {
         ULL mid = (beg + end)/2;
-        if(c <= alphabet[mid]) {
-            CurI = CurN->freq.naive_rank0(CurI);
+        if(c <= this->root->alphabet[mid]) {
+            CurI = CurN->freq->naive_rank0(CurI);
             CurN = CurN->lchild;
             end = mid;
         }
         else {
-            CurI = CurN->freq.naive_rank1(CurI);
+            CurI = CurN->freq->naive_rank1(CurI);
             CurN = CurN->rchild;
             beg = mid + 1;
         }
@@ -122,29 +118,40 @@ ULL WaveletTree::rankc(char c, ULL i) {
     return CurI;
 }
 
-ULL WaveletTree::selectc(char c,  ULL i, wtNode* node){
+// returns the (j + 1)'th position of the j'th appearence of the given char
+ULL WaveletTree::selectc(char c,  size_t i, wtNode* node){
     ULL beg = 0;
-    ULL end = this->alphabet.size();
-    ULL CharI;
+    ULL end = node->alphabet.size() - 1;
 
-    if(beg == end)
+    cout << endl << "beg: " << beg << endl;
+    cout << "end: " << end << endl;
+
+    if(beg == end){
+        if (node->alphabet[0] != c) return -1;
+        cout << "base i returned as: " << i << endl << endl << "subindo..." << endl << endl;
         return i;
+    }
         
-    ULL mid = (beg + end)/2;
-    if(c <= alphabet[mid]) {
+    ULL mid = end / 2;
+    cout << "mid: " << mid << endl;
+    if(c <= node->alphabet[mid]) {
         i = this->selectc(c, i, node->lchild);
-        return node->freq.naive_select0(i);
+        cout << "'i' indo para o naive select: " << i << endl;
+        cout << node->freq->naive_select0(i) << endl; 
+        return node->freq->naive_select0(i);
     }
     else {
         i = this->selectc(c, i, node->rchild);
-        return node->freq.naive_select1(i);
+        cout << "'i' indo para o naive select: " << i << endl;
+        cout << node->freq->naive_select1(i) << endl;
+        return node->freq->naive_select1(i);
     }
 }
 
 void WaveletTree::print() {
 	queue<wtNode*> q;
 	q.push(this->root);
-    cout<< this->alphabet << endl << endl;
+    cout<< this->root->alphabet << endl << endl;
 	while(!q.empty()){
 		wtNode* cur = q.front();
 		q.pop();
@@ -153,8 +160,8 @@ void WaveletTree::print() {
         //         cout << (cur->freq)[i];
         //     }cout << endl;
         // }
-        if(cur->symbol)cout << cur->symbol << endl;
-        else cur->freq.print();
+        if(cur->alphabet.size() == 1)cout << cur->alphabet[0] << endl;
+        else cur->freq->print();
 		if(cur->lchild)q.push(cur->lchild);
 		if(cur->rchild)q.push(cur->rchild);
 	}

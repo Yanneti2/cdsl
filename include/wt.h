@@ -9,14 +9,13 @@ typedef struct wtNode{
     wtNode *dad;
     wtNode *lchild;
     wtNode *rchild;
-    BitVector freq;
-    char symbol; //leaf
+    BitVector* freq;
+    string alphabet;
 }wtNode;
 
 class WaveletTree {
     protected:
     wtNode* root;
-    string alphabet;
 
     public:
     wtNode* getRoot();
@@ -25,7 +24,7 @@ class WaveletTree {
 
     char access(unsigned long long i);
     unsigned long long rankc(char c, unsigned long long i);
-    unsigned long long selectc(char c,  unsigned long long i, wtNode* Node);
+    unsigned long long selectc(char c,  size_t i, wtNode* Node);
 
     void print();
     ~WaveletTree();
