@@ -1,6 +1,7 @@
 #include "bitvectorj.hpp"
-#include <iostream>
+
 #include <algorithm>
+#include <iostream>
 #include <cmath>
 
 #ifndef bitMask

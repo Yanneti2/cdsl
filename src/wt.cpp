@@ -123,27 +123,18 @@ ULL WaveletTree::selectc(char c,  size_t i, wtNode* node){
     ULL beg = 0;
     ULL end = node->alphabet.size() - 1;
 
-    cout << endl << "beg: " << beg << endl;
-    cout << "end: " << end << endl;
-
     if(beg == end){
         if (node->alphabet[0] != c) return -1;
-        cout << "base i returned as: " << i << endl << endl << "subindo..." << endl << endl;
         return i;
     }
         
     ULL mid = end / 2;
-    cout << "mid: " << mid << endl;
     if(c <= node->alphabet[mid]) {
         i = this->selectc(c, i, node->lchild);
-        cout << "'i' indo para o naive select: " << i << endl;
-        cout << node->freq->naive_select0(i) << endl; 
         return node->freq->naive_select0(i);
     }
     else {
         i = this->selectc(c, i, node->rchild);
-        cout << "'i' indo para o naive select: " << i << endl;
-        cout << node->freq->naive_select1(i) << endl;
         return node->freq->naive_select1(i);
     }
 }

@@ -1,7 +1,11 @@
 #include "general_tree.hpp"
 #include "binary_tree.hpp"
 #include "bitvector.hpp"
+
 #include <string>
+
+#ifndef LOUDST
+#define LOUDST
 
 class LOUDS {
 private:
@@ -40,3 +44,5 @@ public:
     unsigned long long nodemap(size_t v);
     size_t nodeselect(unsigned long long i);
 };
+
+#endif

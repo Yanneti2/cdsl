@@ -1,9 +1,9 @@
-#ifndef BITVECTOR
-#define BITVECTOR
-
 #include <cstdint>
 #include <cstdlib>
 #include <string>
+
+#ifndef BITVECTOR
+#define BITVECTOR
 
 #define NBITS __WORDSIZE
 

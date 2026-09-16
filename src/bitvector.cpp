@@ -7,16 +7,16 @@
     TODO:
     Uma funcao para appendar um long e/ou uma string a um bitvector.
 */
-
-#include <cmath>
-#include <fstream>
-#include <stdexcept>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "bitvector.hpp"
-#include <cassert>
+
+#include <stdexcept>
+#include <stdlib.h>
 #include <iostream>
+#include <stdint.h>
+#include <fstream>
+#include <stdio.h>
+#include <cassert>
+#include <cmath>
 
 #ifndef bitMask
 #ifdef IS32BIT

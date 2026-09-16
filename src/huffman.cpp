@@ -10,6 +10,7 @@
 #include "binary_tree.hpp"
 #include "bitvector.hpp"
 #include "huffman.hpp"
+
 #include <iostream>
 #include <string>
 #include <vector>

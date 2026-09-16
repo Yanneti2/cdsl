@@ -1,7 +1,7 @@
+#include "bitvector.hpp"
+
 #ifndef BITVECTORJACOBSON
 #define BITVECTORJACOBSON
-
-#include "bitvector.hpp"
 
 class BitVectorJ : public BitVector {
 private:

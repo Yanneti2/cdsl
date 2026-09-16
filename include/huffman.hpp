@@ -8,8 +8,8 @@
 
 using namespace std;
 
-#ifndef HUFFMAN_TREE_H
-#define HUFFMAN_TREE_H
+#ifndef HUFFMAN
+#define HUFFMAN
 
 #define ULL unsigned long long
 

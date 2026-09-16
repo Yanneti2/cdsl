@@ -1,4 +1,5 @@
-#include "../include/RRR.h" 
+#include "RRR.hpp"
+
 #include <iostream>
 #include <iomanip>
 #include <chrono>
@@ -6,12 +7,14 @@
 #include <cstdlib>
 #include <assert.h>
 
+using namespace std;
+
 int main(void) {
     srand(time(0));
     cout << "\"Size\";\"Time\"\n";
     long double ns_time = 0;
     for (unsigned long long size = 1000; size < 10000000000; size *= 10) {
-        bitVector B = bitVector();
+        BitVector B = BitVector();
         int order = log10(size);
         // cout << "Order: " << order << endl;
 

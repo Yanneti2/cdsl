@@ -1,7 +1,9 @@
-#include "binary_tree.hpp" 
 #include "general_tree.hpp"
-#include <queue>
+#include "binary_tree.hpp" 
+
 #include <vector>
+#include <queue>
+
 using namespace std;
 
 // builds a new Tree initializating the root

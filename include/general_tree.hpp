@@ -2,8 +2,8 @@
 
 using namespace std;
 
-#ifndef GENERAL_TREE_H
-#define GENERAL_TREE_H
+#ifndef GTREE
+#define GTREE
 
 class Gtree{
 	public:

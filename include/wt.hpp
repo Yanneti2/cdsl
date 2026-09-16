@@ -5,6 +5,9 @@
 
 using namespace std;
 
+#ifndef WT
+#define WT
+
 typedef struct wtNode{
     wtNode *dad;
     wtNode *lchild;
@@ -29,3 +32,5 @@ class WaveletTree {
     void print();
     ~WaveletTree();
 };
+
+#endif

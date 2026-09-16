@@ -1,6 +1,8 @@
 #include "binary_tree.hpp" 
+
 #include <iostream>
 #include <queue>
+
 using namespace std;
 
 // builds a new Tree initializating the root

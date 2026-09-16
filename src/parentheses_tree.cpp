@@ -3,6 +3,7 @@
 #include "binary_tree.hpp"
 #include "bitvector.hpp"
 #include "huffman.hpp"
+
 #include <stdlib.h>
 #include <iostream>
 #include <stdio.h>

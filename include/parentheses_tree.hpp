@@ -1,6 +1,9 @@
-#include "bitvector.hpp"
 #include "general_tree.hpp"
 #include "binary_tree.hpp"
+#include "bitvector.hpp"
+
+#ifndef BPTREE
+#define BPTREE
 
 class ParenthesesTree {
 private:
@@ -70,3 +73,5 @@ public:
 
     BitVector& getBv();
 };
+
+#endif
