@@ -7,10 +7,10 @@
  * Shannon Entropy: average lenght of the codes of a univer U, such that u E U and Pr(u) is known;
  */
 
-#include "../include/binary_tree.h"
-#include "../include/bitvector.h"
-#include "../include/huffman.h"
-#include <bits/stdc++.h>
+#include "binary_tree.hpp"
+#include "bitvector.hpp"
+#include "huffman.hpp"
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -18,26 +18,23 @@
 #include <cmath>
 #include <set>
 #include <map>
+
 using namespace std;
 
-/* Precisa transformar a variavel curr em bitvector, alem de transformas os tamanhos de int para unsigned long long int e deixar o de double talvez??? */
-
-// receives the size of the set with unique elements to encode
-double worst_case_entropy(double setSize){ return log2(setSize); }
-
 // function that receives a strings and return a map of that strings chars probabilities
-priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> probabilities_frequency(string S, bool prob){
-	Tree::Node* table[256] = {};
+priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> probabilities_frequency(string S) {
+	BinaryTree::Node* table[256] = {};
 	double size = S.size();
 	for(char c : S){
 		unsigned char index = (unsigned char) c;
 		if(table[index])table[index]->frequency+=1.0;
-		else table[index] = new Tree::Node(c,1.0);
+		else table[index] = new BinaryTree::Node(c,1.0);
 	}
-	priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> pq;
+	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> pq;
 	for(int i = 0; i<256;i++){
 		if(table[i]){
-			if(prob)table[i]->frequency/=size;
+			// if(prob)
+			table[i]->frequency/=size;
 			pq.push(table[i]);
 		}
 	}
@@ -45,42 +42,74 @@ priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> probabiliti
 }
 
 // Builds a Huffman tree and returns its root
-Tree::Node* build_huffman(priority_queue<Tree::Node*, vector<Tree::Node*>, Tree::compareNodes> heap){
+HuffmanTree::HuffmanTree(string S) {
+ 	priority_queue<BinaryTree::Node*, vector<BinaryTree::Node*>, BinaryTree::compareNodes> heap = probabilities_frequency(S);
 	while(heap.size() > 1){
-		Tree::Node* lc = heap.top();
+		BinaryTree::Node* lc = heap.top();
 		heap.pop();
-		Tree::Node* rc = heap.top();
+		BinaryTree::Node* rc = heap.top();
 		heap.pop();
-		Tree::Node* aux = new Tree::Node('$', lc->frequency + rc->frequency);
+		BinaryTree::Node* aux = new BinaryTree::Node('$', lc->frequency + rc->frequency);
 		aux->left = lc;
 		aux->right = rc;
 		heap.push(aux);
-	}	
-	return heap.top();
+	}
+	delete this->root;
+    this->root = heap.top();
+}
+
+// travels a ht and encode the nodes into its respetifully bitvector
+void HuffmanTree::huffman_coding(BinaryTree::Node *root, map<char,BitVector*>& arr, BitVector* B){
+	if (!root) return;
+	if ((!root->left) && (!root->right)){
+		if(B->size() != 0) {
+			arr.insert({root->data, B});
+		}
+		else {
+			BitVector* dmy = new BitVector();
+			dmy->append0();
+			arr.insert({root->data, dmy});
+		}
+		return;
+	}
+	BitVector* BL = new BitVector();
+	BL->extend(B);
+	BL->append0();
+	
+	BitVector* BR = new BitVector();
+	BR->extend(B);
+	BR->append1();
+
+	huffman_coding(root->left,arr,BL);
+	huffman_coding(root->right,arr,BR);
 }
 
 // travels a huffman tree and encode the nodes
-void huffman_coding(Tree::Node* root, map<char,string>& arr, string curr){
+void HuffmanTree::huffman_coding(BinaryTree::Node *root, map<char,string>& arr, string curr){
 	if(!root)return;
 	if(!root->left && !root->right){ 
 		if(curr!="")arr.insert({root->data,curr});
 		else arr.insert({root->data,"0"});
 		return;
-	}
+	} 
 	huffman_coding(root->left,arr,curr+'0');
 	huffman_coding(root->right,arr,curr+'1');
 }
 
 // map<encoding_length,char_probability>
-double average_length_codes(vector<unsigned long int> v1,vector<double> v2){
+double HuffmanTree::average_length_codes(vector<ULL> v1,vector<double> v2){
 	double result = 0.0;
-	for(unsigned long int i = 0;i<v1.size();i++){ result += (v1[i]*v2[i]); }	
+	for(ULL i = 0;i<v1.size();i++){ result += (v1[i]*v2[i]); }	
 	return result;
 }
 
 // receives the map with the Code length and probability and returns the minumun average code lenght that can be decoded (unambiguos)
-double minimum_average_code_length(vector<double> v1){
+double HuffmanTree::minimum_average_code_length(vector<double> v1){
 	double result = 0.0;
-	for(unsigned long int i = 0;i<v1.size();i++){ result += v1[i]*log2(1/v1[i]);}
+	for(ULL i = 0;i<v1.size();i++){ result += v1[i]*log2(1/v1[i]);}
 	return result;
+}
+
+double HuffmanTree::worst_case_entropy(double setSize){ 
+	return log2(setSize); 
 }

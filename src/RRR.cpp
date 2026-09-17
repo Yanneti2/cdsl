@@ -1,4 +1,5 @@
-#include "../include/RRR.h"
+#include "RRR.hpp"
+
 #include <iostream>
 
 #ifndef bitMask
@@ -77,7 +78,7 @@ unsigned long long binary_search(T *V, T target, unsigned long long beginning, u
         }
     }
 }
-RRR::RRR(bitVector *B, bool fixSizeToWordSize) {
+RRR::RRR(BitVector *B, bool fixSizeToWordSize) {
     block_size = ceil(log2(B->size())) / 2 * floor(log2(B->size()));
     total_blocks = (B->size() + block_size - 1) / block_size;
     partial_ranks = (unsigned long long *) malloc(total_blocks * sizeof(unsigned long long));
@@ -134,7 +135,7 @@ unsigned long long RRR::rank1(unsigned long long i) {
 unsigned long long RRR::rank0(unsigned long long i) {
     return i - rank1(i);
 }
-unsigned long long RRR::select1(bitVector *B, unsigned long long i) {
+unsigned long long RRR::select1(BitVector *B, unsigned long long i) {
     if (i > rank1(B->size())) return -1;
     if (i == 0) return 0;
     const unsigned long long pos = binary_search(partial_ranks, i, 0, (B->size() + block_size - 1) / block_size);
@@ -150,7 +151,7 @@ unsigned long long RRR::select1(bitVector *B, unsigned long long i) {
         target -= (*B)[select++];
     return select;
 }
-unsigned long long RRR::select0(bitVector *B, unsigned long long i) {
+unsigned long long RRR::select0(BitVector *B, unsigned long long i) {
     if (i > rank0(B->size())) return -1;
     if (i == 0) return 0;
     const unsigned long long pos = binary_search(partial_ranks, i, 0, (B->size() + block_size - 1) / block_size, block_size);

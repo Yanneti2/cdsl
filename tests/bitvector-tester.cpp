@@ -1,4 +1,5 @@
-#include "bitvector.h"
+#include "bitvector.hpp"
+
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
@@ -38,8 +39,8 @@ int main(int argc, char *argv[])
 
     string s = "11010011101000";
     BitVector* string = new BitVector(s);
-    assert(string.naive_rank1(s.size()) == 7);
-    assert(string.naive_rank0(s.size()) == 7);
+    assert(string->naive_rank1(s.size()) == 7);
+    assert(string->naive_rank0(s.size()) == 7);
 
     BitVector* string2 = new BitVector(s);
 

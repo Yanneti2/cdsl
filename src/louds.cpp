@@ -1,7 +1,8 @@
-#include "general_tree.h"
-#include "binary_tree.h"
-#include "bitvector.h"
+#include "general_tree.hpp"
+#include "binary_tree.hpp"
+#include "bitvector.hpp"
 #include "louds.hpp"
+
 #include <iostream>
 #include <string>
 #include <queue>
@@ -55,17 +56,17 @@ LOUDS::LOUDS(Gtree* G){
  * Starts with '10' plus the previous description so that it prevents some border cases
  * This functions populates a BitVector for a given explicit form tree previously initialized
  */
-LOUDS::LOUDS(Tree* BT){
+LOUDS::LOUDS(BinaryTree* BT) {
  	T.append1(); T.append0();
-	Tree::Node* node = BT->getRoot();
+	BinaryTree::Node* node = BT->getRoot();
  	if (!node) return;
- 	queue<Tree::Node*>q;
+ 	queue<BinaryTree::Node*>q;
  	q.push(node);
  	while(q.size()){
  		unsigned long long nodes = q.size();
  		for(int i=0;i<nodes;i++)
 		{
- 			Tree::Node* aux = q.front();	
+ 			BinaryTree::Node* aux = q.front();	
 			if(aux->left){
 				T.append1();
 				q.push(aux->left);

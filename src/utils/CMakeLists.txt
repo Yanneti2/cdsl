@@ -1,8 +1,4 @@
 add_library(utils
-    stack.cpp
-    queue.cpp
-    ll2.cpp
-    dll.cpp
 	general_tree.cpp
 	binary_tree.cpp
 )

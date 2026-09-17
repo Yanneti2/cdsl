@@ -7,15 +7,16 @@
     TODO:
     Uma funcao para appendar um long e/ou uma string a um bitvector.
 */
+#include "bitvector.hpp"
 
-#include <cmath>
-#include <fstream>
 #include <stdexcept>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include "bitvector.h"
+#include <iostream>
+#include <stdint.h>
+#include <fstream>
+#include <stdio.h>
 #include <cassert>
+#include <cmath>
 
 #ifndef bitMask
 #ifdef IS32BIT
@@ -143,6 +144,19 @@ BitVector::BitVector(size_t size, bool (*fn)(size_t)) {
         if (fn(i))
             this->set1(i);
     }
+}
+
+BitVector::BitVector(const BitVector &B) {
+    _cap = B.cap();
+    _size = B.size();
+
+    A = (TYPE *) malloc(B.cap() * sizeof(TYPE));
+
+    if (!A)
+        throw std::bad_alloc();
+
+    for (size_t i = 0; i < B.cap(); i++) 
+        A[i] = B.A[i];
 }
 
 BitVector::~BitVector() {
@@ -365,26 +379,28 @@ size_t BitVector::naive_rank1(size_t i) const {
 }
 
 size_t BitVector::naive_select0(size_t i) const {
-    size_t counter = 0;
-    size_t j;
-    for (j = 0; j < _size; j++) {
-        if ((j - counter) == i) return j;
-        counter += (*this)[j];
+    if (i == 0) return 0;
+
+    size_t pop_count = 0;
+    for (size_t j = 0; j < _size; j++) {
+        pop_count += !(*this)[j];
+        if (pop_count == i) return j + 1;
     }
     return -1;
 }
 
 size_t BitVector::naive_select1(size_t i) const {
+    if (i == 0) return 0;
+
     size_t pop_count = 0;
-    size_t j;
-    for (j = 0; j < _size; j++) {
-        if (pop_count == i) return j;
+    for (size_t j = 0; j < _size; j++) {
         pop_count += (*this)[j];
+        if (pop_count == i) return j + 1;
     }
     return -1;
 }
 
-void BitVector::serialize(const char *path) {
+void BitVector::serialize(const char *path) const {
     
     FILE *arch = fopen(path, "w");
     std::string s;

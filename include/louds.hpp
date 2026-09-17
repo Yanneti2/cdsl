@@ -1,7 +1,11 @@
-#include "general_tree.h"
-#include "binary_tree.h"
-#include "bitvector.h"
+#include "general_tree.hpp"
+#include "binary_tree.hpp"
+#include "bitvector.hpp"
+
 #include <string>
+
+#ifndef LOUDST
+#define LOUDST
 
 class LOUDS {
 private:
@@ -10,8 +14,8 @@ private:
 public:
     // Here, size_t refers to a position on the bitvector
     LOUDS(string s);
-    LOUDS(Gtree* G);
-    LOUDS(Tree* BT);
+    LOUDS(Gtree *G);
+    LOUDS(BinaryTree *BT);
 
     bool is_louds(string s);
     bool is_louds();
@@ -40,3 +44,5 @@ public:
     unsigned long long nodemap(size_t v);
     size_t nodeselect(unsigned long long i);
 };
+
+#endif

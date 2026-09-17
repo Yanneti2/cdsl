@@ -1,16 +1,19 @@
-#include "../include/RRR.h" 
+#include "RRR.hpp" 
+
+#include <assert.h>
 #include <iostream>
+#include <cstdlib>
 #include <iomanip>
 #include <chrono>
 #include <math.h>
-#include <cstdlib>
-#include <assert.h>
+
+using namespace std;
 
 int main(void) {
     srand(time(0));
     cout << "\"Size\";\"Time\"\n";
     for (long long unsigned size = 1000; size < 10000; size *= 10) {
-        bitVector B(64, 2.0);
+        BitVector B(64, 2.0);
         int order = log10(size);
         // cout << "Order: " << order << endl;
 
@@ -21,8 +24,6 @@ int main(void) {
                 B.append0();
             }
         }
-        
-
         auto start = std::chrono::high_resolution_clock::now();
         RRR R(&B);
         auto end = std::chrono::high_resolution_clock::now();
@@ -33,7 +34,5 @@ int main(void) {
         end = std::chrono::high_resolution_clock::now();
         ns_time = end - start;
         cout << size << ";" << ns_time.count() << "\n";
-        
-        
     }
 }

@@ -1,6 +1,7 @@
-#include "general_tree.h"
-#include "binary_tree.h"
+#include "general_tree.hpp"
+#include "binary_tree.hpp"
 #include "louds.hpp"
+
 #include <iostream>
 #include <cassert>
 #include <string>
@@ -10,7 +11,7 @@ using namespace std;
 int main (int argc, char *argv[])
 {
 	//==========================
-	//	Constructors	   |
+	//		Constructors	   |
 	//==========================
 	
 	Gtree* t = new Gtree();
@@ -51,8 +52,8 @@ int main (int argc, char *argv[])
 	LOUDS l1 = LOUDS(s);
 	//l1.print();
 
-	Tree* t1 = new Tree();
-	Tree::Node* root = t1->getRoot();	
+	BinaryTree* t1 = new BinaryTree();
+	BinaryTree::Node* root = t1->getRoot();	
 	root->left = t1->create_node('a',1.0);
 	root->right = t1->create_node('b',1.0);
 	root->left->left = t1->create_node('c',1.0);
@@ -63,7 +64,7 @@ int main (int argc, char *argv[])
 	delete t1;
 
 	//==========================
-	//	 IS LOUDS ? 	   |
+	//		 IS LOUDS ? 	   |
 	//==========================
 	
 	assert(l1.is_louds(s));
