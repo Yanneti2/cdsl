@@ -173,8 +173,8 @@ size_t LOUDS::fchild(size_t v) {
  *
  */
 size_t LOUDS::lchild(size_t v) {
-    return 17;
-
+	if (!T[v]) return -1;
+    return T.naive_select0(T.naive_rank1(v + 1) + 1) - 2;
 }
 
 /**
@@ -213,14 +213,16 @@ size_t LOUDS::parent(size_t v) {
  *
  */
 size_t LOUDS::nsibling(size_t v) {
-    return 17;
+	if (!T[v + 1]) return -1;
+    return succ0(fchild(v));
 }
 
 /**
  *
  */
 size_t LOUDS::psibling(size_t v) {
-    return 17;
+	if (!T[v-1]) return -1;
+    return pred0(fchild(v));
 }
 
 /**
