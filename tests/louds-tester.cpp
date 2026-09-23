@@ -45,12 +45,14 @@ int main (int argc, char *argv[])
 	t->append_nnode(n14);
 
 	LOUDS l = LOUDS(t);
-	//l.print();
+	l.print();
 	delete t;
-
+	//          12345678901234567890123456789012345678901
 	string s = "10111011011000011010100111101110010000000";
+	BitVector b = BitVector(s);
+	LOUDS la = LOUDS(b);
 	LOUDS l1 = LOUDS(s);
-	//l1.print();
+	l1.print();
 
 	BinaryTree* t1 = new BinaryTree();
 	BinaryTree::Node* root = t1->getRoot();	
@@ -60,8 +62,108 @@ int main (int argc, char *argv[])
 	root->right->right = t1->create_node('d',1.0);
 
 	LOUDS l2 = LOUDS(t1);
-	//l2.print();
+	l2.print();
 	delete t1;
+	
+	std::cout <<
+	l1.fchild(2) <<
+	l1.fchild(3) <<
+	l1.fchild(7) <<
+	l1.fchild(8) <<
+
+	l1.lchild(2) <<
+	l1.lchild(3) <<
+	l1.lchild(7) <<
+	l1.lchild(8) <<
+
+	l1.child(1,3) <<
+	l1.child(2,2) <<
+	l1.child(2,1) <<
+	l1.child(11,4) <<
+
+	l1.children(1) <<
+	l1.children(2) <<
+	l1.children(8) <<
+	l1.children(11) <<
+
+	l1.childrank(2) << //1
+	l1.childrank(3) <<
+	l1.childrank(4) <<
+	l1.childrank(5) << //2
+	l1.childrank(6) <<
+	l1.childrank(7) << //3
+	l1.childrank(8) <<
+	l1.childrank(9) << //7
+	l1.childrank(10) <<
+	l1.childrank(11) << //8
+	l1.childrank(12) << //9
+	l1.childrank(13) << //11
+	l1.childrank(14) <<
+	l1.childrank(15) <<
+	l1.childrank(16) <<
+	l1.childrank(17) << //12
+	l1.childrank(18) <<
+	l1.childrank(19) <<
+
+	l1.nsibling(2) <<
+	l1.nsibling(3) <<
+	l1.nsibling(5) <<
+	l1.nsibling(7) <<
+	l1.nsibling(9) <<
+	l1.nsibling(13) <<
+	l1.nsibling(14) <<
+	l1.nsibling(15) <<
+	l1.nsibling(17) <<
+	l1.nsibling(18) <<
+
+	l1.psibling(3) <<
+	l1.psibling(4) <<
+	l1.psibling(6) <<
+	l1.psibling(8) <<
+	l1.psibling(10) <<
+	l1.psibling(11) <<
+	l1.psibling(12) <<
+	l1.psibling(14) <<
+	l1.psibling(15) <<
+	l1.psibling(16) <<
+	l1.psibling(18) <<
+
+	l1.isleaf(2) <<
+	l1.isleaf(3) <<
+	l1.isleaf(4) <<
+	l1.isleaf(11) <<
+	l1.isleaf(17) <<
+
+	l1.parent(2) << //1
+	l1.parent(3) <<
+	l1.parent(4) <<
+	l1.parent(5) << //2
+	l1.parent(6) <<
+	l1.parent(7) << //3
+	l1.parent(8) <<
+	l1.parent(9) << //7
+	l1.parent(10) <<
+	l1.parent(11) << //8
+	l1.parent(12) << //9
+	l1.parent(13) << //11
+	l1.parent(14) <<
+	l1.parent(15) <<
+	l1.parent(16) <<
+	l1.parent(17) << //12
+	l1.parent(18) <<
+	l1.parent(19) <<
+
+	l1.nodemap(10) <<
+	l1.nodemap(20) <<
+	l1.nodemap(30) <<
+	l1.nodemap(41) <<
+	l1.nodeselect(2) <<
+	l1.nodeselect(8) <<
+	l1.nodeselect(11) <<
+	l1.nodeselect(19) <<
+	std::endl
+
+
 
 	//==========================
 	//		 IS LOUDS ? 	   |

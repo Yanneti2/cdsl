@@ -26,6 +26,13 @@ LOUDS::LOUDS(string s){
 	}
 }
 
+LOUDS::LOUDS(BitVector b) {
+	for(auto i = 0; i < b._size(); i++) {
+		if(b[i] == 0) T.append0();
+		else T.append1();
+	}
+}
+
 /**
  * Starts with '10' plus the previous description so that it prevents some border cases
  * This functions populates a BitVector for a given explicit form tree previously initialized
@@ -228,7 +235,7 @@ size_t LOUDS::psibling(size_t v) {
 /**
  *
  */
-bool LOUDS::isleaf(size_t v) {
+bool LOUDS::isleaf(size_t v) { //!
     if (v < 2) return false;
     return T[v] == 0;
 }
