@@ -149,16 +149,14 @@ size_t LOUDS::succ1(size_t v) {
  *
  */
 size_t LOUDS::pred0(size_t v) {
-    int a = T.naive_rank0(v);
-    int b = T.naive_select0(a);
-    return b;
+    return T.naive_select0(naive_rank0(v + 1)) - 1;
 }
 
 /**
  *
  */
 size_t LOUDS::pred1(size_t v) {
-    return T.naive_select1(T.naive_rank1(v)) - 1;
+    return T.naive_select1(T.naive_rank1(v + 1)) - 1;
 }
 
 /**
@@ -174,7 +172,7 @@ size_t LOUDS::root() {
 size_t LOUDS::fchild(size_t v) {
     if (!T[v]) return -1;
     return T.naive_select0(T.naive_rank1(v + 1));
-}
+}		
 
 /**
  *
@@ -220,22 +218,20 @@ size_t LOUDS::parent(size_t v) {
  *
  */
 size_t LOUDS::nsibling(size_t v) {
-	if (!T[v + 1]) return -1;
-    return succ0(fchild(v));
+    return succ0(fchild(v + 1)) + 1;
 }
 
 /**
  *
  */
 size_t LOUDS::psibling(size_t v) {
-	if (!T[v-1]) return -1;
-    return pred0(fchild(v));
+    return pred0(fchild(v - 1)) + 1;
 }
 
 /**
  *
  */
-bool LOUDS::isleaf(size_t v) { //!
+bool LOUDS::isleaf(size_t v) {
     if (v < 2) return false;
     return T[v] == 0;
 }
