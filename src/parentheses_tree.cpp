@@ -1,13 +1,13 @@
+#include <stdlib.h>
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+
 #include "parentheses_tree.hpp"
 #include "general_tree.hpp"
 #include "binary_tree.hpp"
 #include "bitvector.hpp"
 #include "huffman.hpp"
-
-#include <stdlib.h>
-#include <iostream>
-#include <stdio.h>
-#include <vector>
 
 using namespace std;
 
@@ -147,7 +147,7 @@ bool ParenthesesTree::is_bp(){
 
 // Searches for the greatest j < i | excess(B, j) == excess(B,i) + d
 // if not found, returns 0 (should i change this behavior?)
-unsigned long long ParenthesesTree::backward_search(size_t i, unsigned long long d)
+unsigned long long ParenthesesTree::backward_search(size_t i, long long d)
 {
     if (i == 0)
     {
@@ -167,7 +167,7 @@ unsigned long long ParenthesesTree::backward_search(size_t i, unsigned long long
     return 0;
 }
 
-unsigned long long ParenthesesTree::forward_search(size_t i, unsigned long long d) {
+unsigned long long ParenthesesTree::forward_search(size_t i, long long d) {
     //if (i == 0)
     //{
     //    return 0;

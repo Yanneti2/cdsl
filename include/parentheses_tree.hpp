@@ -1,12 +1,12 @@
+#ifndef BPTREE
+#define BPTREE
+
 #include "general_tree.hpp"
 #include "binary_tree.hpp"
 #include "bitvector.hpp"
 
-#ifndef BPTREE
-#define BPTREE
-
 class ParenthesesTree {
-private:
+protected:
     BitVector T;
 
 public:
@@ -15,16 +15,15 @@ public:
     ParenthesesTree(Gtree t);
     ParenthesesTree(BinaryTree t);
     ParenthesesTree(BitVector& B);
+    virtual ~ParenthesesTree() {};
     
     // Private func range start ==============
     void bt_build(BinaryTree::Node* node);
     void gt_build(Gtree::gNode* node);
     bool is_bp();
 
-    unsigned long long backward_search(size_t i, unsigned long long d);
-    unsigned long long forward_search(size_t i, unsigned long long d);
-    pair<unsigned long long, unsigned long long> fwdblock(size_t i, unsigned long long d);
-    unsigned long long fwd_search(size_t i, unsigned long long d);
+    virtual unsigned long long backward_search(size_t i, long long d);
+    virtual unsigned long long forward_search(size_t i, long long d);
     unsigned long long excess(size_t i);
     unsigned long long close(unsigned long long i);
     unsigned long long open(unsigned long long i);
