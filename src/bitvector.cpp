@@ -238,16 +238,15 @@ TYPE BitVector::accessWord(size_t i) const {
 }
 
 TYPE BitVector::accessWord(size_t i, unsigned wordSize) const {
-    unsigned long long start = i * wordSize;
-    unsigned long long end = start + wordSize - 1;
-    unsigned long long start_index = start / NBITS;
-    unsigned long long end_index = end / NBITS;
-    start %= NBITS;
-    end %= NBITS;
-    if (start_index == end_index) {
-        return (A[start_index] & ~bitMask(end + 1)) << start;
+    size_t begin = i * wordSize;
+    TYPE *A = this->A + begin / NBITS;
+    begin %= NBITS;
+    size_t end = begin + wordSize;
+    if (end > NBITS) {
+        return ((A[0] & bitMask(begin)) << (end - NBITS)) | ((A[1] & ~bitMask(end - NBITS)) >> (2 * NBITS - end));
     }
-    return (A[start_index] << start) | ((A[end_index] & ~bitMask(end + 1)) >> (NBITS - start));
+
+    return (A[0] & bitMask(begin)) >> (NBITS - end);
 }
 
 /**
