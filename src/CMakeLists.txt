@@ -7,6 +7,7 @@ add_library(compact
         RRR.cpp
         huffman.cpp
         wt.cpp
+        uvector.cpp
 )
 target_include_directories(compact PUBLIC ${CMAKE_SOURCE_DIR}/include)
 

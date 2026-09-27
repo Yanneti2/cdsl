@@ -36,3 +36,8 @@ add_executable(wt-tester
         wt-tester.cpp
 )
 target_link_libraries(wt-tester compact)
+
+add_executable(uvector_tester
+        uvector_tester.cpp
+)
+target_link_libraries(uvector_tester compact)
