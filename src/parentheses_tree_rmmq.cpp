@@ -3,6 +3,8 @@
 #include "climits"
 #include "iostream"
 
+#define max(a, b) ((a) > (b) ? (a) : (b))
+
 using namespace std;
 
 size_t ParenthesesTreeRMMQ::leafnum(size_t k) {
@@ -28,14 +30,13 @@ ParenthesesTreeRMMQ::~ParenthesesTreeRMMQ() {
     if (rmmq_tree) {
         free(rmmq_tree);
     }
-
 }
 
 void ParenthesesTreeRMMQ::init() {
     size_t size = T.size();
     size_t leaves = (size + b) / b;
 
-    rmmq_tree = (RMMQNode *) malloc(2 * leaves - 1);
+    rmmq_tree = (RMMQNode *) malloc((2 * leaves - 1) * sizeof(RMMQNode));
 
     for (size_t leaf = 0; leaf < leaves; leaf++) {
         size_t leaf_pos = leafnum(leaf);
@@ -61,9 +62,9 @@ void ParenthesesTreeRMMQ::init() {
     }
 
     for (long long i = leaves - 2; i != -1; i--) {
-        RMMQNode *cur = &(rmmq_tree[i]);
-        RMMQNode *l = &(rmmq_tree[2 * i + 1]);
-        RMMQNode *r = &(rmmq_tree[2 * i + 2]);
+        RMMQNode *cur = rmmq_tree + i;
+        RMMQNode *l = rmmq_tree + 2 * i + 1;
+        RMMQNode *r = rmmq_tree + 2 * i + 2;
         cur->e = l->e + r->e;
 
         if (l->max > r->max) {
@@ -101,7 +102,7 @@ unsigned long long ParenthesesTreeRMMQ::forward_search(size_t i, long long d) {
 
     size_t leaf = leafnum(i / b);
 
-    while (popcount(leaf + 2) != 0 && rmmq_tree[leaf + 1].min > d) {
+    while (__popcount(leaf + 2) != 0 && rmmq_tree[leaf + 1].min > d) {
         if (leaf % 2) {
             d -= rmmq_tree[leaf + 1].e;
         }
@@ -109,7 +110,7 @@ unsigned long long ParenthesesTreeRMMQ::forward_search(size_t i, long long d) {
         leaf = (leaf - 1) / 2;
     }
 
-    if (popcount(leaf + 2) == 0) return -1;
+    if (__popcount(leaf + 2) == 0) return -1;
 
     leaf++;
 
@@ -134,14 +135,14 @@ unsigned long long ParenthesesTreeRMMQ::forward_search(size_t i, long long d) {
 }
 
 unsigned long long ParenthesesTreeRMMQ::backward_search(size_t i, long long d) {
-    for (size_t j = i; j + 1 > (i / b) * b; j--) {
+    for (size_t j = i; j + 1 > max((i / b) * b, 1); j--) {
         d += T[j - 1] ? 1 : -1;
         if (d == 0) return j - 1;
     }
 
     size_t leaf = leafnum(i / b);
 
-    while (popcount(leaf + 1) != 0 && rmmq_tree[leaf - 1].min - rmmq_tree[leaf - 1].e > d) {
+    while (__popcount(leaf + 1) != 0 && rmmq_tree[leaf - 1].min - rmmq_tree[leaf - 1].e > d) {
         if (leaf % 2 == 0) {
             d += rmmq_tree[leaf - 1].e;
         }
@@ -149,7 +150,7 @@ unsigned long long ParenthesesTreeRMMQ::backward_search(size_t i, long long d) {
         leaf = (leaf - 1) / 2;
     }
 
-    if (popcount(leaf + 1) == 0) return -1;
+    if (__popcount(leaf + 1) == 0) return -1;
 
     leaf--;
 

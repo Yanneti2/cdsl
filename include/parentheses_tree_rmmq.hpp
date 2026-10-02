@@ -15,7 +15,7 @@ class ParenthesesTreeRMMQ : public ParenthesesTree {
             long long min_count;
         };
 
-        RMMQNode *rmmq_tree;
+        RMMQNode *rmmq_tree = nullptr;
         size_t b = 32;
 
         size_t leafnum(size_t k);
@@ -31,6 +31,9 @@ class ParenthesesTreeRMMQ : public ParenthesesTree {
         unsigned long long backward_search(size_t i, long long d) override;
         unsigned long long forward_search(size_t i, long long d) override;
         unsigned long long forward_block(size_t i, long long &d);
+        // unsigned long long min_count(size_t i, size_t j) override;
+        // unsigned long long min_select(size_t i, size_t j) override;
+        // unsigned long long max(size_t i, size_t j) override;
 };
 
 #endif

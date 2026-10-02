@@ -1,13 +1,17 @@
 #include "parentheses_tree.hpp"
+#include "parentheses_tree_rmmq.hpp"
 
 #include <bits/stdc++.h>
 #include <iostream>
 #include <cstring>
+#include <cassert>
 #include <random>
 #include <string>
 #include <chrono>
 
 using namespace std;
+
+#define ULL unsigned long long
 
 void generate_pt(string& s, int n)
 {
@@ -24,10 +28,10 @@ void generate_pt(string& s, int n)
         if (open == (n/2)) canOpen = false;
         else canOpen  = open < (n/2);
         
-        canClose = close < open;
+        canClose = close < open  - 1;
 
         if (canOpen && canClose){
-            if ((rand() % 2) == 0)
+            if (rand() % 2 == 0)
             {
                 s += ')';
                 close++;
@@ -51,6 +55,16 @@ void generate_pt(string& s, int n)
     }
 }
 
+void shuffle(vector<ULL> &v) {
+    // findex = size -1 (ok), lindex = 0 (1-1)
+    for (int i = v.size() - 1; i > 0; i--) {
+        ULL aux = v[i - 1];
+        ULL rindex = rand() % i;
+        v[i - 1] = v[rindex];
+        v[rindex] = aux;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     /*
@@ -61,7 +75,7 @@ int main(int argc, char *argv[])
         Include the value already sorted in O(logn)
     */
 
-    unsigned long long operations = 100000;
+    ULL operations = 100000;
 
     // Control variables
     bool verbose = false;
@@ -69,24 +83,25 @@ int main(int argc, char *argv[])
     srand(time(0));
 
     // Operations performed
-    bool children = false;
-    bool builders = false;
+    
+    // bool children = false;
+    // bool builders = false;
     bool enclose = false;
-    bool subtree = false;
-    bool parent = false;
-    bool valid = false;
+    // bool subtree = false;
+    // bool parent = false;
+    // bool valid = false;
     bool close = false;
-    bool isl = false;
-    bool dpn = false;
-    bool lr = false;
-    bool ln = false;
-    bool ls = false;
-    bool cr = false;
-    bool lc = false;
-    bool ia = false;
+    // bool isl = false;
+    // bool dpn = false;
+    // bool lr = false;
+    // bool ln = false;
+    // bool ls = false;
+    // bool cr = false;
+    // bool lc = false;
+    // bool ia = false;
 
     bool enclosestring = true;
-    bool parentstring = true;
+    bool closestring = true;
 
     for(int i = 0; i < argc; i++)
     {
@@ -99,144 +114,130 @@ int main(int argc, char *argv[])
 
         if (all) continue;
 
-        if (strcmp(curr_arg, "-c") || strcmp(curr_arg, "--constructors") == 0  ||
-            strcmp(curr_arg, "-b") == 0 || strcmp(curr_arg, "--builders") == 0)
-            builders = true;
-        else if (strcmp(curr_arg, "-isbp") == 0 || strcmp(curr_arg, "--valid") == 0)
-            valid = true;
+        // if (strcmp(curr_arg, "-c") || strcmp(curr_arg, "--constructors") == 0  ||
+        //     strcmp(curr_arg, "-b") == 0 || strcmp(curr_arg, "--builders") == 0)
+        //     builders = true;
+        // else if (strcmp(curr_arg, "-isbp") == 0 || strcmp(curr_arg, "--valid") == 0)
+        //     valid = true;
         else if (strcmp(curr_arg, "-en") == 0 || strcmp(curr_arg, "--enclose") == 0)
             enclose = true;
-        else if (strcmp(curr_arg, "-p") == 0 || strcmp(curr_arg, "--parent") == 0)
-            parent = true;
-        else if (strcmp(curr_arg, "-isl") == 0 || strcmp(curr_arg, "--is_leaf") == 0)
-            isl = true;
-        else if (strcmp(curr_arg, "-sbt") == 0 || strcmp(curr_arg, "--subtree") == 0)
-            subtree = true;
-        else if (strcmp(curr_arg, "-lr") == 0 || strcmp(curr_arg, "--leafrank") == 0)
-            lr = true;
-        else if (strcmp(curr_arg, "-ln") == 0 || strcmp(curr_arg, "--leafnum") == 0)
-            ln = true;
-        else if (strcmp(curr_arg, "-ls") == 0 || strcmp(curr_arg, "--leafselect") == 0)
-            ls = true;
-        else if (strcmp(curr_arg, "-ch") == 0 || strcmp(curr_arg, "--children") == 0)
-            children = true;
-        else if (strcmp(curr_arg, "-cr") == 0 || strcmp(curr_arg, "--childrank") == 0)
-            cr = true;
-        else if (strcmp(curr_arg, "-lc") == 0 || strcmp(curr_arg, "--lchild") == 0)
-            lc = true;
-        else if (strcmp(curr_arg, "-ia") == 0 || strcmp(curr_arg, "--isancestor") == 0)
-            ia = true;
+        // else if (strcmp(curr_arg, "-p") == 0 || strcmp(curr_arg, "--parent") == 0)
+        //     parent = true;
+        // else if (strcmp(curr_arg, "-isl") == 0 || strcmp(curr_arg, "--is_leaf") == 0)
+        //     isl = true;
+        // else if (strcmp(curr_arg, "-sbt") == 0 || strcmp(curr_arg, "--subtree") == 0)
+        //     subtree = true;
+        // else if (strcmp(curr_arg, "-lr") == 0 || strcmp(curr_arg, "--leafrank") == 0)
+        //     lr = true;
+        // else if (strcmp(curr_arg, "-ln") == 0 || strcmp(curr_arg, "--leafnum") == 0)
+        //     ln = true;
+        // else if (strcmp(curr_arg, "-ls") == 0 || strcmp(curr_arg, "--leafselect") == 0)
+        //     ls = true;
+        // else if (strcmp(curr_arg, "-ch") == 0 || strcmp(curr_arg, "--children") == 0)
+        //     children = true;
+        // else if (strcmp(curr_arg, "-cr") == 0 || strcmp(curr_arg, "--childrank") == 0)
+        //     cr = true;
+        // else if (strcmp(curr_arg, "-lc") == 0 || strcmp(curr_arg, "--lchild") == 0)
+        //     lc = true;
+        // else if (strcmp(curr_arg, "-ia") == 0 || strcmp(curr_arg, "--isancestor") == 0)
+        //     ia = true;
         else if (strcmp(curr_arg, "-cl") == 0 || strcmp(curr_arg, "--close") == 0)
             close = true;
-        else if (strcmp(curr_arg, "-dpn") == 0 || strcmp(curr_arg, "--deepestnode") == 0)
-            dpn = true;
+        // else if (strcmp(curr_arg, "-dpn") == 0 || strcmp(curr_arg, "--deepestnode") == 0)
+        //     dpn = true;
     }
 
     if (verbose) cout << "ALL THE FOLLOWING TESTS WERE COMPUTED FROM ORDER 3 TO ORDER 9 BITVECTOR SIZE\n\n";
 
     for(int order = 3; order <= 9; order++)
     {
-        vector<string> vs; // array de valid bp strings
-        vector<ParenthesesTree> vpt;
-
-        unsigned long long order_num = 1;
+        ULL order_num = 1;
         for(int i = 0; i < order; i++) order_num *= 10;
 
         string valid_pt = "";
         generate_pt(valid_pt, order_num);
-        // cout << valid_pt << "\n";
 
-        ParenthesesTree PT = ParenthesesTree(valid_pt);
+        ParenthesesTree *PT = new ParenthesesTree(valid_pt);
+        ParenthesesTreeRMMQ *PTRMMQ = new ParenthesesTreeRMMQ(*PT);
 
-        // for(int i = 0; i <= 1000000; i++)
-        // {
-        //     string valid_pt = "";
-        //     generate_pt(valid_pt, order_num);
-        //     vs.push_back(valid_pt);
-        //     vpt.push_back(ParenthesesTree(valid_pt));
-        // }
+        vector<ULL> rand_indexes(order_num);
+        for(int i = 0; i < order_num; i++)
+        {
+            rand_indexes[i] = i;
+        }
+        shuffle(rand_indexes);
 
-        // if (builders || all)
-        // {
-        //     if (verbose) cout << "This Test consist in the average time of construction of 1M ParenthesesTree objects from random valid PT strings with size == current order\n\n";
-            
-        //     chrono::high_resolution_clock::time_point start;
-        //     chrono::high_resolution_clock::time_point end;
-
-        //     start = chrono::high_resolution_clock::now();
-        //     for(string cs: vs) ParenthesesTree pt = ParenthesesTree(cs);
-        //     end = chrono::high_resolution_clock::now();
-
-        //     std::chrono::duration<double, nano> elapsed_times{end - start};
-
-        //     if (verbose) { 
-        //         cout << "Size: " << order << endl;
-        //         cout << "Time per string build: " << elapsed_times.count() / (long double) 1000000 << " ns\n";
-        //     } else {
-        //         cout << order << ";" << elapsed_times.count() / (long double) 1000000 << "\n";
-        //     }
-        // }
-        // else if (valid || all)
-        // {
-        //     if (verbose)
-        //     {
-        //         cout << "This test iterates through all the created valid bp string and verifies if they consist in a valid ParenthesesTree\n\n";
-        //     }
-
-        //     chrono::high_resolution_clock::time_point start;
-        //     chrono::high_resolution_clock::time_point end;
-
-        //     start = chrono::high_resolution_clock::now();
-        //     for(ParenthesesTree pt: vpt) pt.is_bp();
-        //     end = chrono::high_resolution_clock::now();
-
-        //     std::chrono::duration<double, nano> elapsed_times{end - start};
-
-        //     if (verbose)
-        //     {
-        //         cout << "Size: " << order << "IsBp operation average time: " << (elapsed_times.count() / (long double) 1000000) << "\n\n";
-        //     }
-        //     else
-        //     {
-        //         cout << order << ";" << (elapsed_times.count() / (long double) 1000000) << " ns\n";
-        //     }
-        // }
         if (enclose || all)
         {
             if (verbose && enclosestring)
             {
-                cout << "This test consist in the enclose operation in each and every position [1...order_num-1] of the current PT BitVector in random order.\n\n";
+                cout << "This test consist in the backwards search operation in each and every position [1...order_num-1] of the current PT BitVector in random order for naive and rmMq balanced parentheses tree implementation.\n\n";
                 enclosestring = false;
             }
 
             chrono::high_resolution_clock::time_point start;
             chrono::high_resolution_clock::time_point end;
 
-            vector<unsigned long long> rand_indexes(operations);
-
-            for(int i = 0; i < operations; i++)
-            {
-                rand_indexes[i] = rand() % operations;
-            }
-
             start = chrono::high_resolution_clock::now();
-            for(unsigned long long i : rand_indexes)
+            for(ULL i : rand_indexes)
             {
-                PT.enclose(i);
+                PT->enclose(i);
             }
             end = chrono::high_resolution_clock::now();
             
             std::chrono::duration<double, nano> elapsed_times{end - start};
-            
-            if (verbose) cout << "Size: " << order << " average enclose operation time: " << elapsed_times.count() / operations << " ns\n\n";
-            else cout << order << ";" << elapsed_times.count() / operations << "\n";
-        }
-        else if (all)
-        {
-            if (verbose && parentstring)
-            {
+            if (verbose) cout << "Size: " << order << " average naive enclose operation time: " << elapsed_times.count() / order_num << " ns\n\n";
+            else cout << order << ";" << elapsed_times.count() / order_num << "\n";
 
+            start = chrono::high_resolution_clock::now();
+            for(ULL i : rand_indexes)
+            {
+                PTRMMQ->enclose(i);
             }
+            end = chrono::high_resolution_clock::now();
+
+            elapsed_times = end - start;
+
+            if (verbose) cout << "Size: " << order << " average rmMq enclose operation time: " << elapsed_times.count() / order_num << " ns\n\n";
+            else cout << order << ";" << elapsed_times.count() / order_num << "\n";
+        }
+        else if (all || close)
+        {
+            if (verbose && closestring)
+            {
+                cout << "This test consist in the forward search operation for all positions of size order of a randomly created PT BitVector in random order for naive and rmMq balanced parentheses tree implementation.\n";
+                closestring = false;
+            }
+
+            chrono::high_resolution_clock::time_point start;
+            chrono::high_resolution_clock::time_point end;
+
+            // vector<ULL>Nresults(order_num + 100000);
+            // vector<ULL>Rresults(order_num + 100000);
+            
+            start = chrono::high_resolution_clock::now();
+            for (ULL i : rand_indexes){                
+                PT->close(i);
+            }
+            end = chrono::high_resolution_clock::now();
+
+            std::chrono::duration<double, nano> elapsed_times{end - start};
+
+            if (verbose) cout << "order: " << order << "Naive close average time per operation: " << elapsed_times.count()/order << "ns\n";
+            else cout << order << ";" << elapsed_times.count() / order << "\n\n";
+
+            start = chrono::high_resolution_clock::now();
+            for (ULL i : rand_indexes){
+                PTRMMQ->close(i);
+            }
+            end = chrono::high_resolution_clock::now();
+
+            elapsed_times = end - start;
+
+            if (verbose) cout << "order: " << order << "rmMq close average time per operation: " << elapsed_times.count()/order << endl;
+            else cout << order << ";" << elapsed_times.count() / order << endl << endl;
+
+            // for (ULL i = 0; i < order_num; i++) assert(Nresults[i] == Rresults[i]);
         }
     }
     return 1;

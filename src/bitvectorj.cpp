@@ -120,10 +120,10 @@ bool BitVectorJ::is_initialized() const {
 }
 
 BitVectorJ::~BitVectorJ() {
-    if (layer1) free(layer1);
-    if (layer2) free(layer2);
-    if (select_vector0) free(select_vector0);
-    if (select_vector1) free(select_vector1);
+//     if (layer1) free(layer1);
+//     if (layer2) free(layer2);
+//     if (select_vector0) free(select_vector0);
+//     if (select_vector1) free(select_vector1);
 }
 
 size_t BitVectorJ::rank0(size_t i) const {
