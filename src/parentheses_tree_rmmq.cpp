@@ -127,7 +127,7 @@ unsigned long long ParenthesesTreeRMMQ::forward_search(size_t i, long long d) {
 
     size_t j;
     for (j = k * b; j < min((k + 1) * b, T.size() + 1); j++) {
-        d -= T[j - 1] ? 1 : -1;
+        if (j != 0) d -= T[j - 1] ? 1 : -1;
         if (d == 0) return j;
     }
 

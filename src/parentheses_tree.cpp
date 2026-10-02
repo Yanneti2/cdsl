@@ -292,7 +292,7 @@ unsigned long long ParenthesesTree::enclose(unsigned long long i) {
 }
 
 // Returns the BitVector associated to this BP instance
-BitVector &ParenthesesTree::getBv() { return this->T; }
+BitVectorJ &ParenthesesTree::getBv() { return this->T; }
 
 /**
  * Returns the root node of the tree.

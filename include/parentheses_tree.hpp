@@ -74,7 +74,7 @@ public:
     unsigned long long rank10(size_t i); ///
     size_t select10(unsigned long long i); ///
 
-    BitVector& getBv(); ///
+    BitVectorJ& getBv(); ///
 };
 
 #endif

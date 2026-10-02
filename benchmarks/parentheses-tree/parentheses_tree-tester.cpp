@@ -167,27 +167,27 @@ int main(int argc, char *argv[])
         }
         shuffle(rand_indexes);
 
-        if (enclose || all)
+        if (all || enclose)
         {
             if (verbose && enclosestring)
             {
-                cout << "This test consist in the backwards search operation in each and every position [1...order_num-1] of the current PT BitVector in random order for naive and rmMq balanced parentheses tree implementation.\n\n";
+                cout << "This test consist in the backwards search operation in each and every position [0, 1,..., order_num-1] of the current PT BitVector in random order for naive and rmMq balanced parentheses tree implementation.\n\n";
                 enclosestring = false;
             }
 
             chrono::high_resolution_clock::time_point start;
             chrono::high_resolution_clock::time_point end;
 
-            start = chrono::high_resolution_clock::now();
-            for(ULL i : rand_indexes)
-            {
-                PT->enclose(i);
-            }
-            end = chrono::high_resolution_clock::now();
+            // start = chrono::high_resolution_clock::now();
+            // for(ULL i : rand_indexes)
+            // {
+            //     PT->enclose(i);
+            // }
+            // end = chrono::high_resolution_clock::now();
             
-            std::chrono::duration<double, nano> elapsed_times{end - start};
-            if (verbose) cout << "Size: " << order << " average naive enclose operation time: " << elapsed_times.count() / order_num << " ns\n\n";
-            else cout << order << ";" << elapsed_times.count() / order_num << "\n";
+            // std::chrono::duration<double, nano> elapsed_times{end - start};
+            // if (verbose) cout << "Size: " << order << " average naive enclose operation time: " << elapsed_times.count() / order_num << " ns\n\n";
+            // else cout << order << ";" << elapsed_times.count() / order_num << "\n";
 
             start = chrono::high_resolution_clock::now();
             for(ULL i : rand_indexes)
@@ -196,7 +196,8 @@ int main(int argc, char *argv[])
             }
             end = chrono::high_resolution_clock::now();
 
-            elapsed_times = end - start;
+            // elapsed_times = end - start;
+            std::chrono::duration<double, nano> elapsed_times{end - start};
 
             if (verbose) cout << "Size: " << order << " average rmMq enclose operation time: " << elapsed_times.count() / order_num << " ns\n\n";
             else cout << order << ";" << elapsed_times.count() / order_num << "\n";
@@ -215,27 +216,36 @@ int main(int argc, char *argv[])
             // vector<ULL>Nresults(order_num + 100000);
             // vector<ULL>Rresults(order_num + 100000);
             
+            // start = chrono::high_resolution_clock::now();
+            // for (ULL i : rand_indexes){                
+            //     PT->close(i);
+            // }
+            // end = chrono::high_resolution_clock::now();
+
+            // std::chrono::duration<double, nano> elapsed_times{end - start};
+
+            // if (verbose) cout << "order: " << order << "Naive close average time per operation: " << elapsed_times.count()/order << "ns\n";
+            // else cout << order << ";" << elapsed_times.count() / order << "\n\n";
+
+            BitVectorJ Bv = PT->getBv();
+            double vsize = Bv.size();
+            vector<ULL> cindex(vsize); // close indexes
+            for (ULL vindex: rand_indexes){ 
+                if (Bv[vindex] == 0) cindex.push_back(vindex);
+            }
+
             start = chrono::high_resolution_clock::now();
-            for (ULL i : rand_indexes){                
-                PT->close(i);
+            for (ULL i : cindex){
+                PTRMMQ->close(i);
             }
             end = chrono::high_resolution_clock::now();
 
             std::chrono::duration<double, nano> elapsed_times{end - start};
 
-            if (verbose) cout << "order: " << order << "Naive close average time per operation: " << elapsed_times.count()/order << "ns\n";
-            else cout << order << ";" << elapsed_times.count() / order << "\n\n";
+            // elapsed_times = end - start;
 
-            start = chrono::high_resolution_clock::now();
-            for (ULL i : rand_indexes){
-                PTRMMQ->close(i);
-            }
-            end = chrono::high_resolution_clock::now();
-
-            elapsed_times = end - start;
-
-            if (verbose) cout << "order: " << order << "rmMq close average time per operation: " << elapsed_times.count()/order << endl;
-            else cout << order << ";" << elapsed_times.count() / order << endl << endl;
+            if (verbose) cout << "order: " << order << "rmMq close average time per operation: " << elapsed_times.count() / vsize << "ns\n\n";
+            else cout << order << ";" << elapsed_times.count() / vsize << "\n";
 
             // for (ULL i = 0; i < order_num; i++) assert(Nresults[i] == Rresults[i]);
         }
