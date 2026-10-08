@@ -1,4 +1,4 @@
-#include "bitvector.hpp"
+#include "bitvectorj.hpp"
 
 #include <iostream>
 #include <map>
@@ -12,7 +12,7 @@ typedef struct wtNode{
     wtNode *dad;
     wtNode *lchild;
     wtNode *rchild;
-    BitVector* freq;
+    BitVectorJ* freq;
     string alphabet;
 }wtNode;
 
