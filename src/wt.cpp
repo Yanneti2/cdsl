@@ -41,7 +41,7 @@ wtNode* WaveletTree::buildWT(string S, wtNode* dad)
     sort(alphabet.begin(), alphabet.end());
 
     string LSS, RSS;
-    BitVector* vector = new BitVector();
+    BitVectorJ* vector = new BitVectorJ();
 
     for (ULL i = 0; i < S.size(); i++)
     {
@@ -54,6 +54,9 @@ wtNode* WaveletTree::buildWT(string S, wtNode* dad)
             RSS += S[i];
         }
     }
+    vector->init();
+    vector->build_select0();
+    vector->build_select1();
     cur_node->freq = vector;
     // vector.JacobsonRank_build();
 
@@ -83,12 +86,12 @@ char WaveletTree::access(ULL i) {
 
     while (end != beg) {
         if((*CurN->freq)[CurI] == 0){
-            CurI = CurN->freq->naive_rank0(CurI);
+            CurI = CurN->freq->rank0(CurI);
             CurN = CurN->lchild;
             end = (beg + end)/2;
         }
         else {
-            CurI = CurN->freq->naive_rank1(CurI);
+            CurI = CurN->freq->rank1(CurI);
             CurN = CurN->rchild;
             beg = (beg + end)/2 + 1;
         }
@@ -105,12 +108,12 @@ ULL WaveletTree::rankc(char c, ULL i) {
     while(beg != end) {
         ULL mid = (beg + end)/2;
         if(c <= this->root->alphabet[mid]) {
-            CurI = CurN->freq->naive_rank0(CurI);
+            CurI = CurN->freq->rank0(CurI);
             CurN = CurN->lchild;
             end = mid;
         }
         else {
-            CurI = CurN->freq->naive_rank1(CurI);
+            CurI = CurN->freq->rank1(CurI);
             CurN = CurN->rchild;
             beg = mid + 1;
         }
@@ -131,11 +134,11 @@ ULL WaveletTree::selectc(char c,  size_t i, wtNode* node){
     ULL mid = end / 2;
     if(c <= node->alphabet[mid]) {
         i = this->selectc(c, i, node->lchild);
-        return node->freq->naive_select0(i);
+        return node->freq->select0(i);
     }
     else {
         i = this->selectc(c, i, node->rchild);
-        return node->freq->naive_select1(i);
+        return node->freq->select1(i);
     }
 }
 
