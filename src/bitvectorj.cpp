@@ -93,14 +93,14 @@ void BitVectorJ::init() {
 
     layer1_size = (size() + chunk1_size - 1) / chunk1_size + 1;
     chunk2_per_chunk1 = chunk1_size / chunk2_size;
-    layer2_size = chunk2_per_chunk1 * (layer1_size - 1);
+    layer2_size = chunk2_per_chunk1 * (layer1_size - 1) + 1;
 
     layer1 = (size_t *) malloc(layer1_size * sizeof(size_t));
     layer2 = (short *) malloc(layer2_size * sizeof(short));
 
     size_t layer1_counter = 0;
     size_t layer2_counter = 0;
-    for (size_t i = 0; i < layer2_size; i++) {
+    for (size_t i = 0; i < layer2_size - 1; i++) {
         if (i % chunk2_per_chunk1 == 0) {
             layer1[i / chunk2_per_chunk1] = layer1_counter;
             layer2_counter = 0;
@@ -111,8 +111,10 @@ void BitVectorJ::init() {
         layer2_counter += pop_count;
     }
     layer1[layer1_size - 1] = layer1_counter;
+    layer2[layer2_size - 1] = 0;
 
     init_status = true;
+
 }
 
 bool BitVectorJ::is_initialized() const {
@@ -133,7 +135,7 @@ size_t BitVectorJ::rank0(size_t i) const {
 size_t BitVectorJ::rank1(size_t i) const {
     size_t chunk1 = i / chunk1_size;
     size_t chunk2 = i / chunk2_size;
-    unsigned pop_count = std::__popcount(accessWord(chunk2, chunk2_size) & ~bitMask(i % chunk2_size));
+    unsigned pop_count = std::__popcount(accessWord(chunk2, chunk2_size) & ~bitMask(NBITS - (chunk2_size - i % chunk2_size)));
     return layer1[chunk1] + layer2[chunk2] + pop_count;
 }
 
