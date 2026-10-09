@@ -1,12 +1,19 @@
-/* These operations consider the exclusive rank and select operations previously implemented. That being said, the enclose operation returns the k+1 position of the 0 indexed bitvector position of the starting of a segment that contains that i'th position.
+/* 
+ * These operations consider the exclusive rank and select operations previously 
+ * implemented. That being said, the enclose operation returns the k+1 position of
+ * the 0 indexed BitVectorJ position of the starting of a segment that contains 
+ * that i'th position.
  * 
- * These behaviour makes so that the enclosing of tha last position of the BV return 1, not 0.
+ * These behaviour makes so that the enclosing of tha last position of the BV
+ * return 1, not 0.
  *
- * I suggest a remodel in this operations, comment that was made before my interview in this file, so that it returns the exact 0-indexed position of the BitVector.
+ * I suggest a remodel in this operations, comment that was made before my
+ * interview in this file, so that it returns the exact 0-indexed position of
+ * the BitVectorJ.
+ * 
  */
 
 #include "parentheses_tree.hpp"
-#include "bitvector.hpp"
 
 #include <iostream>
 #include <cassert>
@@ -14,7 +21,7 @@
 
 using namespace std;
 
-int main(int argc, char *argv[])
+int main()
 {
     ///--------------------------
     // Constructors for BP Tree |
@@ -26,9 +33,9 @@ int main(int argc, char *argv[])
     string s = "(()())";
     ParenthesesTree pt = ParenthesesTree(s);
 
-    // Creating the BP bitvector
+    // Creating the BP BitVectorJ
     unsigned long long size = 32;
-    BitVector B = BitVector(); 
+    BitVectorJ B = BitVectorJ(); 
 
     char pattern[] = "((())()(())(()())())()((())())()";
 
@@ -74,7 +81,7 @@ int main(int argc, char *argv[])
     //---------------------------
 
     // B1 == ()()() == 101010
-    BitVector B1 = BitVector();
+    BitVectorJ B1 = BitVectorJ();
     for(int i = 0; i < 3; i++){
 	    B1.append1();
 	    B1.append0();
@@ -83,14 +90,14 @@ int main(int argc, char *argv[])
     assert(T1.is_bp());
 
     // B2 = ((())) == 111000
-    BitVector B2 = BitVector();
+    BitVectorJ B2 = BitVectorJ();
     for(int i = 0; i < 3; i++)B2.append1();
     for(int i = 0; i < 3; i++)B2.append0();
     ParenthesesTree T2 = ParenthesesTree(B2);
     assert(T2.is_bp());
 
     // B3 = (()()() == 1101010
-    BitVector B3 = BitVector();
+    BitVectorJ B3 = BitVectorJ();
     B3.append1();
     for(int i = 0; i < 3; i++){
 	    B3.append1();
@@ -100,43 +107,43 @@ int main(int argc, char *argv[])
     assert(!T3.is_bp());
 
     // B4 == ) == 0
-    BitVector B4 = BitVector();
+    BitVectorJ B4 = BitVectorJ();
     B4.append0();
     ParenthesesTree T4 = ParenthesesTree(B4);
     assert(!T4.is_bp());
 
     // B5 = empty
-    BitVector B5 = BitVector();
+    BitVectorJ B5 = BitVectorJ();
     ParenthesesTree T5 = ParenthesesTree(B5);
     assert(!T5.is_bp());
 
     // B6 == ())(() == 100110
     string arantes = "100110";
-    BitVector B6 = BitVector(arantes);
+    BitVectorJ B6 = BitVectorJ(arantes);
     ParenthesesTree T6 = ParenthesesTree(B6);
     assert(!T6.is_bp());
 
     // B7 == )))))((((( == 0000011111
     string arantes2 = "0000011111";
-    BitVector B7 = BitVector(arantes2);
+    BitVectorJ B7 = BitVectorJ(arantes2);
     ParenthesesTree T7 = ParenthesesTree(B7);
     assert(!T7.is_bp());
 
     // B8 == ((()())((((()()()))())((()(())()())))()) 
     string a = "1110100111110101000100111011001010000100";
-    BitVector B8 = BitVector(a);
+    BitVectorJ B8 = BitVectorJ(a);
     ParenthesesTree T8 = ParenthesesTree(B8);
     assert(T8.is_bp());
 
     // B9 == () == 10
-    BitVector B9 = BitVector();
+    BitVectorJ B9 = BitVectorJ();
     B9.append1();
     B9.append0();
     ParenthesesTree T9 = ParenthesesTree(B9);
     assert(T9.is_bp());
 
     // B10 == ((( == 111
-    BitVector B10 = BitVector();
+    BitVectorJ B10 = BitVectorJ();
     B10.append1();
     B10.append1();
     B10.append1();
@@ -177,7 +184,7 @@ int main(int argc, char *argv[])
     //    Enclose Operation    |
     //---------------------------
 
-    // 1110100111110101000100111011001010000100 Original BitVector
+    // 1110100111110101000100111011001010000100 Original BitVectorJ
     //
     // ((()())((((()()()))())((()(())()())))()) Parenthesis Analogy
     //
@@ -186,7 +193,7 @@ int main(int argc, char *argv[])
     //
     // encloses(23) == 8
 
-    BitVector BV = BitVector();
+    BitVectorJ BV = BitVectorJ();
     BV.append1();
     BV.append1();
     BV.append1();
@@ -208,13 +215,13 @@ int main(int argc, char *argv[])
     assert(PT.enclose(15) == 0);
 
     string navarro = "1110100111110101000100111011001010000100";
-    BitVector gonzalo = BitVector(navarro);
+    BitVectorJ gonzalo = BitVectorJ(navarro);
     ParenthesesTree ng = ParenthesesTree(gonzalo);
 
     assert(ng.enclose(22) == 7);
 
     string fring = "110100";
-    BitVector h = BitVector(fring);
+    BitVectorJ h = BitVectorJ(fring);
     ParenthesesTree HH = ParenthesesTree(h);
     assert(HH.is_bp());
     //cout << "enclose(6) " << HH.enclose(6) << " excess(6) " << HH.excess(6) << endl;
@@ -277,7 +284,7 @@ int main(int argc, char *argv[])
     assert(PT1.leafrank(35) == 12);
 
     //---------------------------
-    //    leanum Operation    |
+    //     leafnum Operation    |
     //---------------------------
 
     //assert(PT1.leafnum(0) == 11);

@@ -4,6 +4,7 @@ add_library(compact
         huffman.cpp
         louds.cpp
         parentheses_tree.cpp
+        parentheses_tree_rmmq.cpp
         RRR.cpp
         huffman.cpp
         wt.cpp

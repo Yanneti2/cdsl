@@ -41,3 +41,8 @@ add_executable(uvector_tester
         uvector_tester.cpp
 )
 target_link_libraries(uvector_tester compact)
+
+add_executable(rmmq_tester
+        rmmq_tester.cpp
+)
+target_link_libraries(rmmq_tester compact)

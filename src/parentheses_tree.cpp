@@ -1,13 +1,14 @@
-#include "parentheses_tree.hpp"
-#include "general_tree.hpp"
-#include "binary_tree.hpp"
-#include "bitvector.hpp"
-#include "huffman.hpp"
-
 #include <stdlib.h>
 #include <iostream>
 #include <stdio.h>
 #include <vector>
+
+#include "parentheses_tree.hpp"
+#include "general_tree.hpp"
+#include "binary_tree.hpp"
+#include "bitvectorj.hpp"
+#include "bitvector.hpp"
+#include "huffman.hpp"
 
 using namespace std;
 
@@ -95,28 +96,28 @@ void ParenthesesTree::gt_build(Gtree::gNode* node){
 
 // Balanced Parentheses build for string == "(()())"
 ParenthesesTree::ParenthesesTree(string s){
-	this->T = BitVector();
 	for(unsigned long i=0; i<s.size(); i++){
 		if (s[i] == '(')T.append1();
 		else if (s[i] == ')')T.append0();
 	}
+    T.init();
 }
 
 // Constructor for a General Tree
 ParenthesesTree::ParenthesesTree(Gtree t){
-	this->T = BitVector();
 	gt_build(t.getRoot());
+    T.init();
 }
 
 // Constructor for a Binary Tree
 ParenthesesTree::ParenthesesTree(BinaryTree t){
-	this->T = BitVector();
 	bt_build(t.getRoot());
+    T.init();
 }
 
 // Constructor for a Bitvector
-ParenthesesTree::ParenthesesTree(BitVector& B){
-	this->T = B;
+ParenthesesTree::ParenthesesTree(BitVectorJ& B){
+    T.init();
 }
 
 /* 
@@ -125,7 +126,7 @@ ParenthesesTree::ParenthesesTree(BitVector& B){
 */
 unsigned long long ParenthesesTree::excess(size_t i)
 {
-    return 2 * this->T.naive_rank1(i) - i;
+    return 2 * this->T.rank1(i) - i;
 }
 
 // returns true if bp and false if not bp 
@@ -147,7 +148,7 @@ bool ParenthesesTree::is_bp(){
 
 // Searches for the greatest j < i | excess(B, j) == excess(B,i) + d
 // if not found, returns 0 (should i change this behavior?)
-unsigned long long ParenthesesTree::backward_search(size_t i, unsigned long long d)
+unsigned long long ParenthesesTree::backward_search(size_t i, long long d)
 {
     if (i == 0)
     {
@@ -167,7 +168,7 @@ unsigned long long ParenthesesTree::backward_search(size_t i, unsigned long long
     return 0;
 }
 
-unsigned long long ParenthesesTree::forward_search(size_t i, unsigned long long d) {
+unsigned long long ParenthesesTree::forward_search(size_t i, long long d) {
     //if (i == 0)
     //{
     //    return 0;
@@ -291,7 +292,7 @@ unsigned long long ParenthesesTree::enclose(unsigned long long i) {
 }
 
 // Returns the BitVector associated to this BP instance
-BitVector &ParenthesesTree::getBv() { return this->T; }
+BitVectorJ &ParenthesesTree::getBv() { return this->T; }
 
 /**
  * Returns the root node of the tree.
@@ -376,7 +377,7 @@ unsigned long long ParenthesesTree::childrank(size_t v) {
  * Returns the identifier of node v.
  */
 unsigned long long ParenthesesTree::nodemap(size_t v) {
-    return T.naive_rank1(v);
+    return T.rank1(v);
 }
 
 /**
@@ -384,7 +385,7 @@ unsigned long long ParenthesesTree::nodemap(size_t v) {
  */
 size_t ParenthesesTree::nodeselect(unsigned long long i) {
     // if (i == 0) return 0; This depends on select implementation
-    return T.naive_select1(i);
+    return T.select1(i);
 }
 
 /**
@@ -396,7 +397,7 @@ bool ParenthesesTree::isancestor(size_t u, size_t v) {
 }
 
 /**
- * If height(u) == height(v) + d and u is an ancestor of v, returns u.
+ * If depth(u) == Fd(v) + d and u is an ancestor of v, returns u.
  * Returns SIZE_MAX if u doesn't exist.
  */
 size_t ParenthesesTree::levelancestor(size_t v, unsigned long long d) {
@@ -434,24 +435,25 @@ bool ParenthesesTree::isleaf(size_t v){
 	return true;
 }
 
-// Computes M, the maximum excess in B[i, j]. Once we determine M, a method analogous to fwdsearch(i − 1, M) finds the first position where excess M occurs.
-size_t ParenthesesTree::rMq_naive(size_t i, size_t j){
-	if(i > j)return -1;
-	unsigned long long M = excess(i);
-	for(size_t h = i; h <= j; h++){
-		unsigned long long cur_excess = excess(h);
-		if(cur_excess > M)M = cur_excess;
-	}
-	size_t pos = i - 1;
-	while(1){
-		if(excess(pos) == M)return pos-1;
-		pos+=1;
-	}
-}
-
 // returns the index of the deepest node in the subtree of v
 size_t ParenthesesTree::deepestnode(size_t v){
-	return rMq_naive(v, close(v));
+	unsigned long long max_e = 0;
+	unsigned long long cur_e = 0;
+    size_t index = v;
+    unsigned long long end_index = close(v);
+    // cout << "end: " << end_index << endl;
+
+    for(size_t aux = v; aux < end_index; aux++){
+        cur_e += T[aux] ? 1:-1;
+        // cout << "excess: " << excess(aux) << endl;
+        // cout << "cur_e: " << cur_e << endl;
+        if (cur_e > max_e) {
+            max_e = cur_e;
+            index = aux;
+        }
+        // cout << "max_e : " << max_e << endl;
+    }
+    return index;
 }
 
 // returns the number os nodes inside a subtree with root = v counting v (inclusive) 
@@ -562,19 +564,9 @@ size_t ParenthesesTree::postorderselect(unsigned long long i){
 }
 
 unsigned long long ParenthesesTree::depth(size_t v){
-    if(v == 0 ){return -1;}
-    size_t root = this->root();
-
-    unsigned long long aux = 1;
-    size_t i;
-
-    for(i = root + 1; i < v - 1; i++){
-        aux += T[i];
-    }
-    
-    return 2*(aux) - v; 
+    return excess(v);
 }
 
 unsigned long long ParenthesesTree::height(size_t v){
-    return depth(deepestnode(v) - depth(v));
+    return (depth(deepestnode(v)) - depth(v));
 }
