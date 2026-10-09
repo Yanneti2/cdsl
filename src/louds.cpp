@@ -26,7 +26,7 @@ LOUDS::LOUDS(string s){
 	}
 }
 
-LOUDS::LOUDS(BitVector b) {
+LOUDS::LOUDS(BitVector& b) {
 	for(auto i = 0; i < b.size(); i++) {
 		if(b[i] == 0) T.append0();
 		else if(b[i] == 1) T.append1();
