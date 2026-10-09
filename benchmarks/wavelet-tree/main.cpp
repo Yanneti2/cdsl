@@ -92,12 +92,15 @@ int main(int argc, char* argv[])
             cur_op = 'r';
             if (!succinct || both)
             {
+                long ct = 0;
                 start = std::chrono::high_resolution_clock::now();
                 for (pair<size_t, size_t> i : rand_index)
                 {
-                    wt.rankc(i.second, i.first);
+                    ct += wt.rankc(i.second, i.first);
                 }
                 end = std::chrono::high_resolution_clock::now();
+
+                cout << "ct : " << (ct/rand_index.size()) << endl;
 
                 std::chrono::duration<double, nano> elapsed_time{end - start};
 
