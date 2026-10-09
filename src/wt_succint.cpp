@@ -1,5 +1,5 @@
 #include "bitvector.hpp"
-#include "wt_implicit.hpp"
+#include "wt_succint.hpp"
 
 #include <algorithm>
 #include <iostream>
