@@ -57,20 +57,6 @@ void Gtree::add_node(gNode* into, gNode* dummy){
 	into->Children.push_back(dummy);
 }
 
-Gtree *rand_tree(size_t n) {
-    Gtree *GT = new Gtree();
-    vector<Gtree::gNode *> nodes;
-    nodes.push_back(GT->getRoot());
-
-    for (size_t i = 0; i < n - 1; i++) {
-        Gtree::gNode *node = nodes[rand() % nodes.size()];
-        Gtree::gNode *new_node = GT->create_node();
-        GT->add_node(node, new_node);
-        nodes.push_back(new_node);
-    }
-    return GT;
-}
-
 // Prints the Tree in BFS order
 //void Tree::print_tree(Node* root){
 //	if (!root) return;
