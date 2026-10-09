@@ -1,5 +1,6 @@
 #include "parentheses-tree_benchmark.hpp"
 #include "interquartil-stats.hpp"
+#include "general_tree.hpp"
 
 #include <bits/stdc++.h>
 #include <stdexcept>
@@ -16,6 +17,7 @@ using namespace std;
 // Control variables :
 bool comparison = false;
 bool verbose = false;
+bool naive = false;
 int completion = 0;
 bool all = false;
 
@@ -25,13 +27,13 @@ bool enclose = false;
 
 // Verbose String control :
 map<string, string> vstrings = 
-    {
-        {"enclose" , "The following test results consist in the backwards search operation\n\n"},
-        {"close" , "This test consist in the forward search operation for all positions of size order of a randomly created PT BitVector in random order.\n\n"},
-    };
+{
+    {"enclose" , "The following test results consist in the backwards search operation\n\n"},
+    {"close" , "This test consist in the forward search operation for all positions of size order of a randomly created PT BitVector in random order.\n\n"},
+};
 
 map<string, map<int, Statistics>> results;  // rmmq
-map<string, map<int, Statistics>> nresults; // naive
+map<string, map<int, double>> nresults; // naive
 
 void generate_pt(string& s, int n)
 {
@@ -94,6 +96,8 @@ void parse_arguments(int argc, char *argv[])
 
         if (strcmp(curr_arg, "-v") == 0 || strcmp(curr_arg,"--verbose") == 0)
             verbose = true;
+        else if (strcmp(curr_arg, "-n") == 0 || strcmp(curr_arg, "--naive") == 0)
+            naive = true;
         else if (strcmp(curr_arg, "-cmp") == 0 || strcmp(curr_arg, "--compare") == 0)
             comparison = true;
         else if (strcmp(curr_arg, "-a") == 0 || strcmp(curr_arg, "--all") == 0)
@@ -108,6 +112,20 @@ void parse_arguments(int argc, char *argv[])
     }
 }
 
+Gtree *rand_tree(ULL n) {
+    Gtree *GT = new Gtree();
+    vector<Gtree::gNode *> nodes;
+    nodes.push_back(GT->getRoot());
+
+    for (ULL i = 0; i < n - 1; i++) {
+        Gtree::gNode *node = nodes[rand() % nodes.size()];
+        Gtree::gNode *new_node = GT->create_node();
+        GT->add_node(node, new_node);
+        nodes.push_back(new_node);
+    }
+    return GT;
+}
+
 int main(int argc, char *argv[])
 {
     if (argc == 1) throw invalid_argument("No benchmark flags were provided, check this folder's README.md for more informations.");
@@ -118,7 +136,7 @@ int main(int argc, char *argv[])
 
     if (verbose)
     {
-        cout << "All the following tests were computed on order 4-8 BitVector size :" << endl;
+        cout << "All the following tests were computed on order 4-8 BitVector size for rmMq operations and order 4-6 BitVector size for naive operations :" << endl;
         cout << "[";
     }
 
@@ -128,10 +146,13 @@ int main(int argc, char *argv[])
         for(int i = 0; i < order; i++) order_num *= 10;
 
         string cur_op;
-        string valid_pt = "";
-        generate_pt(valid_pt, order_num);
 
-        ParenthesesTree *PT = new ParenthesesTree(valid_pt);
+        Gtree* gt = rand_tree(order_num);
+
+        // string valid_pt = "";
+        // generate_pt(valid_pt, order_num);
+
+        ParenthesesTree *PT = new ParenthesesTree(*gt);
         BitVectorJ Bv = PT->getBv();
         ParenthesesTreeRMMQ *PTRMMQ = new ParenthesesTreeRMMQ(*PT);
 
@@ -148,69 +169,48 @@ int main(int argc, char *argv[])
             vector<ULL> endex;
             for (ULL i : rand_indexes) if (i!=0 && Bv[i] == 1) endex.push_back(i);
 
-            if (comparison && (order <= 6))
+            if (order <= 6 && (naive || comparison))
             {
-                for (int w = 0; w < MIN_WARMUP_SAMPLES; w++)
-                {
-                    run_naive_benchmark(*PT,order,cur_op,endex);
-                }
-                int nt = 0;
-                do
-                {
-                    vector<double> nsamples;
+                vector<double> nsamples;
 
-                    for(int i = 0; i < MIN_SAMPLES; i++)
-                        nsamples.push_back(run_naive_benchmark(*PT,order,cur_op,endex));
+                for(int i = 0; i < MIN_WARMUP_SAMPLES; i++)
+                    nsamples.push_back(run_naive_benchmark(*PT,order,cur_op,endex));
 
-                    if (nsamples.empty()) {
-                        nt+=1;
-                        continue;
-                    }
-
-                    Statistics sn = calculate_interquartil(nsamples);
-                    if (sn.is_valid) {
-                        nresults["enclose"].insert({order, sn});
-                        break;
-                    }
-
-                    nt += 1;
-                }
-                while (nt < MAX_ATTEMPTS);
-
-                if (nt == MAX_ATTEMPTS)
-                    throw invalid_argument("Naive enclose operation failed fot interquartile metrics."); 
+                nresults["enclose"].insert({order, get_median(nsamples)});
                 
                 if (verbose) cout << "#";
             }
-            for (int w = 0; w < MIN_WARMUP_SAMPLES; w++)
+            if (!naive || comparison)
             {
-                run_rmmq_benchmark(*PTRMMQ,order,cur_op,endex);
-            }
-            int t = 0;
+                for (int w = 0; w < MIN_WARMUP_SAMPLES; w++)
+                {
+                    run_rmmq_benchmark(*PTRMMQ,order,cur_op,endex);
+                }
+                int t = 0;
 
-            do
-            {
-                vector<double> samples;
+                do
+                {
+                    vector<double> samples;
 
-                for(int i = 0; i < MIN_SAMPLES; i++)
-                    samples.push_back(run_rmmq_benchmark(*PTRMMQ,order,cur_op,endex));
+                    for(int i = 0; i < MIN_SAMPLES; i++)
+                        samples.push_back(run_rmmq_benchmark(*PTRMMQ,order,cur_op,endex));
 
-                if (samples.empty()){
+                    if (samples.empty()){
+                        t += 1;
+                        continue;
+                    }
+
+                    Statistics s = calculate_interquartil(samples);
+                    if (s.is_valid) {
+                        results["enclose"].insert({order, s});
+                        break;
+                    }
                     t += 1;
-                    continue;
-                }
+                } while (t < MAX_ATTEMPTS);
 
-                Statistics s = calculate_interquartil(samples);
-                if (s.is_valid) {
-                    results["enclose"].insert({order, s});
-                    break;
-                }
-                t += 1;
-            } while (t < MAX_ATTEMPTS);
-
-            if (t == MAX_ATTEMPTS)
-                throw invalid_argument("RmMq enclose operation failed fot interquartile metrics."); 
-            
+                if (t == MAX_ATTEMPTS)
+                    throw invalid_argument("RmMq enclose operation failed fot interquartile metrics."); 
+            }
             if (verbose) cout << "#";
         }
         if (all || closeop)
@@ -223,120 +223,96 @@ int main(int argc, char *argv[])
 
             for (ULL vindex: rand_indexes) {if (Bv[vindex] == 1) cindex.push_back(vindex);}
 
-            if (comparison && (order <= 6))
+            if (order <= 6 && (naive || comparison))
+            {
+                vector<double> nsamples;
+
+                for(int i = 0; i < MIN_WARMUP_SAMPLES; i++)
+                    nsamples.push_back(run_naive_benchmark(*PT,order,cur_op,cindex));
+
+                nresults["close"].insert({order, get_median(nsamples)});
+
+                if (verbose) cout << "#";
+            }
+            if (!naive || comparison)
             {
                 for (int w = 0; w < MIN_WARMUP_SAMPLES; w++)
                 {
-                    run_naive_benchmark(*PT,order,cur_op,cindex);
+                    run_rmmq_benchmark(*PTRMMQ,order,cur_op,cindex);
                 }
-                int nt = 0;
+                int t = 0;
+
                 do
                 {
-                    vector<double> nsamples;
+                    vector<double> samples;
 
                     for(int i = 0; i < MIN_SAMPLES; i++)
-                        nsamples.push_back(run_naive_benchmark(*PT,order,cur_op,cindex));
+                        samples.push_back(run_rmmq_benchmark(*PTRMMQ,order,cur_op,cindex));
 
-                    if (nsamples.empty()) {
-                        nt+=1;
+                    if (samples.empty()){
+                        t += 1;
                         continue;
                     }
 
-                    Statistics sn = calculate_interquartil(nsamples);
-                    if (sn.is_valid) {
-                        nresults["close"].insert({order, sn});
+                    Statistics s = calculate_interquartil(samples);
+                    if (s.is_valid) {
+                        results["close"].insert({order, s});
                         break;
                     }
-
-                    nt += 1;
-                }
-                while (nt < MAX_ATTEMPTS);
-
-                if (nt == MAX_ATTEMPTS)
-                    throw invalid_argument("Naive close operation failed fot interquartile metrics.");
-                    
-                if (verbose) cout << "#";
-            }
-            for (int w = 0; w < MIN_WARMUP_SAMPLES; w++)
-            {
-                run_rmmq_benchmark(*PTRMMQ,order,cur_op,cindex);
-            }
-            int t = 0;
-
-            do
-            {
-                vector<double> samples;
-
-                for(int i = 0; i < MIN_SAMPLES; i++)
-                    samples.push_back(run_rmmq_benchmark(*PTRMMQ,order,cur_op,cindex));
-
-                if (samples.empty()){
                     t += 1;
-                    continue;
-                }
+                } while (t < MAX_ATTEMPTS);
 
-                Statistics s = calculate_interquartil(samples);
-                if (s.is_valid) {
-                    results["close"].insert({order, s});
-                    break;
-                }
-                t += 1;
-            } while (t < MAX_ATTEMPTS);
-
-            if (t == MAX_ATTEMPTS)
-                throw invalid_argument("RmMq enclose operation failed fot interquartile metrics."); 
-
+                if (t == MAX_ATTEMPTS)
+                    throw invalid_argument("RmMq enclose operation failed fot interquartile metrics."); 
+            }
             if (verbose) cout << "#";
         }
+        // delete gt;
         delete PT;
         delete PTRMMQ;
     }
     if (verbose) cout << "]\n\n";
 
-    for (auto el : results){
-        if (verbose) cout << vstrings[el.first];
-        for (auto res : el.second)
+    if (!naive || comparison)
+    {
+        for (auto el : results)
         {
-            if (verbose){
-                cout << "RmMq operations for order " << res.first << " :" << endl;
-                cout << "==============================" << endl;
-                cout << "q1: " << res.second.q1 << endl;
-                cout << "q2: " << res.second.median << endl;
-                cout << "q3: " << res.second.q3 << endl;
-                cout << "iqr: " << res.second.iqr << endl;
-                cout << "lower bound: " << res.second.lower_bound << endl;
-                cout << "upper bound: " << res.second.upper_bound << endl;
-                cout << "mean: " << res.second.mean << endl;
-                cout << "standard deviation: " << res.second.standard_deviation << endl;
-                cout << "coefficient_variation: " << res.second.coefficient_variation << endl;
-                cout << "valid samples: " << res.second.valid.size() << endl;
-                cout << "outlier samples: " << res.second.outliers.size() << endl;
-            } else {
-                cout << res.first << ';' << res.second.median;
-            }
-
-            if (comparison)
+            if (verbose) cout << vstrings[el.first];
+            for (auto res : el.second)
             {
-                if (verbose)
-                {
-                    cout << "Naive operations for order " << res.first << " :" << endl;
+                if(verbose) cout << "RmMq operations for order " << res.first << " :" << endl;
+                else cout << res.first;
+
+                if (verbose){
                     cout << "==============================" << endl;
-                    cout << "q1: " << nresults[el.first][res.first].q1 << endl;
-                    cout << "q2: " << nresults[el.first][res.first].median << endl;
-                    cout << "q3: " << nresults[el.first][res.first].q3 << endl;
-                    cout << "iqr: " << nresults[el.first][res.first].iqr << endl;
-                    cout << "lower bound: " << nresults[el.first][res.first].lower_bound << endl;
-                    cout << "upper bound: " << nresults[el.first][res.first].upper_bound << endl;
-                    cout << "mean: " << nresults[el.first][res.first].mean << endl;
-                    cout << "standard deviation: " << nresults[el.first][res.first].standard_deviation << endl;
-                    cout << "coefficient_variation: " << nresults[el.first][res.first].coefficient_variation << endl;
-                    cout << "valid samples: " << nresults[el.first][res.first].valid.size() << endl;
-                    cout << "outlier samples: " << nresults[el.first][res.first].outliers.size() << endl;
+                    cout << "q1: " << res.second.q1 << endl;
+                    cout << "q2: " << res.second.median << endl;
+                    cout << "q3: " << res.second.q3 << endl;
+                    cout << "iqr: " << res.second.iqr << endl;
+                    cout << "lower bound: " << res.second.lower_bound << endl;
+                    cout << "upper bound: " << res.second.upper_bound << endl;
+                    cout << "mean: " << res.second.mean << endl;
+                    cout << "standard deviation: " << res.second.standard_deviation << endl;
+                    cout << "coefficient_variation: " << res.second.coefficient_variation << endl;
+                    cout << "valid samples: " << res.second.valid.size() << endl;
+                    cout << "outlier samples: " << res.second.outliers.size() << endl;
                 } else {
-                    cout << ';' << nresults[el.first][res.first].median;
+                    cout << ';' << res.second.median;
                 }
+                cout << "\n\n";
             }
             cout << "\n";
+        }
+    }
+    if (naive || comparison)
+    {
+        for (auto el: nresults)
+        {
+            if (verbose) cout << vstrings[el.first];
+
+            for (auto res: el.second)
+                cout << res.first <<  ';' << nresults[el.first][res.first] << "\n";
+            cout << "\n\n";
         }
         cout << "\n\n";
     }

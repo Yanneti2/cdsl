@@ -26,9 +26,9 @@ using namespace std;
 const double MAX_COEFFICIENT_VARIATION = 0.10;
 const double MAX_OUTLIER_RATIO = 0.20;
 const int MIN_WARMUP_SAMPLES = 10;
-const int MIN_VALID_SAMPLES = 25; // 6/7 ?
+const int MIN_VALID_SAMPLES = 25;
 const int MAX_ATTEMPTS = 5;
-const int MIN_SAMPLES = 30; // -> 10?
+const int MIN_SAMPLES = 30;
 
 struct Statistics {
     double q1;
