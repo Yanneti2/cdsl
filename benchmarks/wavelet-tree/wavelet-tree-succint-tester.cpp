@@ -1,4 +1,4 @@
-#include "wt.hpp"
+#include "wt_succint.hpp"
 
 #include <iostream>
 #include <chrono>
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
             rand_index[i] = {i, rand() % 128};
         }
         shuffle(rand_index);
-        WaveletTree T(s);
+        WaveletTreeSuccint T(s);
 
         std::chrono::high_resolution_clock::time_point start;
         std::chrono::high_resolution_clock::time_point end;
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
         if (args & RANKC) {
             start = std::chrono::high_resolution_clock::now();
             for (pair<size_t, size_t> i : rand_index) {
-                T.rankc(i.second, i.first);
+                T.rank(i.second, i.first);
             }
             end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double, nano> elapsed_time{end - start};
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
         if (args & SELECTC) {
             start = std::chrono::high_resolution_clock::now();
             for (pair<size_t, size_t> i : rand_index) {
-                T.selectc(i.second, i.first, T.getRoot());
+                T.select(i.second, i.first);
             }
             end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double, nano> elapsed_time{end - start};
