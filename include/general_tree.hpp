@@ -26,6 +26,7 @@ class Gtree{
 		vector<gNode*> getChildren();
 
 		bool isEmpty(gNode* root);
+		Gtree* rand_tree(size_t n);
 
 	private:
 		gNode* root;

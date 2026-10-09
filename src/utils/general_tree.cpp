@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <queue>
-
+#include <cstdlib>
 using namespace std;
 
 // builds a new Tree initializating the root

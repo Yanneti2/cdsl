@@ -27,9 +27,9 @@ LOUDS::LOUDS(string s){
 }
 
 LOUDS::LOUDS(BitVector b) {
-	for(auto i = 0; i < b._size(); i++) {
+	for(auto i = 0; i < b.size(); i++) {
 		if(b[i] == 0) T.append0();
-		else T.append1();
+		else if(b[i] == 1) T.append1();
 	}
 }
 
@@ -149,7 +149,7 @@ size_t LOUDS::succ1(size_t v) {
  *
  */
 size_t LOUDS::pred0(size_t v) {
-    return T.naive_select0(naive_rank0(v + 1)) - 1;
+    return T.naive_select0(T.naive_rank0(v + 1)) - 1;
 }
 
 /**
@@ -179,7 +179,7 @@ size_t LOUDS::fchild(size_t v) {
  */
 size_t LOUDS::lchild(size_t v) {
 	if (!T[v]) return -1;
-    return T.naive_select0(T.naive_rank1(v + 1) + 1) - 2;
+    return T.naive_select0(T.naive_rank1(succ0(v)));
 }
 
 /**

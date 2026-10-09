@@ -16,6 +16,7 @@ public:
     LOUDS(string s);
     LOUDS(Gtree *G);
     LOUDS(BinaryTree *BT);
+    LOUDS(BitVector b);
 
     bool is_louds(string s);
     bool is_louds();

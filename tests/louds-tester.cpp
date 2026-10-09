@@ -1,7 +1,9 @@
 #include "general_tree.hpp"
 #include "binary_tree.hpp"
 #include "louds.hpp"
-
+#include "general_tree.hpp"
+// fiquei de gerar tree aleatoria, refazer last child e assert nas f 
+// cria um vetor, colocar raiz no vetor e sortear alguma index do vetor pra colocar um filho no nó q tiver nessa posição e colocar esse filho no vetor
 #include <iostream>
 #include <cassert>
 #include <string>
@@ -65,6 +67,9 @@ int main (int argc, char *argv[])
 	l2.print();
 	delete t1;
 	
+	unsigned long long n = 1000;
+	Gtree* tree = rand_tree(n)
+
 	std::cout <<
 	l1.fchild(2) <<
 	l1.fchild(3) <<
