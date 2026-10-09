@@ -12,11 +12,11 @@ private:
     unsigned chunk2_size;
     unsigned chunk2_per_chunk1;
 
-    size_t *layer1;
-    short *layer2;
+    size_t *layer1 = nullptr;
+    short *layer2 = nullptr;
 
-    size_t *select_vector0;
-    size_t *select_vector1;
+    size_t *select_vector0 = nullptr;
+    size_t *select_vector1 = nullptr;
     unsigned select_j;
 
     bool init_status = false;
