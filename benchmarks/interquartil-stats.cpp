@@ -28,9 +28,9 @@ double get_median(const vector<double>& arr)
     size_t mid = size/2;
 
     if (size % 2 != 0) {
-        return arr[size/2];
+        return arr[mid];
     } else {
-        return (arr[size/2 - 1] + arr[size/2]) / 2.0;
+        return (arr[mid - 1] + arr[mid]) / 2.0;
     }
 }
 
