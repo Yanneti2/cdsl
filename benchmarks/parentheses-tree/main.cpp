@@ -32,8 +32,8 @@ map<string, string> vstrings =
     {"close" , "This test consist in the forward search operation for all positions of size order of a randomly created PT BitVector in random order.\n\n"},
 };
 
-map<string, map<int, Statistics>> results;  // rmmq
-map<string, map<int, double>> nresults; // naive
+map<string, map<ULL, Statistics>> results;  // rmmq
+map<string, map<ULL, double>> nresults; // naive
 
 void generate_pt(string& s, int n)
 {
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
                 for(int i = 0; i < MIN_WARMUP_SAMPLES; i++)
                     nsamples.push_back(run_naive_benchmark(*PT,order,cur_op,endex));
 
-                nresults["enclose"].insert({order, get_median(nsamples)});
+                nresults["enclose"].insert({order_num, get_median(nsamples)});
                 
                 if (verbose) cout << "#";
             }
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 
                     Statistics s = calculate_interquartil(samples);
                     if (s.is_valid) {
-                        results["enclose"].insert({order, s});
+                        results["enclose"].insert({order_num, s});
                         break;
                     }
                     t += 1;
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
                 for(int i = 0; i < MIN_WARMUP_SAMPLES; i++)
                     nsamples.push_back(run_naive_benchmark(*PT,order,cur_op,cindex));
 
-                nresults["close"].insert({order, get_median(nsamples)});
+                nresults["close"].insert({order_num, get_median(nsamples)});
 
                 if (verbose) cout << "#";
             }
@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
 
                     Statistics s = calculate_interquartil(samples);
                     if (s.is_valid) {
-                        results["close"].insert({order, s});
+                        results["close"].insert({order_num, s});
                         break;
                     }
                     t += 1;
@@ -272,6 +272,7 @@ int main(int argc, char *argv[])
         delete PTRMMQ;
     }
     if (verbose) cout << "]\n\n";
+    else cout << "\"Order\"" << ";" << "\"Time\"" << endl;
 
     if (!naive || comparison)
     {
@@ -299,7 +300,7 @@ int main(int argc, char *argv[])
                 } else {
                     cout << ';' << res.second.median;
                 }
-                cout << "\n\n";
+                cout << "\n";
             }
             cout << "\n";
         }
@@ -312,7 +313,7 @@ int main(int argc, char *argv[])
 
             for (auto res: el.second)
                 cout << res.first <<  ';' << nresults[el.first][res.first] << "\n";
-            cout << "\n\n";
+            cout << "\n";
         }
         cout << "\n\n";
     }
