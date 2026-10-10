@@ -105,8 +105,8 @@ int Permutation::power(int i, int n)
     size_t j = tau_inverse(i);
 
     size_t r = cycles.naive_rank1(j);
-    size_t p = (r == 0) ? 0 : cycles.naive_select1(r) + 1;
-    size_t s = cycles.naive_select1(r + 1) + 1;
+    size_t p = cycles.naive_select1(r);
+    size_t s = cycles.naive_select1(r + 1);
     long long len = s - p;
 
 
