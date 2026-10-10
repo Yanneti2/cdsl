@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
                 }
                 end = std::chrono::high_resolution_clock::now();
 
-                cout << "ct : " << (ct/rand_index.size()) << endl;
+                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
 
                 std::chrono::duration<double, nano> elapsed_time{end - start};
 
@@ -108,12 +108,15 @@ int main(int argc, char* argv[])
             }
             if (succinct || both)
             {
+                long ct = 0;
                 start = std::chrono::high_resolution_clock::now();
                 for (pair<size_t, size_t> i : rand_index)
                 {
-                    wts.rank(i.second, i.first);
+                    ct += wts.rank(i.second, i.first);
                 }
                 end = std::chrono::high_resolution_clock::now();
+
+                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
 
                 std::chrono::duration<double, nano> elapsed_time{end - start};
 
@@ -125,11 +128,14 @@ int main(int argc, char* argv[])
             cur_op = 's';
             if(!succinct || both)
             {
+                long ct = 0;
                 start = std::chrono::high_resolution_clock::now();
                 for (pair<size_t, size_t> i : rand_index) {
-                    wt.selectc(i.second, i.first, wt.getRoot());
+                    ct += wt.selectc(i.second, i.first, wt.getRoot());
                 }
                 end = std::chrono::high_resolution_clock::now();
+
+                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
 
                 std::chrono::duration<double, nano> elapsed_time{end - start};
 
@@ -137,11 +143,14 @@ int main(int argc, char* argv[])
             }
             if (succinct || both)
             {
+                long ct = 0;
                 start = std::chrono::high_resolution_clock::now();
                 for (pair<size_t, size_t> i : rand_index) {
-                    wts.select(i.second, i.first);
+                    ct += wts.select(i.second, i.first);
                 }
                 end = std::chrono::high_resolution_clock::now();
+
+                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
 
                 std::chrono::duration<double, nano> elapsed_time{end - start};
 
@@ -153,11 +162,14 @@ int main(int argc, char* argv[])
             cur_op = 'a';
             if(!succinct || both)
             {
+                long ct = 0;
                 start = std::chrono::high_resolution_clock::now();
                 for (pair<size_t, size_t> i : rand_index) {
-                    wt.access(i.second);
+                    ct += wt.access(i.second);
                 }
                 end = std::chrono::high_resolution_clock::now();
+
+                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
 
                 std::chrono::duration<double, nano> elapsed_time{end - start};
 
@@ -165,11 +177,14 @@ int main(int argc, char* argv[])
             }
             if (succinct || both)
             {
+                long ct = 0;
                 start = std::chrono::high_resolution_clock::now();
                 for (pair<size_t, size_t> i : rand_index) {
-                    wts.access(i.second);
+                    ct += wts.access(i.second);
                 }
                 end = std::chrono::high_resolution_clock::now();
+
+                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
 
                 std::chrono::duration<double, nano> elapsed_time{end - start};
 
