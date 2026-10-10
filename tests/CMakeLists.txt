@@ -52,3 +52,4 @@ add_executable(permutation_tester
     permutation_tester.cpp
 )
 target_link_libraries(permutation_tester compact)
+add_test(NAME TestPermutations COMMAND permutation_tester)
