@@ -13,8 +13,6 @@
 #define RANKC   (1 << 1)
 #define SELECTC (1 << 2)
 
-#define ULL unsigned long long;
-
 bool succinct = false;
 bool verbose = false;
 bool both = false;
