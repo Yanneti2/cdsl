@@ -1,20 +1,13 @@
 # Benchmarking on Parentheses_Tree (bp) structure
 
+For more information on this implementation, access: [parentheses_tree doc](https://github.com/Yanneti2/cdsl/wiki/Gonzalo-8.2-Balanced_Parentheses).
 
+## Operations Tested
 
-## Runtime Flags
-
-In the following table, there are documented the functions benchmarked, its respectifull full and alternative flags for file execution and generic return type expected. By default, the benchmark tests run the functions with ParenthesesTreeRMMQ class for each and every position of the PT's `BitVector` in random order and its output is structured in a `.csv` type, with: `order`;`average_op_time` per line.
-
-| Function | Flag | Alt Flag | Description |
+| Operation | Flag | Alt Flag | Return type |
 |---|---|---|---|
-| `None` | `--verbose` | `-v` | How the functions passed by this flags were tested |
-| `*` | `--compare`| `-cmp` | Run the test with the naive and rmMq structures, comparatively |
-| `*` | `--all` | `-a` | Run the tests to all the functions in the ParenthesesTree implementation |
-| `*` | `--naive` | `-n` | Run the test to all function in a naive ParenthesesTree implementation |
 | `enclose(ULL i)` | `--enclose` | `-en` | Returns a ULL index |
 | `close(ULL i)` | `--close` | `-cl` | Returns a ULL index |
-
 <!-- | `ParenthesesTree`(`string` || `BitVector&`) | `--constructor` || `--builders` | `-c` || `-b` | ParenthesesTree class initilizers |
 | `is_bp()` | `--valid` | `isbp` | Returns true if valid ParenthesesTree |
 | `backward_search(size_t i, unsigned long long d)` | `--backwardssearch` | `bwds` | Returns a ULL index |
@@ -30,14 +23,21 @@ In the following table, there are documented the functions benchmarked, its resp
 | `isancestor(size_t u, size_t v)` | `--isancestor` | `ia` | Returns true if ancestor |
 | `deepestnode(size_t v)` | `--deepestnode` | `dpn` | Returns a size_t id of a node | -->
 
-If no flags were to be used to execute this executable, it should appear an error:
+## Runtime Flags
+
+By default, the benchmark tests run the functions with ParenthesesTreeRMMQ class for each and every position of the PTRMMQ's `BitVector` in random order and its output is structured in a `.csv` type, with: `order`;`average_op_time` per line.
+
+| Flag | Alt Flag | Description |
+|---|---|---|
+| `--verbose` | `-v` | How the functions passed by this flags were tested plus verbose output |
+| `--compare`| `-cmp` | Run the test with the naive and rmMq structures, making comparison easier |
+| `--all` | `-a` | Run the tests to all the functions for the ParenthesesTreeRMMQ implementation |
+| `--naive` | `-n` | Run the test to all function for the naive ParenthesesTree implementation |
+
+If no flags were to be used to execute this executable, it should appear the error:
 
 ```
 terminate called after throwing an instance of 'std::invalid_argument'
   what():  No benchmark flags were provided, check this folder's README.md for more informations.
 Aborted
 ```
-
-## Notes
-
-for more information on this implementation, access: [parentheses_tree doc](https://github.com/Yanneti2/cdsl/wiki/Gonzalo-8.2-Balanced_Parentheses)
