@@ -46,3 +46,10 @@ add_executable(rmmq_tester
         rmmq_tester.cpp
 )
 target_link_libraries(rmmq_tester compact)
+
+
+add_executable(permutation_tester 
+    permutation_tester.cpp
+)
+target_link_libraries(permutation_tester compact)
+add_test(NAME TestPermutations COMMAND permutation_tester)
