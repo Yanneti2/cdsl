@@ -1,3 +1,5 @@
+#include "wavelet-tree_benchmark.hpp"
+#include "interquartil-stats.hpp"
 #include "wt_succint.hpp"
 #include "wt.hpp"
 
@@ -10,6 +12,8 @@
 #define ACCESS  (1 << 0)
 #define RANKC   (1 << 1)
 #define SELECTC (1 << 2)
+
+#define ULL unsigned long long;
 
 bool succinct = false;
 bool verbose = false;
@@ -53,8 +57,8 @@ void shuffle(vector<pair<size_t, size_t>> &V) {
 }
 
 // {"access", {10000 : 54.32}}
-map<char, map<unsigned long long, double>> wtres;
-map<char, map<unsigned long long, double>> wtsres;
+map<char, map<unsigned long long, Statistics>> wtres;
+map<char, map<unsigned long long, Statistics>> wtsres;
 
 int main(int argc, char* argv[])
 {
@@ -84,43 +88,68 @@ int main(int argc, char* argv[])
         WaveletTree wt(s);
         WaveletTreeSuccint wts(s);
 
-        std::chrono::high_resolution_clock::time_point start;
-        std::chrono::high_resolution_clock::time_point end;
-        
         if (all || (args & RANKC))
         {
             cur_op = 'r';
             if (!succinct || both)
             {
-                long ct = 0;
-                start = std::chrono::high_resolution_clock::now();
-                for (pair<size_t, size_t> i : rand_index)
+                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
+                    run_wt_benchmark(wt, order, cur_op, rand_index);
+
+                int t = 0;
+                do
                 {
-                    ct += wt.rankc(i.second, i.first);
-                }
-                end = std::chrono::high_resolution_clock::now();
+                    vector<double> samples;
 
-                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
+                    for (int i = 0; i < MIN_SAMPLES; i++)
+                        samples.push_back(run_wt_benchmark(wt, order, cur_op, rand_index));
 
-                std::chrono::duration<double, nano> elapsed_time{end - start};
+                    if (samples.empty()){
+                        t += 1;
+                        continue;
+                    }
 
-                wtres[cur_op].insert({n, (elapsed_time.count() / n)});
+                    Statistics s = calculate_interquartil(samples);
+                    if (s.is_valid)
+                    {
+                        wtsres[cur_op].insert({n, s});
+                        break;
+                    }
+                    t += 1;
+                } while (t < MAX_ATTEMPTS);
+
+                if (t == MAX_ATTEMPTS)
+                    throw invalid_argument("WT rankc operation failed fot interquartile metrics."); 
             }
             if (succinct || both)
             {
-                long ct = 0;
-                start = std::chrono::high_resolution_clock::now();
-                for (pair<size_t, size_t> i : rand_index)
+                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
+                    run_wts_benchmark(wts, order, cur_op, rand_index);
+
+                int t = 0;
+                do
                 {
-                    ct += wts.rank(i.second, i.first);
-                }
-                end = std::chrono::high_resolution_clock::now();
+                    vector<double> samples;
 
-                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
+                    for (int i = 0; i < MIN_SAMPLES; i++)
+                        samples.push_back(run_wts_benchmark(wts, order, cur_op, rand_index));
 
-                std::chrono::duration<double, nano> elapsed_time{end - start};
+                    if (samples.empty()){
+                        t += 1;
+                        continue;
+                    }
 
-                wtsres[cur_op].insert({n, (elapsed_time.count()/n)});
+                    Statistics s = calculate_interquartil(samples);
+                    if (s.is_valid)
+                    {
+                        wtres[cur_op].insert({n, s});
+                        break;
+                    }
+                    t += 1;
+                } while (t < MAX_ATTEMPTS);
+
+                if (t == MAX_ATTEMPTS)
+                    throw invalid_argument("WTS rank operation failed for interquartile metrics."); 
             }
         }
         if (all || (args & SELECTC))
@@ -128,33 +157,63 @@ int main(int argc, char* argv[])
             cur_op = 's';
             if(!succinct || both)
             {
-                long ct = 0;
-                start = std::chrono::high_resolution_clock::now();
-                for (pair<size_t, size_t> i : rand_index) {
-                    ct += wt.selectc(i.second, i.first, wt.getRoot());
-                }
-                end = std::chrono::high_resolution_clock::now();
+                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
+                    run_wt_benchmark(wt, order, cur_op, rand_index);
 
-                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
+                int t = 0;
+                do
+                {
+                    vector<double> samples;
 
-                std::chrono::duration<double, nano> elapsed_time{end - start};
+                    for (int i = 0; i < MIN_SAMPLES; i++)
+                        samples.push_back(run_wt_benchmark(wt, order, cur_op, rand_index));
 
-                wtres[cur_op].insert({n, (elapsed_time.count()/n)});
+                    if (samples.empty()){
+                        t += 1;
+                        continue;
+                    }
+
+                    Statistics s = calculate_interquartil(samples);
+                    if (s.is_valid)
+                    {
+                        wtres[cur_op].insert({n, s});
+                        break;
+                    }
+                    t += 1;
+                } while (t < MAX_ATTEMPTS);
+
+                if (t == MAX_ATTEMPTS)
+                    throw invalid_argument("WT selectc operation failed for interquartile metrics."); 
             }
             if (succinct || both)
             {
-                long ct = 0;
-                start = std::chrono::high_resolution_clock::now();
-                for (pair<size_t, size_t> i : rand_index) {
-                    ct += wts.select(i.second, i.first);
-                }
-                end = std::chrono::high_resolution_clock::now();
+                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
+                    run_wts_benchmark(wts, order, cur_op, rand_index);
 
-                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
+                int t = 0;
+                do
+                {
+                    vector<double> samples;
 
-                std::chrono::duration<double, nano> elapsed_time{end - start};
+                    for (int i = 0; i < MIN_SAMPLES; i++)
+                        samples.push_back(run_wts_benchmark(wts, order, cur_op, rand_index));
 
-                wtsres[cur_op].insert({n, (elapsed_time.count()/n)});
+                    if (samples.empty()){
+                        t += 1;
+                        continue;
+                    }
+
+                    Statistics s = calculate_interquartil(samples);
+                    if (s.is_valid)
+                    {
+                        wtsres[cur_op].insert({n, s});
+                        break;
+                    }
+                    t += 1;
+                } while (t < MAX_ATTEMPTS);
+
+                if (t == MAX_ATTEMPTS)
+                    throw invalid_argument("WTS select operation failed for interquartile metrics."); 
             }
         }
         if (all || (args & ACCESS))
@@ -162,36 +221,67 @@ int main(int argc, char* argv[])
             cur_op = 'a';
             if(!succinct || both)
             {
-                long ct = 0;
-                start = std::chrono::high_resolution_clock::now();
-                for (pair<size_t, size_t> i : rand_index) {
-                    ct += wt.access(i.second);
-                }
-                end = std::chrono::high_resolution_clock::now();
+                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
+                    run_wt_benchmark(wt, order, cur_op, rand_index);
 
-                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
+                int t = 0;
+                do
+                {
+                    vector<double> samples;
 
-                std::chrono::duration<double, nano> elapsed_time{end - start};
+                    for (int i = 0; i < MIN_SAMPLES; i++)
+                        samples.push_back(run_wt_benchmark(wt, order, cur_op, rand_index));
 
-                wtres[cur_op].insert({n, (elapsed_time.count()/n)});
+                    if (samples.empty()){
+                        t += 1;
+                        continue;
+                    }
+
+                    Statistics s = calculate_interquartil(samples);
+                    if (s.is_valid)
+                    {
+                        wtres[cur_op].insert({n, s});
+                        break;
+                    }
+                    t += 1;
+                } while (t < MAX_ATTEMPTS);
+
+                if (t == MAX_ATTEMPTS)
+                    throw invalid_argument("WT access operation failed for interquartile metrics."); 
             }
             if (succinct || both)
             {
-                long ct = 0;
-                start = std::chrono::high_resolution_clock::now();
-                for (pair<size_t, size_t> i : rand_index) {
-                    ct += wts.access(i.second);
-                }
-                end = std::chrono::high_resolution_clock::now();
+                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
+                    run_wts_benchmark(wts, order, cur_op, rand_index);
 
-                if (verbose) cout << "ct : " << (ct/rand_index.size()) << endl;
+                int t = 0;
+                do
+                {
+                    vector<double> samples;
 
-                std::chrono::duration<double, nano> elapsed_time{end - start};
+                    for (int i = 0; i < MIN_SAMPLES; i++)
+                        samples.push_back(run_wts_benchmark(wts, order, cur_op, rand_index));
 
-                wtsres[cur_op].insert({n, (elapsed_time.count()/n)});
+                    if (samples.empty()){
+                        t += 1;
+                        continue;
+                    }
+
+                    Statistics s = calculate_interquartil(samples);
+                    if (s.is_valid)
+                    {
+                        wtsres[cur_op].insert({n, s});
+                        break;
+                    }
+                    t += 1;
+                } while (t < MAX_ATTEMPTS);
+
+                if (t == MAX_ATTEMPTS)
+                    throw invalid_argument("WTS access operation failed for interquartile metrics."); 
             }
         }
     }
+    if (verbose) cout << "\n\n";
     if (!succinct)
     {
         for (auto el : wtres)
@@ -200,11 +290,12 @@ int main(int argc, char* argv[])
             {
                 if (verbose)
                 {
-                    if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTree rankc operation time = " << res.second << " ns\n";
-                    else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTree access operation time = " << res.second << " ns\n";
-                    else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTree selectc operation time = " << res.second << " ns\n";
+                    if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTree rankc operation time = " << res.second.median << " ns\n";
+                    else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTree access operation time = " << res.second.median << " ns\n";
+                    else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTree selectc operation time = " << res.second.median << " ns\n";
+                    cout << "q1 : " << res.second.q1 << "\n q3 : " << res.second.q3 << "\n iqr : " << res.second.iqr << "\n lower_bound : " << res.second.lower_bound << "\n upper_bound : " << res.second.upper_bound << "\n mean : " << res.second.mean << "\n standard deviation : "  << res.second.standard_deviation << "\n coefficient variation : " << res.second.coefficient_variation << "\n\n"; 
                 }
-                else cout << res.first << ";" << res.second << "\n";
+                else cout << res.first << ";" << res.second.median << "\n";
             }   
             cout << "\n";
         }
@@ -216,11 +307,12 @@ int main(int argc, char* argv[])
             {
                 if (verbose)
                 {
-                    if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTreeSuccinct rank operation time = " << res.second << " ns\n";
-                    else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTreeSuccinct access operation time = " << res.second << " ns\n";
-                    else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTreeSuccinct select operation time = " << res.second << " ns\n";
+                    if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTreeSuccinct rank operation time = " << res.second.median << " ns\n";
+                    else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTreeSuccinct access operation time = " << res.second.median << " ns\n";
+                    else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTreeSuccinct select operation time = " << res.second.median << " ns\n";
+                    cout << "q1 : " << res.second.q1 << "\n q3 : " << res.second.q3 << "\n iqr : " << res.second.iqr << "\n lower_bound : " << res.second.lower_bound << "\n upper_bound : " << res.second.upper_bound << "\n mean : " << res.second.mean << "\n standard deviation : "  << res.second.standard_deviation << "\n coefficient variation : " << res.second.coefficient_variation << "\n\n"; 
                 }
-                else cout << res.first << ";" << res.second << "\n";
+                else cout << res.first << ";" << res.second.median << "\n";
             }
             cout << "\n";
         }
