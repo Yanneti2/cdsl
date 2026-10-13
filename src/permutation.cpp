@@ -1,6 +1,9 @@
-#include "bitvector.hpp"
+#include "bitvectorj.hpp"
 #include "permutation.hpp"
+#include <stdexcept>
 #include <vector>
+
+// TODO: Search for good t/n factor.
 
 // t is a parameter that can be used to control max number of steps to find the
 // inverse of permutation. To ensure this, every t steps along cycles of length > t
@@ -10,6 +13,8 @@
 Permutation::Permutation(std::vector<int> perm, size_t t)
 {
     size_t size = perm.size();
+    if (size < 2) 
+        throw std::invalid_argument("Permutation can't be smaller than 2");
     BitVector visited(size);
 
     for (size_t i = 0; i < size; i++)
@@ -41,6 +46,8 @@ Permutation::Permutation(std::vector<int> perm, size_t t)
         }
         cycles.set1(permutation.size() - 1);
     }
+    cycles.init();
+    cycles.build_select1();
 
     // Reset visited for the second pass
     visited = BitVector(size);
@@ -87,10 +94,12 @@ Permutation::Permutation(std::vector<int> perm, size_t t)
 
     shortcuts_endpoints.assign(links.size(), 0);
 
+    shortcuts.init();
     for (auto &[element, prev]: links)
     {
-        shortcuts_endpoints[shortcuts.naive_rank1(element)] = prev;
+        shortcuts_endpoints[shortcuts.rank1(element)] = prev;
     }
+
 }
 
 // returns PI(i)
@@ -104,9 +113,9 @@ int Permutation::power(int i, int n)
 {
     size_t j = tau_inverse(i);
 
-    size_t r = cycles.naive_rank1(j);
-    size_t p = cycles.naive_select1(r);
-    size_t s = cycles.naive_select1(r + 1);
+    size_t r = cycles.rank1(j);
+    size_t p = cycles.select1(r);
+    size_t s = cycles.select1(r + 1);
     long long len = s - p;
 
 
@@ -131,7 +140,7 @@ int Permutation::tau_inverse(int i)
     {
         if (s and shortcuts[j])
         {
-            j = shortcuts_endpoints[shortcuts.naive_rank1(j)];
+            j = shortcuts_endpoints[shortcuts.rank1(j)];
             s = false;
         }
         else

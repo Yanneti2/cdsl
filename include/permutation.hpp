@@ -3,6 +3,7 @@
 
 
 #include "uvector.hpp"
+#include "bitvectorj.hpp"
 #include <vector>
 
 // TODO: Implement compressed permutation using Huffman Encoding
@@ -34,13 +35,11 @@ private:
     // shortcuts[i] is 1 if position i has a shortcut.
     // The destination of each shortcut is stored in
     // shortcuts_endpoints in increasing order of shortcut position.
-    BitVector shortcuts;
-    BitVector cycles;
+    BitVectorJ shortcuts;
+    BitVectorJ cycles;
     std::vector<int> shortcuts_endpoints;
 
     std::vector<int> tau;  // cycles written one after another
     int tau_inverse(int i); // position j such that tau[j] == i
 };
-
-
 #endif
