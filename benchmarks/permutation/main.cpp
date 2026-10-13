@@ -16,7 +16,7 @@ using Clock = chrono::steady_clock;
 //          Parameters      |
 //---------------------------
 constexpr size_t SHORTCUT_T      = 16;        // 't' parameter of Permutation (tune/sweep this)
-constexpr size_t MAX_QUERIES     = 1000000;   // queries per sample for the real structure
+constexpr size_t MAX_QUERIES     = 1000;   // queries per sample for the real structure
 constexpr size_t NAIVE_QUERIES   = 1000;      // queries per sample for the naive baseline
 constexpr int    NAIVE_MAX_ORDER = 5;         // naive inverse/power are O(n) per query
 constexpr ULL    SEED            = 1791409268;
