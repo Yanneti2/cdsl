@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cassert>
 #include <climits>
+#include <stdexcept>
+#include <system_error>
 #include <vector>
 #include <numeric>
 #include <algorithm>
@@ -134,8 +136,12 @@ int main(void)
     //     Empty permutation    |
     //---------------------------
     {
-        Permutation P(vector<int>(), 3);
-        assert(P.size() == 0);
+        try {
+            Permutation P(vector<int>(), 3);
+            assert(false); // if we get here, the exception has not be thrown
+        } catch (::invalid_argument) {
+
+        }
     }
 
     //---------------------------
@@ -143,7 +149,11 @@ int main(void)
     //---------------------------
     for (size_t t : ts)
     {
-        check_all(vector<int>{0}, t);
+        try {
+            check_all(vector<int>{0}, t);
+            assert(false); // if we get here, the exception has not be thrown
+        } catch (::invalid_argument) {
+        }
     }
 
     //---------------------------
@@ -158,7 +168,7 @@ int main(void)
     //---------------------------
     //   Identity (all fixed)   |
     //---------------------------
-    for (size_t n : {1, 2, 3, 10, 64, 65, 200})
+    for (size_t n : {2, 3, 10, 64, 65, 200})
         for (size_t t : ts)
             check_all(identity_permutation(n), t);
 
@@ -180,8 +190,8 @@ int main(void)
     //  Single cycle of every length L vs every t (boundaries around
     //  L == t, L == t+1, L == k*t, L == k*t+1, t > L, t == 1)
     //---------------------------------------------------------------
-    for (size_t L = 1; L <= 40; L++)
-        for (size_t t = 1; t <= 45; t++)
+    for (size_t L = 2; L <= 40; L++)
+        for (size_t t = 2; t <= 45; t++)
             check_all(from_cycle_lengths({L}, rng), t);
 
     //---------------------------

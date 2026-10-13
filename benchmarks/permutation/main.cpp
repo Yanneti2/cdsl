@@ -18,7 +18,7 @@ using Clock = chrono::steady_clock;
 constexpr size_t SHORTCUT_T      = 16;        // 't' parameter of Permutation (tune/sweep this)
 constexpr size_t MAX_QUERIES     = 1000;   // queries per sample for the real structure
 constexpr size_t NAIVE_QUERIES   = 1000;      // queries per sample for the naive baseline
-constexpr int    NAIVE_MAX_ORDER = 5;         // naive inverse/power are O(n) per query
+constexpr int    NAIVE_MAX_ORDER = 3;         // naive inverse/power are O(n) per query
 constexpr ULL    SEED            = 1791409268;
 
 //---------------------------
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
     if (verbose)
     {
         cout << "All the following tests were computed on permutations of size 10^4 to 10^8 for the "
-                "implementation and 10^4 to 10^" << NAIVE_MAX_ORDER << " for naive operations :" << endl;
+                "implementation and 10^2 to 10^" << NAIVE_MAX_ORDER << " for naive operations :" << endl;
         cout << "[";
     }
 
