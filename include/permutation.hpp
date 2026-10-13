@@ -41,6 +41,4 @@ private:
     std::vector<int> tau;  // cycles written one after another
     int tau_inverse(int i); // position j such that tau[j] == i
 };
-
-
 #endif

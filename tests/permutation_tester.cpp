@@ -1,3 +1,4 @@
+#include "naive_permutation.hpp"
 #include "permutation.hpp"
 
 #include <iostream>
@@ -9,47 +10,6 @@
 #include <random>
 
 using namespace std;
-
-// ---------------------------------------------------------------
-// Brute-force helpers (reference implementation)
-// ---------------------------------------------------------------
-
-// P(i) applied k times, k >= 0, by plain repetition
-int ref_forward(const vector<int> &p, int i, long long k)
-{
-    for (long long s = 0; s < k; s++)
-        i = p[i];
-    return i;
-}
-
-// length of the cycle containing i
-long long ref_cycle_length(const vector<int> &p, int i)
-{
-    long long len = 1;
-    int j = p[i];
-    while (j != i)
-    {
-        j = p[j];
-        len++;
-    }
-    return len;
-}
-
-// P^k(i) for any integer k (positive, negative, huge), by reducing k mod cycle length
-int ref_power(const vector<int> &p, int i, long long k)
-{
-    long long len = ref_cycle_length(p, i);
-    long long r = ((k % len) + len) % len;
-    return ref_forward(p, i, r);
-}
-
-vector<int> ref_inverse(const vector<int> &p)
-{
-    vector<int> inv(p.size());
-    for (size_t i = 0; i < p.size(); i++)
-        inv[p[i]] = (int)i;
-    return inv;
-}
 
 // ---------------------------------------------------------------
 // Permutation builders
@@ -116,7 +76,9 @@ vector<int> random_permutation(size_t n, mt19937 &rng)
 void check_all(const vector<int> &perm, size_t t)
 {
     size_t n = perm.size();
-    vector<int> inv = ref_inverse(perm);
+    NaivePermutation naiveP;
+    naiveP.p = perm;
+
     Permutation P(perm, t);
 
     assert(P.size() == n);
@@ -126,10 +88,10 @@ void check_all(const vector<int> &perm, size_t t)
         int i = (int)ui;
 
         // basic operations
-        assert(P(i) == perm[i]);
-        assert(P.inverse(i) == inv[i]);
-        assert(P.power(i, 1) == perm[i]);
-        assert(P.power(i, -1) == inv[i]);
+        assert(P(i) == naiveP.apply(i));
+        assert(P.inverse(i) == naiveP.inv(i));
+        assert(P.power(i, 1) == naiveP.apply(i));
+        assert(P.power(i, -1) == naiveP.inv(i));
         assert(P.power(i, 0) == i);
 
         // P and P^-1 undo each other
@@ -138,21 +100,21 @@ void check_all(const vector<int> &perm, size_t t)
 
         // small exponents, positive and negative
         for (int k = -5; k <= 5; k++)
-            assert(P.power(i, k) == ref_power(perm, i, k));
+            assert(P.power(i, k) == naiveP.pow(i, k));
 
         // exponents around the cycle length (full turns, one less, one more)
-        long long L = ref_cycle_length(perm, i);
+        long long L = naiveP.cycle_length(i);
         for (long long k : {L - 1, L, L + 1, 2 * L, 2 * L + 1, 3 * L - 1})
         {
-            assert(P.power(i, (int)k) == ref_power(perm, i, k));
-            assert(P.power(i, (int)-k) == ref_power(perm, i, -k));
+            assert(P.power(i, (int)k) == naiveP.pow(i, k));
+            assert(P.power(i, (int)-k) == naiveP.pow(i, -k));
         }
         assert(P.power(i, (int)L) == i);
         assert(P.power(i, (int)-L) == i);
 
         // huge exponents
         for (int k : {1000003, -1000003, INT_MAX, -INT_MAX, INT_MIN})
-            assert(P.power(i, k) == ref_power(perm, i, k));
+            assert(P.power(i, k) == naiveP.pow(i, k));
 
         // power(power(i, a), b) == power(i, a + b)
         assert(P.power(P.power(i, 3), -7) == P.power(i, -4));
@@ -259,15 +221,16 @@ int main(void)
     //---------------------------
     {
         vector<int> perm = random_permutation(5000, rng);
-        vector<int> inv = ref_inverse(perm);
+        NaivePermutation naiveP;
+        naiveP.p = perm;
         for (size_t t : {1, 2, 10, 70, 5000})
         {
             Permutation P(perm, t);
             assert(P.size() == 5000);
             for (int i = 0; i < 5000; i++)
             {
-                assert(P(i) == perm[i]);
-                assert(P.inverse(i) == inv[i]);
+                assert(P(i) == naiveP.apply(i));
+                assert(P.inverse(i) == naiveP.inv(i));
             }
         }
     }
