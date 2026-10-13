@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <vector>
 
+// TODO: Search for good t/n factor.
+
 // t is a parameter that can be used to control max number of steps to find the
 // inverse of permutation. To ensure this, every t steps along cycles of length > t
 // will introduce a shortcut that maps i to inverse permutation of i.
