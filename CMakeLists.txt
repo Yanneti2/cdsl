@@ -9,6 +9,7 @@ endif()
 
 option(BUILD_TESTS "Habilita a compilação dos testes" ON)
 
+add_subdirectory(dependencies/malloc_count)
 add_subdirectory(src)
 
 if (BUILD_TESTS)

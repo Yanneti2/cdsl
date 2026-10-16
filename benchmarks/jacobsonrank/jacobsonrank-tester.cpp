@@ -6,6 +6,7 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
+#include "malloc_count.h"
 
 #ifdef _nbits
 #define _CHUNK_SIZE "NBITS & NBITS * NBITS"
@@ -68,7 +69,7 @@ int main(int argc, char *argv[]) {
 
         std::cout << header;
     } else {
-        std::cout << "\"Size\";\"Time\"\n";
+        std::cout << "\"Size\";\"Time\";\"Memory\"\n";
     }
 
     for (unsigned long long order = 3; order < 10; order += 1) {
@@ -121,11 +122,13 @@ int main(int argc, char *argv[]) {
         }
 
         std::chrono::duration<double, nano> elapsed_time{end - start};
+        size_t mem_usage = malloc_count_current();
         if (verbose) { 
-            cout << "Size: " << size << "\nTime per " << operation << ": " << elapsed_time.count() / (long double) 999999 << " ns\n\n";
-
+            cout << "Size: " << size << "\nTime per " << operation << ": " << elapsed_time.count() / (long double) 999999 << " ns" << endl;
+            cout << "Memory usage: " << mem_usage << endl;
+            cout << endl;
         } else {
-            cout << size << ";" << elapsed_time.count() / (long double) 999999 << "\n";
+            cout << size << ";" << elapsed_time.count() / (long double) 999999 << ";" << mem_usage << endl;
         }
     }
 }

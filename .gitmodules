@@ -1,0 +1,3 @@
+[submodule "dependencies/malloc_count"]
+	path = dependencies/malloc_count
+	url = https://github.com/KGMats/malloc_count
