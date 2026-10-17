@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
+#include <stdlib.h>
 #include <vector>
 #include "malloc_count.h"
 
@@ -73,9 +74,13 @@ int main(int argc, char *argv[]) {
     }
 
     for (unsigned long long order = 3; order < 10; order += 1) {
+
         srand(time(0));
         unsigned long long size = pow(10, order);
+
+        size_t initial_mem_usage = malloc_count_current();
         BitVectorJ B1(size, randomize_bit);
+        size_t mem_usage = malloc_count_current() - initial_mem_usage;
 
         B1.init();
 
@@ -122,7 +127,7 @@ int main(int argc, char *argv[]) {
         }
 
         std::chrono::duration<double, nano> elapsed_time{end - start};
-        size_t mem_usage = malloc_count_current();
+
         if (verbose) { 
             cout << "Size: " << size << "\nTime per " << operation << ": " << elapsed_time.count() / (long double) 999999 << " ns" << endl;
             cout << "Memory usage: " << mem_usage << endl;
