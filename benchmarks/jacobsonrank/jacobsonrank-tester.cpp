@@ -1,7 +1,7 @@
 #include "bitvectorj.hpp"
 #include "malloc_count.h"
 
-#include <algorithm>
+#include <stdexcept>
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
@@ -27,6 +27,9 @@ bool randomize_bit(unsigned long i) {
 
 int main(int argc, char *argv[])
 {
+    if (argc <= 1)
+        throw invalid_argument("No benchmark flags were provided, check this folder's README.md for more informations.");
+
     bool verbose = false;
     bool select0 = false;
     bool select1 = false;
