@@ -6,12 +6,13 @@
 #include <math.h>
 #include <cstdlib>
 #include <assert.h>
+#include "malloc_count.h"
 
 using namespace std;
 
 int main(void) {
     srand(time(0));
-    cout << "\"Size\";\"Time\"\n";
+    cout << "\"Size\";\"Time\";\"Memory\"\n";
     long double ns_time = 0;
     for (unsigned long long size = 1000; size < 10000000000; size *= 10) {
         BitVector B = BitVector();
@@ -34,7 +35,8 @@ int main(void) {
             auto end = std::chrono::high_resolution_clock::now();
             ns_time += (end - start).count();
         }
-        std::cout << size << ";" << (ns_time/(long double)1000000) << "\n";
+        size_t mem_usage = malloc_count_current();
+        std::cout << size << ";" << (ns_time/(long double)1000000) << ";" << mem_usage << "\n";
     }
 }
 
