@@ -381,9 +381,16 @@ size_t BitVector::naive_select0(size_t i) const {
     if (i == 0) return 0;
 
     size_t pop_count = 0;
-    for (size_t j = 0; j < _size; j++) {
-        pop_count += !(*this)[j];
-        if (pop_count == i) return j + 1;
+    for (size_t j = 0; j < (_size + NBITS - 1) / NBITS; j++) {
+        size_t curW = std::__popcount(~accessWord(j));
+        if (pop_count + curW >= i) {
+            for(size_t a = 0; a < NBITS;a++) {
+                if (pop_count == i) return j * NBITS + a;
+                pop_count += !(*this)[j * NBITS + a];
+            }
+            return j * NBITS + NBITS;
+        }
+        pop_count += curW;
     }
     return -1;
 }
@@ -392,9 +399,16 @@ size_t BitVector::naive_select1(size_t i) const {
     if (i == 0) return 0;
 
     size_t pop_count = 0;
-    for (size_t j = 0; j < _size; j++) {
-        pop_count += (*this)[j];
-        if (pop_count == i) return j + 1;
+    for (size_t j = 0; j < (_size + NBITS - 1 )/ NBITS; j++) {
+        size_t curW = std::__popcount(accessWord(j));
+        if (pop_count + curW >= i) {
+            for(size_t a = 0; a < NBITS; a++) {
+                if (pop_count == i) return j * NBITS + a;
+                pop_count += (*this)[j * NBITS + a];
+            }
+            return j * NBITS + NBITS;
+        }
+        pop_count += curW;
     }
     return -1;
 }
