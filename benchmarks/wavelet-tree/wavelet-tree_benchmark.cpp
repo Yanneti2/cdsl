@@ -108,17 +108,13 @@ double run_mean_benchmark(WTinterface &wt, int order, char operation, vector<pai
 
 string read_file(string path)
 {
-    std::ifstream file(path);
+    ifstream file(path);
 
     if (!file.is_open()) {
         std::cerr << "Error opening file\n";
         return "";
     }
-
-    string content(
-        (std::istreambuf_iterator<char>(file)),
-        std::istreambuf_iterator<char>()
-    );
+    string content((istreambuf_iterator<char>(file)),istreambuf_iterator<char>());
 
     file.close();
 

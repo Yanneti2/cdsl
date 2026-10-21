@@ -3,6 +3,7 @@
 #include "wt_succint.hpp"
 #include "wt.hpp"
 
+#include <filesystem>
 #include <stdexcept>
 #include <iostream>
 #include <cstring>
@@ -89,14 +90,9 @@ int main(int argc, char* argv[])
     parse_args(argc, argv, args);
     srand(61027);
 
-    if (!interquartile && !mean)
-        throw invalid_argument("No time calculation method provided, check this folder's README.md for more informations.");
-
-    if (verbose) cout << "The following tests were made in a order 3-8 BitVector such that each and every operation for index [0...n-1] was made in random order.\n\n";
-    else if (!verbose && !both) cout << "\"Size\";\"Time\"\n";
-
     if (proteins || dna || influenza)
     {
+        cout << filesystem::current_path() << '\n';
         if (proteins)
         {
             string f = read_file(rel_path + "proteins");
@@ -114,6 +110,12 @@ int main(int argc, char* argv[])
         }
         return 1;
     }
+
+    if (!interquartile && !mean)
+        throw invalid_argument("No time calculation method provided, check this folder's README.md for more informations.");
+
+    if (verbose) cout << "The following tests were made in a order 3-8 BitVector such that each and every operation for index [0...n-1] was made in random order.\n\n";
+    else if (!verbose && !both) cout << "\"Size\";\"Time\"\n";
 
     for (size_t order = 3; order < 9; order++)
     {
