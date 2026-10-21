@@ -5,8 +5,9 @@
 #include <cmath>
 
 /*
-    Q1 = mediana da metade inferior = primeiro quartil
-    Q3 = mediana da metade superior = terceiro quartil
+    Q1 = median of the inferior half = first quartile
+    Q2 = median of the whole vector
+    Q3 = median of superior help = third quartile
     IQR = Q3 - Q1
 
     lower = Q1 - 1.5 * IQR
@@ -19,7 +20,7 @@
 
     x = max number of reiterations
 
-    desvio padrao / media < 5% idealmente
+    ideally, (standard_deviation / mean) < 5%
 */
 
 double get_median(const vector<double>& arr)
@@ -56,7 +57,7 @@ double get_standard_deviation(const vector<double>& arr, double mean)
     return sqrt(variance);
 }
 
-Statistics calculate_interquartil(const vector<double>& original_samples)
+Statistics calculate_interquartil(const vector<double>& original_samples, const StatsConfig& config)
 {
     bool is_valid = true;
     
@@ -94,7 +95,7 @@ Statistics calculate_interquartil(const vector<double>& original_samples)
         else valid.push_back(sample);
     }
 
-    if ((double)outliers.size()/sample_size > MAX_OUTLIER_RATIO || valid.size() < MIN_VALID_SAMPLES)
+    if ((double)outliers.size()/sample_size > config.max_outlier_ratio || valid.size() < config.min_valid_samples)
         is_valid = false;
 
     // if valid.size() <= 0 problem with sd assigning
@@ -103,7 +104,7 @@ Statistics calculate_interquartil(const vector<double>& original_samples)
     double sd = get_standard_deviation(valid,mean);
     double cv = sd/mean;
     
-    if (cv > MAX_COEFFICIENT_VARIATION) is_valid = false;
+    if (cv > config.max_coefficient_variation) is_valid = false;
 
     Statistics res = {
         q1,
