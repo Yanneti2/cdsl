@@ -14,6 +14,8 @@ using namespace std;
 
 #define ULL unsigned long long
 
+StatsConfig config;
+
 // Control variables :
 bool comparison = false;
 bool verbose = false;
@@ -173,7 +175,7 @@ int main(int argc, char *argv[])
             {
                 vector<double> nsamples;
 
-                for(int i = 0; i < MIN_WARMUP_SAMPLES; i++)
+                for(int i = 0; i < config.min_warmup_samples; i++)
                     nsamples.push_back(run_naive_benchmark(*PT,order,cur_op,endex));
 
                 nresults["enclose"].insert({order_num, get_median(nsamples)});
@@ -182,7 +184,7 @@ int main(int argc, char *argv[])
             }
             if (!naive || comparison)
             {
-                for (int w = 0; w < MIN_WARMUP_SAMPLES; w++)
+                for (int w = 0; w < config.min_warmup_samples; w++)
                 {
                     run_rmmq_benchmark(*PTRMMQ,order,cur_op,endex);
                 }
@@ -192,7 +194,7 @@ int main(int argc, char *argv[])
                 {
                     vector<double> samples;
 
-                    for(int i = 0; i < MIN_SAMPLES; i++)
+                    for(int i = 0; i < config.min_samples; i++)
                         samples.push_back(run_rmmq_benchmark(*PTRMMQ,order,cur_op,endex));
 
                     if (samples.empty()){
@@ -200,15 +202,15 @@ int main(int argc, char *argv[])
                         continue;
                     }
 
-                    Statistics s = calculate_interquartil(samples);
+                    Statistics s = calculate_interquartil(samples, config);
                     if (s.is_valid) {
                         results["enclose"].insert({order_num, s});
                         break;
                     }
                     t += 1;
-                } while (t < MAX_ATTEMPTS);
+                } while (t < config.max_attempts);
 
-                if (t == MAX_ATTEMPTS)
+                if (t == config.max_attempts)
                     throw invalid_argument("RmMq enclose operation failed fot interquartile metrics."); 
             }
             if (verbose) cout << "#";
@@ -227,7 +229,7 @@ int main(int argc, char *argv[])
             {
                 vector<double> nsamples;
 
-                for(int i = 0; i < MIN_WARMUP_SAMPLES; i++)
+                for(int i = 0; i < config.min_warmup_samples; i++)
                     nsamples.push_back(run_naive_benchmark(*PT,order,cur_op,cindex));
 
                 nresults["close"].insert({order_num, get_median(nsamples)});
@@ -236,7 +238,7 @@ int main(int argc, char *argv[])
             }
             if (!naive || comparison)
             {
-                for (int w = 0; w < MIN_WARMUP_SAMPLES; w++)
+                for (int w = 0; w < config.min_warmup_samples; w++)
                 {
                     run_rmmq_benchmark(*PTRMMQ,order,cur_op,cindex);
                 }
@@ -246,7 +248,7 @@ int main(int argc, char *argv[])
                 {
                     vector<double> samples;
 
-                    for(int i = 0; i < MIN_SAMPLES; i++)
+                    for(int i = 0; i < config.min_samples; i++)
                         samples.push_back(run_rmmq_benchmark(*PTRMMQ,order,cur_op,cindex));
 
                     if (samples.empty()){
@@ -254,15 +256,15 @@ int main(int argc, char *argv[])
                         continue;
                     }
 
-                    Statistics s = calculate_interquartil(samples);
+                    Statistics s = calculate_interquartil(samples, config);
                     if (s.is_valid) {
                         results["close"].insert({order_num, s});
                         break;
                     }
                     t += 1;
-                } while (t < MAX_ATTEMPTS);
+                } while (t < config.max_attempts);
 
-                if (t == MAX_ATTEMPTS)
+                if (t == config.max_attempts)
                     throw invalid_argument("RmMq enclose operation failed fot interquartile metrics."); 
             }
             if (verbose) cout << "#";

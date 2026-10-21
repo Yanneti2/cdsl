@@ -120,7 +120,6 @@ int main(int argc, char *argv[])
             }
             end = std::chrono::high_resolution_clock::now();
         } else if (rank1) {
-            cout << "ebaaaaa" << endl;
             start = std::chrono::high_resolution_clock::now();
             for (unsigned long long i : idx) {
                 dummy += B1.rank1(i);
