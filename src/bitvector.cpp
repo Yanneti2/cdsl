@@ -7,7 +7,7 @@
     TODO:
     Uma funcao para appendar um long e/ou uma string a um bitvector.
 */
-#include "bitvector.hpp"
+#include "../include/bitvector.hpp"
 
 #include <stdexcept>
 #include <stdlib.h>
@@ -127,6 +127,25 @@ BitVector::BitVector(size_t size, int init) {
     }
     A[_cap - 1] = ~bitMask(_size % NBITS);
 }
+
+BitVector::BitVector(size_t size, bool (*fn)(size_t, unsigned), unsigned d) {
+    assert(sizeof(TYPE) * 8 == NBITS);
+
+    _cap = (size + NBITS - 1) / NBITS;
+    _cap = (_cap == 0) ? 1 : _cap;
+    _size = size;
+
+    A = (TYPE*) calloc(_cap, sizeof(TYPE));
+
+    if (!A)
+        throw new std::bad_alloc();
+    
+    for (size_t i = 0; i < _size; i++) {
+        if (fn(i, d))
+            this->set1(i);
+    }
+}
+
 
 BitVector::BitVector(size_t size, bool (*fn)(size_t)) {
     assert(sizeof(TYPE) * 8 == NBITS);
@@ -379,11 +398,17 @@ size_t BitVector::naive_rank1(size_t i) const {
 
 size_t BitVector::naive_select0(size_t i) const {
     if (i == 0) return 0;
-
     size_t pop_count = 0;
-    for (size_t j = 0; j < _size; j++) {
-        pop_count += !(*this)[j];
-        if (pop_count == i) return j + 1;
+    for (size_t j = 0; j < (_size + NBITS - 1)/ NBITS; j++) {
+        size_t curW = std::__popcount(~accessWord(j));
+        if (pop_count +curW >= i) {
+            for(size_t a = 0; a < NBITS; a++) {
+                if (pop_count == i) return j * NBITS + a;
+                pop_count += !(*this)[j * NBITS + a];
+            }
+            return j * NBITS + NBITS;
+        }
+        pop_count += curW;
     }
     return -1;
 }
@@ -392,9 +417,16 @@ size_t BitVector::naive_select1(size_t i) const {
     if (i == 0) return 0;
 
     size_t pop_count = 0;
-    for (size_t j = 0; j < _size; j++) {
-        pop_count += (*this)[j];
-        if (pop_count == i) return j + 1;
+    for (size_t j = 0; j < (_size + NBITS - 1)/ NBITS; j++) {
+        size_t curW = std::__popcount(accessWord(j));
+        if (pop_count + curW >= i) {
+            for(size_t a = 0; a < NBITS; a++) {
+                if(pop_count == i) return j * NBITS + a;
+                pop_count += (*this)[j * NBITS + a];
+            }
+            return j * NBITS + NBITS;
+        }
+        pop_count += curW;
     }
     return -1;
 }
@@ -432,5 +464,6 @@ BitVector *BitVector::deserialize(const char *path){
     }
     return bv;
 }
+
 
 #undef bitMask

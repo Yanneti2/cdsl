@@ -25,6 +25,11 @@ bool randomize_bit(unsigned long i) {
     return rand() % 2 == 0;
 }
 
+bool randomize_bit_d(unsigned long i, unsigned d) {
+    return rand() % 10000 < d;
+}
+
+
 int main(int argc, char *argv[]) {
     bool verbose = false;
     bool rank0 = false;
@@ -32,11 +37,14 @@ int main(int argc, char *argv[]) {
     bool select0 = false;
     bool select1 = false;
     string operation;
+    unsigned dens = 5000;
 
     for (int i = 0; i < argc; i++) {
         if (std::strcmp(argv[i], "-v") == 0 || std::strcmp(argv[i], "--verbose") == 0)
             verbose = true;
-
+        if (std::strcmp(argv[i], "-d") == 0 || std::strcmp(argv[i], "--density") == 0) {
+            dens = std::atol(argv[i + 1]);
+        }
         if (std::strcmp(argv[i], "-op") == 0 || std::strcmp(argv[i], "--operation") == 0) {
             if (std::strcmp(argv[i + 1], "rank0") == 0 || std::strcmp(argv[i + 1], "r0") == 0) {
                 rank0 = true;
@@ -77,9 +85,8 @@ int main(int argc, char *argv[]) {
 
         srand(time(0));
         unsigned long long size = pow(10, order);
-
         size_t initial_mem_usage = malloc_count_current();
-        BitVectorJ B1(size, randomize_bit);
+        BitVectorJ B1(size, randomize_bit_d, dens);
         size_t mem_usage = malloc_count_current() - initial_mem_usage;
 
         B1.init();

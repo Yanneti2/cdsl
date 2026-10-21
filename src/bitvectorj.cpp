@@ -73,6 +73,7 @@ BitVectorJ::BitVectorJ() : BitVector() {};
 BitVectorJ::BitVectorJ(size_t size) : BitVector(size) {};
 BitVectorJ::BitVectorJ(size_t size, int init) : BitVector(size, init) {};
 BitVectorJ::BitVectorJ(size_t size, bool (*fn)(size_t)) : BitVector(size, fn) {};
+BitVectorJ::BitVectorJ(size_t size, bool (*fn)(size_t, unsigned), unsigned d) : BitVector(size, fn, d) {};
 BitVectorJ::BitVectorJ(std::string s) : BitVector(s) {};
 BitVectorJ::BitVectorJ(const BitVector &B) : BitVector(B) {};
 
