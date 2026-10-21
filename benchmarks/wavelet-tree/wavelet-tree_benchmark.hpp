@@ -1,6 +1,8 @@
 #include "interquartil-stats.hpp"
 #include "wtInterface.hpp"
 
+#include <string>
+
 #define ULL unsigned long long
 
 using namespace std;
