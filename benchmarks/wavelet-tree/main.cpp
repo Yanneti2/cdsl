@@ -104,8 +104,6 @@ int main(int argc, char* argv[])
         unsigned long long fsize = f.size();
         WaveletTree wt(f);
 
-        cout << fsize << "\n\n";
-
         double at = 0; long double rt = 0; long double st = 0;
         vector<pair<size_t, size_t>> indexes(OPERATIONS);
 
@@ -115,9 +113,10 @@ int main(int argc, char* argv[])
             indexes[i] = {cindex, f[cindex]};
         }
 
-        at += run_benchmark(wt, 'a', indexes)/OPERATIONS;
-        rt += run_benchmark(wt, 'r', indexes)/OPERATIONS;
-        st += run_benchmark(wt, 's', indexes)/OPERATIONS;
+        // RUN THE MEAN ALGORITHM
+        at += run_benchmark(wt, 'a', indexes);
+        rt += run_benchmark(wt, 'r', indexes);
+        st += run_benchmark(wt, 's', indexes);
 
         cout << "For the dataset: ";
 
