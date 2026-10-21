@@ -143,14 +143,14 @@ int main(int argc, char* argv[])
             {
                 if (!succinct || both)
                     wtres[cur_op][n].stats = run_interquartile_benchmark(config, wt, order, cur_op, rand_index);
-                else
+                if (succinct || both)
                     wtsres[cur_op][n].stats = run_interquartile_benchmark(config, wts, order, cur_op, rand_index);
             }
             else if (mean)
             {
                 if (!succinct || both)
                     wtres[cur_op][n].time = run_mean_benchmark(wt, order, cur_op, rand_index);
-                else
+                if (succinct || both)
                     wtsres[cur_op][n].time = run_mean_benchmark(wts, order, cur_op, rand_index);
             }
         }
