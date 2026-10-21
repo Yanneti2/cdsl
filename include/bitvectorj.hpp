@@ -26,6 +26,7 @@ public:
     explicit BitVectorJ(size_t size);
     explicit BitVectorJ(size_t size, int init);
     explicit BitVectorJ(size_t size, bool (*fn)(size_t));
+    explicit BitVectorJ(size_t size, bool (*fn)(size_t, unsigned), unsigned d);
     explicit BitVectorJ(std::string s);
     explicit BitVectorJ(const BitVector &B);
     ~BitVectorJ();

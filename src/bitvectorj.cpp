@@ -73,6 +73,7 @@ BitVectorJ::BitVectorJ() : BitVector() {};
 BitVectorJ::BitVectorJ(size_t size) : BitVector(size) {};
 BitVectorJ::BitVectorJ(size_t size, int init) : BitVector(size, init) {};
 BitVectorJ::BitVectorJ(size_t size, bool (*fn)(size_t)) : BitVector(size, fn) {};
+BitVectorJ::BitVectorJ(size_t size, bool (*fn)(size_t, unsigned), unsigned d) : BitVector(size, fn, d) {};
 BitVectorJ::BitVectorJ(std::string s) : BitVector(s) {};
 BitVectorJ::BitVectorJ(const BitVector &B) : BitVector(B) {};
 
@@ -122,10 +123,10 @@ bool BitVectorJ::is_initialized() const {
 }
 
 BitVectorJ::~BitVectorJ() {
-//     if (layer1) free(layer1);
-//     if (layer2) free(layer2);
-//     if (select_vector0) free(select_vector0);
-//     if (select_vector1) free(select_vector1);
+    if (layer1) free(layer1);
+    if (layer2) free(layer2);
+    if (select_vector0) free(select_vector0);
+    if (select_vector1) free(select_vector1);
 }
 
 size_t BitVectorJ::rank0(size_t i) const {

@@ -1,5 +1,6 @@
 #include "RRR.hpp"
 
+#include <exception>
 #include <iostream>
 #include <iomanip>
 #include <chrono>
@@ -15,6 +16,9 @@ int main(void) {
     cout << "\"Size\";\"Time\";\"Memory\"\n";
     long double ns_time = 0;
     for (unsigned long long size = 1000; size < 10000000000; size *= 10) {
+        size_t initial_mem_usage = malloc_count_current();
+
+
         BitVector B = BitVector();
         int order = log10(size);
         // cout << "Order: " << order << endl;
@@ -27,6 +31,7 @@ int main(void) {
             }
         }
         RRR R(&B);
+        size_t mem_usage = malloc_count_current() - initial_mem_usage;
         
         for(auto j = 0; j < 1000000; j++){
             unsigned long long index = rand() % B.size();
@@ -35,7 +40,6 @@ int main(void) {
             auto end = std::chrono::high_resolution_clock::now();
             ns_time += (end - start).count();
         }
-        size_t mem_usage = malloc_count_current();
         std::cout << size << ";" << (ns_time/(long double)1000000) << ";" << mem_usage << "\n";
     }
 }

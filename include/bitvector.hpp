@@ -32,6 +32,7 @@ public:
     explicit BitVector(size_t size);
     explicit BitVector(size_t size, int init);
     explicit BitVector(size_t size, bool (*fn)(size_t));
+    explicit BitVector(size_t size, bool (*fn)(size_t, unsigned), unsigned d);
     explicit BitVector(std::string s);
     explicit BitVector(const BitVector &B);
     virtual ~BitVector();

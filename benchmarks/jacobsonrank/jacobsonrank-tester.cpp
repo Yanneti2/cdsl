@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
     bool rank1 = false;
 
     string operation;
+    unsigned dens = 5000;
 
     long int dummy = 0;
 
@@ -80,6 +81,7 @@ int main(int argc, char *argv[])
     }
 
     for (unsigned long long order = 3; order < 10; order += 1) {
+
         srand(time(0));
         unsigned long long size = pow(10, order);
 
