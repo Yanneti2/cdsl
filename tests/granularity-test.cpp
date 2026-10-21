@@ -135,9 +135,10 @@ int main(int argc, char *argv[]) {
         }
 
         for (auto a : times) {
-            cout << a.first << "   ";
+            cout << a.first.count() << "   ";
             cerr << a.second << "   ";
         }
+        cout << "\n";
 
     }
 }
