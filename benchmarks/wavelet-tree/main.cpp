@@ -114,9 +114,9 @@ int main(int argc, char* argv[])
         }
 
         // RUN THE MEAN ALGORITHM
-        at += run_benchmark(wt, 'a', indexes);
-        rt += run_benchmark(wt, 'r', indexes);
-        st += run_benchmark(wt, 's', indexes);
+        at += run_mean_benchmark(wt, 'a', indexes);
+        rt += run_mean_benchmark(wt, 'r', indexes);
+        st += run_mean_benchmark(wt, 's', indexes);
 
         cout << "For the dataset: ";
 
