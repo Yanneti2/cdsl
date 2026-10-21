@@ -92,22 +92,43 @@ int main(int argc, char* argv[])
 
     if (proteins || dna || influenza)
     {
-        cout << filesystem::current_path() << '\n';
+        string f;
+
         if (proteins)
-        {
-            string f = read_file(rel_path + "proteins");
-            cout << f;
-        }
+            f = read_file(rel_path + "proteins");
         else if (dna)
-        {
-            string f = read_file(rel_path + "dna");
-            cout << f;
-        }
+            f = read_file(rel_path + "dna");
         else if (influenza)
+            f = read_file(rel_path + "influenza");
+
+        unsigned long long fsize = f.size();
+        WaveletTree wt(f);
+
+        cout << fsize << "\n\n";
+
+        double at = 0; long double rt = 0; long double st = 0;
+        vector<pair<size_t, size_t>> indexes(OPERATIONS);
+
+        for (size_t i = 0; i < OPERATIONS; i++)
         {
-            string f = read_file(rel_path + "influenza");
-            cout << f;
+            size_t cindex = rand() % fsize;
+            indexes[i] = {cindex, f[cindex]};
         }
+
+        at += run_benchmark(wt, 'a', indexes)/OPERATIONS;
+        rt += run_benchmark(wt, 'r', indexes)/OPERATIONS;
+        st += run_benchmark(wt, 's', indexes)/OPERATIONS;
+
+        cout << "For the dataset: ";
+
+        if (dna) cout << "'dna' :\n";
+        else if (influenza) cout << "'influenza' :\n";
+        else if (proteins) cout << "'proteins' :\n";
+
+        cout << "Average time for rank_c operation: " << rt << " ns\n" <<
+                "Average time for select_c operation: " << st << " ns\n" <<
+                "Average time for access operation: " << at << " ns\n\n";
+
         return 1;
     }
 
@@ -139,21 +160,25 @@ int main(int argc, char* argv[])
         else if (all || selectc) operations.push_back('s');
         else if (all || access) operations.push_back('a');
 
+        for (auto a : operations)
+            cout << a;
+        cout << '\n';
+
         for (char cur_op : operations)
         {
             if (interquartile)
             {
                 if (!succinct || both)
-                    wtres[cur_op][n].stats = run_interquartile_benchmark(config, wt, order, cur_op, rand_index);
+                    wtres[cur_op][n].stats = run_interquartile_benchmark(config, wt, cur_op, rand_index);
                 if (succinct || both)
-                    wtsres[cur_op][n].stats = run_interquartile_benchmark(config, wts, order, cur_op, rand_index);
+                    wtsres[cur_op][n].stats = run_interquartile_benchmark(config, wts, cur_op, rand_index);
             }
             else if (mean)
             {
                 if (!succinct || both)
-                    wtres[cur_op][n].time = run_mean_benchmark(wt, order, cur_op, rand_index);
+                    wtres[cur_op][n].time = run_mean_benchmark(wt, cur_op, rand_index);
                 if (succinct || both)
-                    wtsres[cur_op][n].time = run_mean_benchmark(wts, order, cur_op, rand_index);
+                    wtsres[cur_op][n].time = run_mean_benchmark(wts, cur_op, rand_index);
             }
         }
     }

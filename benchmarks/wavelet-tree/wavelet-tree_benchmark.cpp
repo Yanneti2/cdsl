@@ -9,7 +9,7 @@
 
 using namespace std;
 
-double run_benchmark(WTinterface &wt, int order, char operation, vector<pair<size_t, size_t>> & indexes)
+double run_benchmark(WTinterface &wt, char operation, vector<pair<size_t, size_t>> & indexes)
 {
     if (indexes.empty())
         throw std::invalid_argument("Cannot benchmark an empty index vector.");
@@ -52,10 +52,10 @@ double run_benchmark(WTinterface &wt, int order, char operation, vector<pair<siz
     return (elapsed_time.count() / indexes.size());
 }
 
-Statistics run_interquartile_benchmark(StatsConfig config, WTinterface &wt, int order, char operation, vector<pair<size_t, size_t>> & indexes)
+Statistics run_interquartile_benchmark(StatsConfig config, WTinterface &wt, char operation, vector<pair<size_t, size_t>> & indexes)
 {
     for (int i = 0; i < config.min_warmup_samples; i++)
-        run_benchmark(wt, order, operation, indexes);
+        run_benchmark(wt, operation, indexes);
 
     int t = 0;
     do
@@ -63,7 +63,7 @@ Statistics run_interquartile_benchmark(StatsConfig config, WTinterface &wt, int 
         vector<double> samples;
 
         for (int i = 0; i < config.min_samples; i++)
-            samples.push_back(run_benchmark(wt, order, operation, indexes));
+            samples.push_back(run_benchmark(wt, operation, indexes));
 
         if (samples.empty()){
             t += 1;
@@ -98,11 +98,11 @@ Statistics run_interquartile_benchmark(StatsConfig config, WTinterface &wt, int 
     }
 }
 
-double run_mean_benchmark(WTinterface &wt, int order, char operation, vector<pair<size_t, size_t>> & indexes)
+double run_mean_benchmark(WTinterface &wt, char operation, vector<pair<size_t, size_t>> & indexes)
 {
     double at = 0;
     for (int i = 0; i < SIMPLE_REPETITIONS; i++)
-        at += run_benchmark(wt, order, operation, indexes);
+        at += run_benchmark(wt, operation, indexes);
     return (at/SIMPLE_REPETITIONS);
 };
 
