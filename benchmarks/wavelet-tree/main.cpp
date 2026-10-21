@@ -6,20 +6,28 @@
 #include <stdexcept>
 #include <iostream>
 #include <cstring>
-#include <chrono>
 #include <cmath>
 
-#define ACCESS  (1 << 0)
-#define RANKC   (1 << 1)
-#define SELECTC (1 << 2)
-
+bool interquartile = false;
+bool influenza = false;
 bool succinct = false;
+bool proteins = false;
 bool verbose = false;
+bool selectc = false;
+bool access = false;
+bool rankc = false;
 bool both = false;
+bool mean = false;
 bool all = false;
+bool dna = false;
+
+StatsConfig config; // can modify
+
+string rel_path = "../../../../";
 
 using namespace std;
 
+// interquartil or simple median
 void parse_args(int argc, char* argv[], uint64_t &args) {
     for (int i = 1; i < argc; i++)
     {
@@ -27,19 +35,33 @@ void parse_args(int argc, char* argv[], uint64_t &args) {
 
         if (!strcmp(cur_arg, "-v") || !strcmp(cur_arg, "--verbose"))
             verbose = true;
-        else if (!strcmp(cur_arg, "-s") || !strcmp(cur_arg, "--succinct"))
+
+        // make so its necessary to specify the implementation (Explicit, implicit, succint) LATER!!!
+        if (!strcmp(cur_arg, "-s") || !strcmp(cur_arg, "--succinct"))
             succinct = true;
         else if (!strcmp(cur_arg, "-b") || !strcmp(cur_arg, "--both"))
             both = true;
 
+        if (!strcmp(cur_arg, "-i") || !strcmp(cur_arg, "--interquartile"))
+            interquartile = true;
+        else if (!strcmp(cur_arg, "-m") || !strcmp(cur_arg, "--mean"))
+            mean = true;
+
+        if (!strcmp(cur_arg, "--dna"))
+            dna = true;
+        else if (!strcmp(cur_arg, "--influenza"))
+            influenza = true;
+        else if (!strcmp(cur_arg, "--proteins"))
+            proteins = true;
+
         if (all) continue;
 
         if (!strcmp(cur_arg, "-acs") || !strcmp(cur_arg, "--access"))
-            args |= ACCESS;
+            access = true;
         else if (!strcmp(cur_arg, "-rc") || !strcmp(cur_arg, "--rankc"))
-            args |= RANKC;
+            rankc = true;
         else if (!strcmp(cur_arg, "-sc") || !strcmp(cur_arg, "--selectc"))
-            args |= SELECTC;
+            selectc = true;
         else if (!strcmp(cur_arg, "-a") || !strcmp(cur_arg, "--all"))
             all = true;
     }
@@ -55,8 +77,8 @@ void shuffle(vector<pair<size_t, size_t>> &V) {
 }
 
 // {"access", {10000 : 54.32}}
-map<char, map<unsigned long long, Statistics>> wtres;
-map<char, map<unsigned long long, Statistics>> wtsres;
+map<char, map<unsigned long long, BenchmarkResult>> wtres;
+map<char, map<unsigned long long, BenchmarkResult>> wtsres;
 
 int main(int argc, char* argv[])
 {
@@ -66,13 +88,36 @@ int main(int argc, char* argv[])
     uint64_t args = 0;
     parse_args(argc, argv, args);
     srand(61027);
-    
+
+    if (!interquartile && !mean)
+        throw invalid_argument("No time calculation method provided, check this folder's README.md for more informations.");
+
     if (verbose) cout << "The following tests were made in a order 3-8 BitVector such that each and every operation for index [0...n-1] was made in random order.\n\n";
     else if (!verbose && !both) cout << "\"Size\";\"Time\"\n";
 
+    if (proteins || dna || influenza)
+    {
+        if (proteins)
+        {
+            string f = read_file(rel_path + "proteins");
+            cout << f;
+        }
+        else if (dna)
+        {
+            string f = read_file(rel_path + "dna");
+            cout << f;
+        }
+        else if (influenza)
+        {
+            string f = read_file(rel_path + "influenza");
+            cout << f;
+        }
+        return 1;
+    }
+
     for (size_t order = 3; order < 9; order++)
     {
-        string s; char cur_op;
+        string s;
         unsigned long long n = pow(10, order);
 
         vector<pair<size_t, size_t>> rand_index(n);
@@ -86,196 +131,27 @@ int main(int argc, char* argv[])
         WaveletTree wt(s);
         WaveletTreeSuccint wts(s);
 
-        if (all || (args & RANKC))
+        vector<char> operations;
+
+        if (all || rankc) operations.push_back('r');
+        else if (all || selectc) operations.push_back('s');
+        else if (all || access) operations.push_back('a');
+
+        for (char cur_op : operations)
         {
-            cur_op = 'r';
-            if (!succinct || both)
+            if (interquartile)
             {
-                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
-                    run_wt_benchmark(wt, order, cur_op, rand_index);
-
-                int t = 0;
-                do
-                {
-                    vector<double> samples;
-
-                    for (int i = 0; i < MIN_SAMPLES; i++)
-                        samples.push_back(run_wt_benchmark(wt, order, cur_op, rand_index));
-
-                    if (samples.empty()){
-                        t += 1;
-                        continue;
-                    }
-
-                    Statistics s = calculate_interquartil(samples);
-                    if (s.is_valid)
-                    {
-                        wtsres[cur_op].insert({n, s});
-                        break;
-                    }
-                    t += 1;
-                } while (t < MAX_ATTEMPTS);
-
-                if (t == MAX_ATTEMPTS)
-                    throw invalid_argument("WT rankc operation failed fot interquartile metrics."); 
+                if (!succinct || both)
+                    wtres[cur_op][n].stats = run_interquartile_benchmark(config, wt, order, cur_op, rand_index);
+                else
+                    wtsres[cur_op][n].stats = run_interquartile_benchmark(config, wts, order, cur_op, rand_index);
             }
-            if (succinct || both)
+            else if (mean)
             {
-                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
-                    run_wts_benchmark(wts, order, cur_op, rand_index);
-
-                int t = 0;
-                do
-                {
-                    vector<double> samples;
-
-                    for (int i = 0; i < MIN_SAMPLES; i++)
-                        samples.push_back(run_wts_benchmark(wts, order, cur_op, rand_index));
-
-                    if (samples.empty()){
-                        t += 1;
-                        continue;
-                    }
-
-                    Statistics s = calculate_interquartil(samples);
-                    if (s.is_valid)
-                    {
-                        wtres[cur_op].insert({n, s});
-                        break;
-                    }
-                    t += 1;
-                } while (t < MAX_ATTEMPTS);
-
-                if (t == MAX_ATTEMPTS)
-                    throw invalid_argument("WTS rank operation failed for interquartile metrics."); 
-            }
-        }
-        if (all || (args & SELECTC))
-        {
-            cur_op = 's';
-            if(!succinct || both)
-            {
-                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
-                    run_wt_benchmark(wt, order, cur_op, rand_index);
-
-                int t = 0;
-                do
-                {
-                    vector<double> samples;
-
-                    for (int i = 0; i < MIN_SAMPLES; i++)
-                        samples.push_back(run_wt_benchmark(wt, order, cur_op, rand_index));
-
-                    if (samples.empty()){
-                        t += 1;
-                        continue;
-                    }
-
-                    Statistics s = calculate_interquartil(samples);
-                    if (s.is_valid)
-                    {
-                        wtres[cur_op].insert({n, s});
-                        break;
-                    }
-                    t += 1;
-                } while (t < MAX_ATTEMPTS);
-
-                if (t == MAX_ATTEMPTS)
-                    throw invalid_argument("WT selectc operation failed for interquartile metrics."); 
-            }
-            if (succinct || both)
-            {
-                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
-                    run_wts_benchmark(wts, order, cur_op, rand_index);
-
-                int t = 0;
-                do
-                {
-                    vector<double> samples;
-
-                    for (int i = 0; i < MIN_SAMPLES; i++)
-                        samples.push_back(run_wts_benchmark(wts, order, cur_op, rand_index));
-
-                    if (samples.empty()){
-                        t += 1;
-                        continue;
-                    }
-
-                    Statistics s = calculate_interquartil(samples);
-                    if (s.is_valid)
-                    {
-                        wtsres[cur_op].insert({n, s});
-                        break;
-                    }
-                    t += 1;
-                } while (t < MAX_ATTEMPTS);
-
-                if (t == MAX_ATTEMPTS)
-                    throw invalid_argument("WTS select operation failed for interquartile metrics."); 
-            }
-        }
-        if (all || (args & ACCESS))
-        {
-            cur_op = 'a';
-            if(!succinct || both)
-            {
-                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
-                    run_wt_benchmark(wt, order, cur_op, rand_index);
-
-                int t = 0;
-                do
-                {
-                    vector<double> samples;
-
-                    for (int i = 0; i < MIN_SAMPLES; i++)
-                        samples.push_back(run_wt_benchmark(wt, order, cur_op, rand_index));
-
-                    if (samples.empty()){
-                        t += 1;
-                        continue;
-                    }
-
-                    Statistics s = calculate_interquartil(samples);
-                    if (s.is_valid)
-                    {
-                        wtres[cur_op].insert({n, s});
-                        break;
-                    }
-                    t += 1;
-                } while (t < MAX_ATTEMPTS);
-
-                if (t == MAX_ATTEMPTS)
-                    throw invalid_argument("WT access operation failed for interquartile metrics."); 
-            }
-            if (succinct || both)
-            {
-                for (int i = 0; i < MIN_WARMUP_SAMPLES; i++)
-                    run_wts_benchmark(wts, order, cur_op, rand_index);
-
-                int t = 0;
-                do
-                {
-                    vector<double> samples;
-
-                    for (int i = 0; i < MIN_SAMPLES; i++)
-                        samples.push_back(run_wts_benchmark(wts, order, cur_op, rand_index));
-
-                    if (samples.empty()){
-                        t += 1;
-                        continue;
-                    }
-
-                    Statistics s = calculate_interquartil(samples);
-                    if (s.is_valid)
-                    {
-                        wtsres[cur_op].insert({n, s});
-                        break;
-                    }
-                    t += 1;
-                } while (t < MAX_ATTEMPTS);
-
-                if (t == MAX_ATTEMPTS)
-                    throw invalid_argument("WTS access operation failed for interquartile metrics."); 
+                if (!succinct || both)
+                    wtres[cur_op][n].time = run_mean_benchmark(wt, order, cur_op, rand_index);
+                else
+                    wtsres[cur_op][n].time = run_mean_benchmark(wts, order, cur_op, rand_index);
             }
         }
     }
@@ -286,14 +162,27 @@ int main(int argc, char* argv[])
         {
             for (auto res : el.second)
             {
-                if (verbose)
+                if (interquartile)
                 {
-                    if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTree rankc operation time = " << res.second.median << " ns\n";
-                    else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTree access operation time = " << res.second.median << " ns\n";
-                    else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTree selectc operation time = " << res.second.median << " ns\n";
-                    cout << "q1 : " << res.second.q1 << "\n q3 : " << res.second.q3 << "\n iqr : " << res.second.iqr << "\n lower_bound : " << res.second.lower_bound << "\n upper_bound : " << res.second.upper_bound << "\n mean : " << res.second.mean << "\n standard deviation : "  << res.second.standard_deviation << "\n coefficient variation : " << res.second.coefficient_variation << "\n\n"; 
+                    if (verbose)
+                    {
+                        if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTree rankc operation time = " << res.second.stats->median << " ns\n";
+                        else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTree access operation time = " << res.second.stats->median << " ns\n";
+                        else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTree selectc operation time = " << res.second.stats->median << " ns\n";
+                        cout << "q1 : " << res.second.stats->q1 << "\n q3 : " << res.second.stats->q3 << "\n iqr : " << res.second.stats->iqr << "\n lower_bound : " << res.second.stats->lower_bound << "\n upper_bound : " << res.second.stats->upper_bound << "\n mean : " << res.second.stats->mean << "\n standard deviation : "  << res.second.stats->standard_deviation << "\n coefficient variation : " << res.second.stats->coefficient_variation << "\n\n"; 
+                    }
+                    else cout << res.first << ";" << res.second.stats->median << "\n";
                 }
-                else cout << res.first << ";" << res.second.median << "\n";
+                else if (mean)
+                {
+                    if (verbose)
+                    {
+                        if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTree rankc operation time = " << res.second.time << " ns\n";
+                        else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTree access operation time = " << res.second.time << " ns\n";
+                        else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTree selectc operation time = " << res.second.time << " ns\n";
+                    }
+                    else cout << res.first << ";" << res.second.time << "\n";
+                }
             }   
             cout << "\n";
         }
@@ -303,16 +192,30 @@ int main(int argc, char* argv[])
         {
             for (auto res : el.second)
             {
-                if (verbose)
+                if (interquartile)
                 {
-                    if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTreeSuccinct rank operation time = " << res.second.median << " ns\n";
-                    else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTreeSuccinct access operation time = " << res.second.median << " ns\n";
-                    else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTreeSuccinct select operation time = " << res.second.median << " ns\n";
-                    cout << "q1 : " << res.second.q1 << "\n q3 : " << res.second.q3 << "\n iqr : " << res.second.iqr << "\n lower_bound : " << res.second.lower_bound << "\n upper_bound : " << res.second.upper_bound << "\n mean : " << res.second.mean << "\n standard deviation : "  << res.second.standard_deviation << "\n coefficient variation : " << res.second.coefficient_variation << "\n\n"; 
+                    if (verbose)
+                    {
+                        if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTreeSuccinct rankc operation time = " << res.second.stats->median << " ns\n";
+                        else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTreeSuccinct access operation time = " << res.second.stats->median << " ns\n";
+                        else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTreeSuccinct selectc operation time = " << res.second.stats->median << " ns\n";
+                        cout << "q1 : " << res.second.stats->q1 << "\n q3 : " << res.second.stats->q3 << "\n iqr : " << res.second.stats->iqr << "\n lower_bound : " << res.second.stats->lower_bound << "\n upper_bound : " << res.second.stats->upper_bound << "\n mean : " << res.second.stats->mean << "\n standard deviation : "  << res.second.stats->standard_deviation << "\n coefficient variation : " << res.second.stats->coefficient_variation << "\n\n"; 
+                    }
+                    else cout << res.first << ";" << res.second.stats->median << "\n";
                 }
-                else cout << res.first << ";" << res.second.median << "\n";
+                else if (mean)
+                {
+                    if (verbose)
+                    {
+                        if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTreeSuccinct rankc operation time = " << res.second.time << " ns\n";
+                        else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTreeSuccinct access operation time = " << res.second.time << " ns\n";
+                        else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTreeSuccinct selectc operation time = " << res.second.time << " ns\n";
+                    }
+                    else cout << res.first << ";" << res.second.time << "\n";
+                }
             }
             cout << "\n";
         }
     }
+    return 1;
 }

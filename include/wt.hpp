@@ -1,7 +1,5 @@
+#include "wtInterface.hpp"
 #include "bitvectorj.hpp"
-
-#include <iostream>
-#include <map>
 
 using namespace std;
 
@@ -16,7 +14,10 @@ typedef struct wtNode{
     string alphabet;
 }wtNode;
 
-class WaveletTree {
+class WaveletTree : public WTinterface {
+    private:
+    size_t _select(uint64_t c, size_t i, wtNode* node) const;
+    
     protected:
     wtNode* root;
 
@@ -25,9 +26,9 @@ class WaveletTree {
     WaveletTree(string S);
     wtNode* buildWT(string S, wtNode* dad);
 
-    char access(unsigned long long i);
-    unsigned long long rankc(char c, unsigned long long i);
-    unsigned long long selectc(char c,  size_t i, wtNode* Node);
+    uint64_t access(size_t i) const override;
+    size_t rank(uint64_t c, size_t i) const override;
+    size_t select(uint64_t c, size_t i) const override;
 
     void print();
     ~WaveletTree();
