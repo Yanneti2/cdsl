@@ -4,6 +4,7 @@ add_library(wavelet-tree_benchmark
 target_link_libraries(wavelet-tree_benchmark compact)
 
 add_executable(wavelet-benchmark
+    wavelet-tree_benchmark.cpp
     main.cpp
 )
 target_link_libraries(wavelet-benchmark compact

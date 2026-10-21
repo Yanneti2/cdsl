@@ -6,9 +6,6 @@ For more information on this implementation, access: [wavelet-tree documentation
 
 | Operation | Flag | Alt Flag | Return type |
 |---|---|---|---|
-| `rankc(char c, ULL i)` | `--rankc` | `-rc` | ULL with the number of appearences of that char until the position i (exclusive) |
-| `selectc(char c, size_t i, wtNode* node)` | `--selectc` | `-sc` | The j + 1 'th position of the j'th appearence of the given c char |
-| `access(ULL i)` | `--access` | `-acs` | The char presented in the original string on the i'th position |
 | `rank(uint64_t c, size_t i)` | `--rankc` + `--succinct` | `-rc` + `-s` | The number of occurences of the char c until the i'th -1 position (exclusive) | 
 | `select(uint64_t c,  size_t i)` | `--selectc` + `--succinct` | `-sc` + `s` | The size_t position of the i'th char c in the original string |
 | `access(size_t i)` | `--access` + `--succinct` | `-acs` + `s` | The char c preseneted in the i'th position of the original string |
@@ -23,6 +20,8 @@ By default, the benchmarks tests run the funcions with WaveletTree class for eac
 | `--succinct` | `-s` | Run the tests with only the WaveletTreeSuccint class |
 | `--both` | `-b` | Run the test with the WaveletTree and WaveletTreeSuccinct structures, making comparison easier |
 | `--all` | `-a` | Run the test to all functions for the, by default, WaveletTree class (can be modded by -b && -s) |
+| `--interquartile` | `-i` | Run the tests with the interquartile method |
+| `--mean` | `-m` | Run the tests with a simple average time result |
 
 If no flags were to be used to execute this executable, it should appear the error:
 
@@ -30,4 +29,12 @@ If no flags were to be used to execute this executable, it should appear the err
 terminate called after throwing an instance of 'std::invalid_argument'
   what():  No benchmark flags were provided, check this folder's README.md for more informations.
 Aborted
+```
+
+If no time running time measurement is to be determined, it should appear the error:
+
+```
+ terminate called after throwing an instance of 'std::invalid_argument'
+  what():  No time calculation method provided, check this folder's README.md for more informations.
+Aborted 
 ```

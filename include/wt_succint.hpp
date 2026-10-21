@@ -1,6 +1,7 @@
 #ifndef WT_SUCCINT
 #define WT_SUCCINT
 
+#include "wtInterface.hpp"
 #include "bitvectorj.hpp"
 #include "bitvector.hpp"
 #include "uvector.hpp"
@@ -11,7 +12,7 @@
 
 using namespace std;
 
-class WaveletTreeSuccint {
+class WaveletTreeSuccint : public WTinterface {
     private:
         BitVectorJ B;
         UVector alpha;
@@ -26,9 +27,9 @@ class WaveletTreeSuccint {
         WaveletTreeSuccint(const UVector &S, unsigned letter_size);
         ~WaveletTreeSuccint();
 
-        uint64_t access(size_t i) const;
-        size_t rank(uint64_t c, size_t i) const;
-        size_t select(uint64_t c, size_t i) const;
+        uint64_t access(size_t i) const override;
+        size_t rank(uint64_t c, size_t i) const override;
+        size_t select(uint64_t c, size_t i) const override;
 
         void print();
 };

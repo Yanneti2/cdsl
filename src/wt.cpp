@@ -78,7 +78,7 @@ wtNode* WaveletTree::getRoot(){
     return this->root;
 }
 
-char WaveletTree::access(ULL i) {
+uint64_t WaveletTree::access(size_t i) const {
     wtNode* CurN = this->root;
     ULL end = this->root->alphabet.size() - 1;
     ULL beg = 0;
@@ -99,14 +99,14 @@ char WaveletTree::access(ULL i) {
     return CurN->alphabet[0];
 }
 
-ULL WaveletTree::rankc(char c, ULL i) {
+size_t WaveletTree::rank(uint64_t c, size_t i) const {
     wtNode* CurN = this->root;
-    ULL CurI = i;
-    ULL beg = 0;
-    ULL end = this->root->alphabet.size() - 1;
+    size_t CurI = i;
+    size_t beg = 0;
+    size_t end = this->root->alphabet.size() - 1;
 
     while(beg != end) {
-        ULL mid = (beg + end)/2;
+        size_t mid = (beg + end)/2;
         if(c <= this->root->alphabet[mid]) {
             CurI = CurN->freq->rank0(CurI);
             CurN = CurN->lchild;
@@ -120,24 +120,28 @@ ULL WaveletTree::rankc(char c, ULL i) {
     }
     return CurI;
 }
+size_t WaveletTree::select(uint64_t c, size_t i) const {
+    if (!root) return -1;
+    return _select(c, i, root);
+}
 
 // returns the (j + 1)'th position of the j'th appearence of the given char
-ULL WaveletTree::selectc(char c,  size_t i, wtNode* node){
-    ULL beg = 0;
-    ULL end = node->alphabet.size() - 1;
+size_t WaveletTree::_select(uint64_t c, size_t i, wtNode* node) const {
+    size_t beg = 0;
+    size_t end = node->alphabet.size() - 1;
 
     if(beg == end){
         if (node->alphabet[0] != c) return -1;
         return i;
     }
         
-    ULL mid = end / 2;
+    size_t mid = end / 2;
     if(c <= node->alphabet[mid]) {
-        i = this->selectc(c, i, node->lchild);
+        i = this->_select(c, i, node->lchild);
         return node->freq->select0(i);
     }
     else {
-        i = this->selectc(c, i, node->rchild);
+        i = this->_select(c, i, node->rchild);
         return node->freq->select1(i);
     }
 }

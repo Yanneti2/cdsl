@@ -11,6 +11,7 @@
 using ULL = unsigned long long;
 using Clock = chrono::steady_clock;
 
+StatsConfig config;
 
 //---------------------------
 //          Parameters      |
@@ -99,7 +100,7 @@ void bench_op(const string &op, int order, ULL n,
     if (order <= NAIVE_MAX_ORDER && (naive || comparison))
     {
         vector<double> nsamples;
-        for (int i = 0; i < MIN_SAMPLES; i++)
+        for (int i = 0; i < config.min_samples; i++)
             nsamples.push_back(run_naive_benchmark(NP, op, idx, exps));
 
         nresults[op].insert({n, get_median(nsamples)});
@@ -108,18 +109,18 @@ void bench_op(const string &op, int order, ULL n,
 
     if (!naive || comparison)
     {
-        for (int w = 0; w < MIN_WARMUP_SAMPLES; w++)
+        for (int w = 0; w < config.min_warmup_samples; w++)
             run_compact_benchmark(P, op, idx, exps);
 
         int t = 0;
         bool ok = false;
-        while (t < MAX_ATTEMPTS)
+        while (t < config.max_attempts)
         {
             vector<double> samples;
-            for (int i = 0; i < MIN_SAMPLES; i++)
+            for (int i = 0; i < config.min_samples; i++)
                 samples.push_back(run_compact_benchmark(P, op, idx, exps));
 
-            Statistics s = calculate_interquartil(samples);
+            Statistics s = calculate_interquartil(samples, config);
             if (s.is_valid)
             {
                 results[op].insert({n, s});
