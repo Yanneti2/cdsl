@@ -5,6 +5,7 @@ add_subdirectory(RRR)
 add_subdirectory(wavelet-tree)
 add_subdirectory(parentheses-tree)
 add_subdirectory(permutation)
+add_subdirectory(bitvector)
 
 add_library(interquartil-stats
     interquartil-stats.cpp
