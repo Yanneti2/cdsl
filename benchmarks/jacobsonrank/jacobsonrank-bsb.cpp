@@ -88,11 +88,8 @@ int main(int argc, char *argv[]) {
     } else {
         cout << "\"Size\";\"Time\";\"BV_Memory\";\"RS_Time\";\"RS_Memory\";\"SS_Time\";\"SS_Memory\"\n";
     }
-    for (unsigned long long order = 1; order < 65537; order += 1) {
-
-
+    for (size_t size = 16; size < (1 << 18) + 1; size += 16) {
         srand(time(0));
-        unsigned long long size = order * 16;
         size_t mem_rank_structure_0 = malloc_count_current();
         BitVectorJ B(size, 0);
         for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
