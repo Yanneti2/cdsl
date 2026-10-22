@@ -29,7 +29,7 @@ public:
     explicit BitVectorJ(size_t size, bool (*fn)(size_t, unsigned), unsigned d);
     explicit BitVectorJ(std::string s);
     explicit BitVectorJ(const BitVector &B);
-    ~BitVectorJ();
+    ~BitVectorJ() override;
 
     void init();
     bool is_initialized() const;
