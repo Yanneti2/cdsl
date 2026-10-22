@@ -157,7 +157,7 @@ plt <- ggplot(df, aes(
       y=.data[[y_axis]],
       color=Operation,
       shape=Operation)
-) + geom_point()
+) + geom_point(size = 0.1)
 
 
 
