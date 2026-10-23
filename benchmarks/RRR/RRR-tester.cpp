@@ -13,7 +13,13 @@ using namespace std;
 
 int main(void) {
     srand(time(0));
-    cout << "\"Size\";\"Time\";\"Memory\"\n";
+    // CSV no formato:
+    // tamanho do bitvector;
+    // Tempo medio por operacao;
+    // Tempo para construir estrutura de select;
+    // Memoria usada pela estrutura de select;
+    // Tempo de construcao da estrutura de select
+    cout << "\"Size\";\"Time\";\"RS_Time\";\"RS_Memory\";\"SS_Memory\";\"SS_Time\"\n";
     long double ns_time = 0;
     for (unsigned long long size = 1000; size < 10000000000; size *= 10) {
         size_t initial_mem_usage = malloc_count_current();
@@ -30,9 +36,21 @@ int main(void) {
                 B.append0();
             }
         }
+
+        auto start = std::chrono::high_resolution_clock::now();
         RRR R(&B);
-        size_t mem_usage = malloc_count_current() - initial_mem_usage;
-        
+        auto rank_time = (std::chrono::high_resolution_clock::now() - start).count()/(long double)1000000;
+
+        size_t rank_m_usage = malloc_count_current() - initial_mem_usage;
+
+
+        // TODO: Implementar estrutura de select no RRR
+        // start = std::chrono::high_resolution_clock::now();
+        // R.build_select(&B)
+        // auto select_time = (start - std::chrono::high_resolution_clock::now()).count()/(long double)1000000;
+        auto select_time = -1;
+        auto select_m_usage = -1;
+
         for(auto j = 0; j < 1000000; j++){
             unsigned long long index = rand() % B.size();
             auto start = std::chrono::high_resolution_clock::now();
@@ -40,7 +58,12 @@ int main(void) {
             auto end = std::chrono::high_resolution_clock::now();
             ns_time += (end - start).count();
         }
-        std::cout << size << ";" << (ns_time/(long double)1000000) << ";" << mem_usage << "\n";
+        std::cout << size << ";";
+        std::cout << (ns_time/(long double)1000000) << ";";
+        std::cout << rank_time << ";";
+        std::cout << rank_m_usage << ";";
+        std::cout << select_time << ";";
+        std::cout << select_m_usage << "\n";
     }
 }
 
