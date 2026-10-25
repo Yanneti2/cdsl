@@ -50,4 +50,14 @@ int main(int argc, char *argv[])
 
     assert(string==string2);
     assert(string[4]==string2[4]);
+
+
+    BitVector B(1000, 1);
+
+
+    B.set(0b1001, 4, 13);
+    B.set(0b1001, 4, 18);
+    B.set(0b1001, 4, 62);
+
+    B.print();
 }

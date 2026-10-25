@@ -85,7 +85,7 @@ BitVector::BitVector(std::string s) {
     if (!A) 
         throw new std::bad_alloc();
 
-    for (unsigned long i = 0; i < s.size(); i++) {
+    for (size_t i = 0; i < s.size(); i++) {
         if (s[i] == '0')
             this->set0(i);
         else if (s[i] == '1')
@@ -122,7 +122,7 @@ BitVector::BitVector(size_t size, int init) {
 
     if (init == 0) return;
 
-    for (unsigned long i = 0; i < _cap - 1; i++) {
+    for (size_t i = 0; i < _cap - 1; i++) {
         A[i] = -1;
     }
     A[_cap - 1] = ~bitMask(_size % NBITS);
@@ -159,7 +159,7 @@ BitVector::BitVector(size_t size, bool (*fn)(size_t)) {
     if (!A)
         throw new std::bad_alloc();
     
-    for (unsigned long i = 0; i < _size; i++) {
+    for (size_t i = 0; i < _size; i++) {
         if (fn(i))
             this->set1(i);
     }
@@ -289,15 +289,36 @@ void BitVector::append0() {
 **/
 void BitVector::append1() {
 
-    if (_size == NBITS * _cap)
-    {
-        unsigned long new_cap = ceil(_cap * 1.5);
+    if (_size == NBITS * _cap) {
+        size_t new_cap = ceil(_cap * 1.5);
         if (new_cap <= _cap)
             new_cap = _cap + 1;
         grow(new_cap);
     }
 
     set1(_size++);
+}
+
+void BitVector::append(TYPE x, unsigned size) {
+    if (_size + size > NBITS * _cap) {
+        grow(ceil(_cap * 1.5));
+    }
+    set(x, size, _size);
+    _size += size;
+}
+
+void BitVector::set(TYPE x, unsigned size, size_t i) {
+    x &= bitMask(NBITS - size);
+    size_t pos = i / NBITS;
+    size_t offset = i % NBITS;
+    size_t free_space = NBITS - offset;
+    if (free_space < size) {
+        A[pos] = (A[pos] & ~bitMask(offset)) | (x >> (size - free_space));
+        A[pos + 1] = (A[pos + 1] & bitMask(size - free_space)) | (x << (NBITS - size + free_space));
+        return;
+    }
+
+    A[pos] = (A[pos] & ~(bitMask(offset) ^ bitMask(size + offset))) | (x << (free_space - size));
 }
 
 size_t BitVector::size() const { return _size; }

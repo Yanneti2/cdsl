@@ -11,25 +11,11 @@ long long UVector::operator[](size_t i) const {
 }
 
 void UVector::push_back(long long x) {
-    unsigned long long b = 0x8000000000000000 >> (8 * sizeof(long long) - word_size);
-    for (; b; b >>= 1) {
-        if (b & x)
-            B.append1();
-        else 
-            B.append0();
-    }
+    B.append(x, word_size);
 }
 
 void UVector::set(size_t i, long long x) {
-    unsigned long long b = 0x8000000000000000 >> (8 * sizeof(x) - word_size);
-    i *= word_size;
-    for (; b; b >>= 1) {
-        if (b & x)
-            B.set1(i);
-        else 
-            B.set0(i);
-        i++;
-    }
+    B.set(x, word_size, i * word_size);
 }
 
 size_t UVector::size() const {
