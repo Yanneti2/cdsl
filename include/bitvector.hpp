@@ -42,8 +42,11 @@ public:
 
     void append0();
     void append1();
+    void append(TYPE x, unsigned size);
+
     void set0(size_t i);
     void set1(size_t i);
+    void set(TYPE x, unsigned size, size_t i);
 
     bool operator==(const BitVector &B) const;
     BitVector &operator=(const BitVector &B);
@@ -65,7 +68,6 @@ public:
     void put(BitVector *B, unsigned long i);
     BitVector *slice(unsigned long i, unsigned long k) const;
     void put(BitVector *SRC, unsigned long k, unsigned long i);
-    void append(unsigned long number, unsigned long k);
 };
 
 #endif
