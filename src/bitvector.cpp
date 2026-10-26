@@ -18,6 +18,8 @@
 #include <cassert>
 #include <cmath>
 
+using namespace std;
+
 #ifndef bitMask
 #ifdef IS32BIT
 #define bitMask(i) bitMask32[(i)]
@@ -327,7 +329,10 @@ size_t BitVector::cap() const { return _cap; }
 /**
     Coloca uma sequencia predefinida de bits ao final do bitvector.
 **/
-void BitVector::extend(BitVector* B) {
+void BitVector::extend(BitVector* B)
+{
+    if (B->size() == 0) return;
+
     if (_cap == 0) _cap = 1;
 
     while(!((_size + B->size() + NBITS - 1) / NBITS <= _cap))
@@ -342,7 +347,25 @@ void BitVector::extend(BitVector* B) {
     short bitsFaltando = NBITS - bitsSobrando;
     short cur = _size / NBITS;
 
+    cerr << "this = " << this << '\n';
+    cerr << "B = " << B << '\n';
+
+    cerr << "_size = " << _size
+        << ", B->size() = " << B->size() << '\n';
+
+    cerr << "_cap = " << _cap
+        << ", NBITS = " << NBITS << '\n';
+
+    cerr << "bitsSobrando = " << bitsSobrando
+        << ", cur = " << cur << '\n';
+
+    cerr << "A = " << static_cast<void*>(A)
+        << ", B->A = " << static_cast<void*>(B->A) << '\n';
+
+    cerr << "source words = "
+        << (B->size() + NBITS - 1) / NBITS << '\n';
     for (unsigned long long i = 0; i < (B->size() + NBITS - 1) / NBITS; i++) {
+        cerr << "i = " << i << ", cur = " << cur << '\n';
         if (bitsSobrando == 0) {
             this->A[cur] = B->A[i];
             cur++;
