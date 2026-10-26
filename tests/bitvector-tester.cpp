@@ -20,18 +20,18 @@ int main(int argc, char *argv[])
         if (j%2==1) BV.append1();
         else BV.append0();
     }
-    BV.print();
+    BV.print(false);
     BitVector BV2 = BitVector();
     for (int j = 0; j < 8; j++) {
         BV2.append1();
     }
     std::cout << "BV2:" << std::endl;
-    BV2.print();
+    BV2.print(false);
 
     // Put does not exist anymore
     // BV.put(BV2, 4);
     // std::cout << "BV2 putted into [4] of BV:" << std::endl;
-    BV.print();
+    BV.print(false);
 
     //----------------------------------
     // 		Constructors	       |
@@ -59,5 +59,5 @@ int main(int argc, char *argv[])
     B.set(0b1001, 4, 18);
     B.set(0b1001, 4, 62);
 
-    B.print();
+    B.print(false);
 }

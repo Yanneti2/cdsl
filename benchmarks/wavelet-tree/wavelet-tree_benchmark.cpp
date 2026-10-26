@@ -77,26 +77,23 @@ Statistics run_interquartile_benchmark(StatsConfig config, WTinterface &wt, char
         t += 1;
     } while (t < config.max_attempts);
 
-    if (t == config.max_attempts)
-    {
-        if (operation == 'r'){
-            throw invalid_argument("WT rankc operation failed for interquartile metrics.");
-            // else
-            //     throw invalid_argument("WTS rank operation failed for interquartile metrics.");
-        }
-        else if (operation == 's'){
-            throw invalid_argument("WT selectc operation failed for interquartile metrics.");
-            // else
-            //     throw invalid_argument("WTS select operation failed for interquartile metrics.");
-        }
-        else if (operation == 'a'){
-            throw invalid_argument("WT access operation failed for interquartile metrics.");
-            // else
-            //     throw invalid_argument("WTS access operation failed for interquartile metrics.");
-        }
-        else
-            terminate();
+    if (operation == 'r'){
+        throw invalid_argument("WT rankc operation failed for interquartile metrics.");
+        // else
+        //     throw invalid_argument("WTS rank operation failed for interquartile metrics.");
     }
+    else if (operation == 's'){
+        throw invalid_argument("WT selectc operation failed for interquartile metrics.");
+        // else
+        //     throw invalid_argument("WTS select operation failed for interquartile metrics.");
+    }
+    else if (operation == 'a'){
+        throw invalid_argument("WT access operation failed for interquartile metrics.");
+        // else
+        //     throw invalid_argument("WTS access operation failed for interquartile metrics.");
+    }
+    else
+        terminate();
 }
 
 double run_mean_benchmark(WTinterface &wt, char operation, vector<pair<size_t, size_t>> & indexes)
