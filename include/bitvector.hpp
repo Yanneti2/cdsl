@@ -52,7 +52,7 @@ public:
     TYPE accessWord(size_t i) const;
     TYPE accessWord(size_t i, unsigned wordSize) const;
 
-    void print() const;
+    void print(bool verbose) const;
 
     size_t naive_popcount() const;
     size_t naive_rank0(size_t i) const;

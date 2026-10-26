@@ -159,7 +159,7 @@ void WaveletTree::print() {
         //     }cout << endl;
         // }
         if(cur->alphabet.size() == 1)cout << cur->alphabet[0] << endl;
-        else cur->freq->print();
+        else cur->freq->print(false);
 		if(cur->lchild)q.push(cur->lchild);
 		if(cur->rchild)q.push(cur->rchild);
 	}

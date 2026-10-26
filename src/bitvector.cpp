@@ -366,12 +366,12 @@ void BitVector::put(BitVector* B, unsigned long i) {
 /**
    \brief Print the bit array on the screen.
 **/
-void BitVector::print() const {
-    printf("size: %ld, cap: %ld\n", _size, _cap);
+void BitVector::print(bool verbose) const {
+    if (verbose) printf("size: %ld, cap: %ld\n", _size, _cap);
     for (size_t i = 0; i < _size; i++) {
         printf("%d", (*this)[i]);
     }
-    printf("\n\n");
+    if (verbose) printf("\n\n");
 }
 
 size_t BitVector::naive_popcount() const {
