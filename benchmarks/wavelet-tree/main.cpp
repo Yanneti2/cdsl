@@ -107,6 +107,8 @@ int main(int argc, char* argv[])
         else if (influenza)
             f = read_file(rel_path + "influenza");
 
+        if (verbose) cout << "Read file...\n";
+
         unsigned long long fsize = f.size();
         WaveletTree wt(f);
 
@@ -135,16 +137,20 @@ int main(int argc, char* argv[])
         rt += run_mean_benchmark(wt, 'r', indexes);
         st += run_mean_benchmark(wt, 's', indexes);
 
-        cout << "For the dataset: ";
+        if (verbose)
+        {
+            cout << "For the dataset: ";
 
-        if (dna) cout << "'dna' :\n";
-        else if (influenza) cout << "'influenza' :\n";
-        else if (proteins) cout << "'proteins' :\n";
+            if (dna) cout << "'dna' :\n";
+            else if (influenza) cout << "'influenza' :\n";
+            else if (proteins) cout << "'proteins' :\n";
 
-        cout << "Average time for rank_c operation: " << rt << " ns\n" <<
-                "Average time for select_c operation: " << st << " ns\n" <<
-                "Average time for access operation: " << at << " ns\n\n";
-
+            cout << "Average time for rank_c operation: " << rt << " ns\n" <<
+                    "Average time for select_c operation: " << st << " ns\n" <<
+                    "Average time for access operation: " << at << " ns\n\n";
+        } else {
+            cout << rt << "\n" << st << "\n" << at << "\n";
+        }
         return 1;
     }
 
