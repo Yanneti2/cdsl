@@ -343,7 +343,7 @@ void BitVector::extend(BitVector* B) {
     short cur = _size / NBITS;
 
     for (unsigned long long i = 0; i < (B->size() + NBITS - 1) / NBITS; i++) {
-         if (bitsSobrando == 0) {
+        if (bitsSobrando == 0) {
             this->A[cur] = B->A[i];
             cur++;
         } else {

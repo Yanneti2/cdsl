@@ -40,7 +40,7 @@ void parse_args(int argc, char* argv[], uint64_t &args) {
         if (!strcmp(cur_arg, "-v") || !strcmp(cur_arg, "--verbose"))
             verbose = true;
 
-        if (!strcmp(cur_arg, "-om") || !strcmp(cur_arg, "omnia"))
+        if (!strcmp(cur_arg, "-om") || !strcmp(cur_arg, "--omnia"))
             omnia = true;
         else if (!strcmp(cur_arg, "-s") || !strcmp(cur_arg, "--succinct"))
             succinct = true;

@@ -73,6 +73,10 @@ void HuffmanTree::huffman_coding(BinaryTree::Node *root, map<char,BitVector*>& a
 		return;
 	}
 	BitVector* BL = new BitVector();
+	cout << "from: \n";
+	BL->print(true);
+	cout << "to: \n";
+	B->print(false);
 	BL->extend(B);
 	BL->append0();
 	

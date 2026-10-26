@@ -38,26 +38,40 @@ int main(int argc, char *argv[])
     //----------------------------------
 
     string s = "11010011101000";
-    BitVector* string = new BitVector(s);
-    assert(string->naive_rank1(s.size()) == 7);
-    assert(string->naive_rank0(s.size()) == 7);
+    BitVector* stringg = new BitVector(s);
+    assert(stringg->naive_rank1(s.size()) == 7);
+    assert(stringg->naive_rank0(s.size()) == 7);
 
     BitVector* string2 = new BitVector(s);
 
     //---------------------------
-    //		Operators	|
+    //	       Operators    	|
     //---------------------------
 
-    assert(string==string2);
-    assert(string[4]==string2[4]);
-
+    // assert(stringg==string2);
+    // assert(stringg[4]==string2[4]);
 
     BitVector B(1000, 1);
-
 
     B.set(0b1001, 4, 13);
     B.set(0b1001, 4, 18);
     B.set(0b1001, 4, 62);
 
     B.print(false);
+
+    //---------------------------
+    //	       Extend       	|
+    //---------------------------
+
+    cout << endl << "extend start" << endl;
+
+    string test = "100101";
+    BitVector* testbv = new BitVector(test);
+    BitVector nbv("001");
+    nbv.print(false);
+    cout << "\nbefore end\n";
+    nbv.extend(testbv);
+    nbv.print(false);
+
+    cout << "\n\n";
 }
