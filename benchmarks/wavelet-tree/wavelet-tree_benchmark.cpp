@@ -1,6 +1,7 @@
 #include "wavelet-tree_benchmark.hpp"
 #include "interquartil-stats.hpp"
 #include "wtInterface.hpp"
+#include "huffman.hpp"
 
 #include <chrono>
 #include <string>
@@ -119,4 +120,13 @@ string read_file(string path)
     file.close();
 
     return content;
+}
+
+map<char,BitVector*> get_huffman_encoding_dict(string original)
+{
+    BitVector* B = new BitVector(original);
+    HuffmanTree ht(original);
+    map<char,BitVector*> res;
+    ht.huffman_coding(ht.getRoot(), res, B);
+    return res;
 }

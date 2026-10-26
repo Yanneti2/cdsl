@@ -11,13 +11,16 @@
 
 bool interquartile = false;
 bool influenza = false;
+bool implicit = false;
 bool succinct = false;
 bool proteins = false;
 bool verbose = false;
 bool selectc = false;
+bool hcoding = false;
 bool access = false;
+bool omnia = false;
+bool naive = false;
 bool rankc = false;
-bool both = false;
 bool mean = false;
 bool all = false;
 bool dna = false;
@@ -37,11 +40,14 @@ void parse_args(int argc, char* argv[], uint64_t &args) {
         if (!strcmp(cur_arg, "-v") || !strcmp(cur_arg, "--verbose"))
             verbose = true;
 
-        // make so its necessary to specify the implementation (Explicit, implicit, succint) LATER!!!
-        if (!strcmp(cur_arg, "-s") || !strcmp(cur_arg, "--succinct"))
+        if (!strcmp(cur_arg, "-om") || !strcmp(cur_arg, "omnia"))
+            omnia = true;
+        else if (!strcmp(cur_arg, "-s") || !strcmp(cur_arg, "--succinct"))
             succinct = true;
-        else if (!strcmp(cur_arg, "-b") || !strcmp(cur_arg, "--both"))
-            both = true;
+        else if (!strcmp(cur_arg, "-n") || !strcmp(cur_arg, "--naive"))
+            naive = true;
+        else if (!strcmp(cur_arg, "-im") || !strcmp(cur_arg, "--implicit"))
+            implicit = true;
 
         if (!strcmp(cur_arg, "-i") || !strcmp(cur_arg, "--interquartile"))
             interquartile = true;
@@ -104,6 +110,17 @@ int main(int argc, char* argv[])
         unsigned long long fsize = f.size();
         WaveletTree wt(f);
 
+        if (verbose){
+            map<char, BitVector*> encodings = get_huffman_encoding_dict(f);
+            for (auto duo : encodings)
+            {
+                cout << duo.first << " - ";
+                duo.second->print(verbose=false);
+                cout << "\n";
+            }
+            cout << "\n\n";
+        }
+
         double at = 0; long double rt = 0; long double st = 0;
         vector<pair<size_t, size_t>> indexes(OPERATIONS);
 
@@ -135,7 +152,7 @@ int main(int argc, char* argv[])
         throw invalid_argument("No time calculation method provided, check this folder's README.md for more informations.");
 
     if (verbose) cout << "The following tests were made in a order 3-8 BitVector such that each and every operation for index [0...n-1] was made in random order.\n\n";
-    else if (!verbose && !both) cout << "\"Size\";\"Time\"\n";
+    else if (!verbose && !((naive != succinct) != implicit)) cout << "\"Size\";\"Time\"\n";
 
     for (size_t order = 3; order < 9; order++)
     {
@@ -153,6 +170,18 @@ int main(int argc, char* argv[])
         WaveletTree wt(s);
         WaveletTreeSuccint wts(s);
 
+        if (verbose)
+        {
+            map<char, BitVector*> encodings = get_huffman_encoding_dict(s);
+            for (auto duo : encodings)
+            {
+                cout << duo.first << " - ";
+                duo.second->print(verbose=false);
+                cout << "\n";
+            }
+            cout << "\n\n";
+        }
+
         vector<char> operations;
 
         if (all || rankc) operations.push_back('r');
@@ -167,22 +196,22 @@ int main(int argc, char* argv[])
         {
             if (interquartile)
             {
-                if (!succinct || both)
+                if (!succinct || omnia)
                     wtres[cur_op][n].stats = run_interquartile_benchmark(config, wt, cur_op, rand_index);
-                if (succinct || both)
+                if (succinct || omnia)
                     wtsres[cur_op][n].stats = run_interquartile_benchmark(config, wts, cur_op, rand_index);
             }
             else if (mean)
             {
-                if (!succinct || both)
+                if (!succinct || omnia)
                     wtres[cur_op][n].time = run_mean_benchmark(wt, cur_op, rand_index);
-                if (succinct || both)
+                if (succinct || omnia)
                     wtsres[cur_op][n].time = run_mean_benchmark(wts, cur_op, rand_index);
             }
         }
     }
     if (verbose) cout << "\n\n";
-    if (!succinct)
+    if (naive || omnia || (!succinct && !implicit))
     {
         for (auto el : wtres)
         {
@@ -213,7 +242,7 @@ int main(int argc, char* argv[])
             cout << "\n";
         }
     }
-    if (succinct || both) {
+    if (succinct || omnia) {
         for (auto el : wtsres)
         {
             for (auto res : el.second)
