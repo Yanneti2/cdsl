@@ -191,12 +191,8 @@ int main(int argc, char* argv[])
         vector<char> operations;
 
         if (all || rankc) operations.push_back('r');
-        else if (all || selectc) operations.push_back('s');
-        else if (all || access) operations.push_back('a');
-
-        for (auto a : operations)
-            cout << a;
-        cout << '\n';
+        if (all || selectc) operations.push_back('s');
+        if (all || access) operations.push_back('a');
 
         for (char cur_op : operations)
         {
