@@ -72,30 +72,29 @@ WaveletTreeImplicit::WaveletTreeImplicit(string S) : V()
 
 uint64_t WaveletTreeImplicit::access(size_t i) const
 {
-    size_t end = alpha.size();
+    size_t end = alpha.size() - 1;
     size_t cindex = i;
     size_t beg = 0;
     size_t it = 0;
 
-    BitVectorJ* cbv = V[it];
-
-    while (beg != end)
+    while (beg < end)
     {
-        cbv = V[it];
+        BitVectorJ* cbv = V[it];
+        size_t mid = (beg + end)/2;
 
         if ((*cbv)[cindex] == 0)
         {
             cindex = cbv->rank0(cindex);
             it = 2*it + 1;
-            end = (beg + end)/2;
+            end = mid;
         } 
         else{
             cindex = cbv->rank1(cindex);
             it = 2*it + 2;
-            beg = ((beg + end)/2) + 1;
+            beg = mid + 1;
         }
     }
-    return alpha[beg - 1];
+    return alpha[beg];
 }
 
 
