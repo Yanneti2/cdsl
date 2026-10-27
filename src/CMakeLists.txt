@@ -9,6 +9,7 @@ add_library(compact
         huffman.cpp
         wt.cpp
         wt_succint.cpp
+        wt_implicit.cpp
         uvector.cpp
         permutation.cpp
 	bitvectorBS.cpp
