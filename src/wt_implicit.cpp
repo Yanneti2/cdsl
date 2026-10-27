@@ -110,14 +110,14 @@ size_t WaveletTreeImplicit::rank(uint64_t c, size_t i) const
     
     while(beg + 1 != end)
     {
-        // if (it > V.size()) break;
+        if (it >= V.size()) break;
 
         cbv = V[it];
         size_t mid = (beg + end)/2;
 
         // cout << endl << beg << " " << end << " " << mid << " " << cindex << " \n";
 
-        if(c <= alpha[mid])
+        if(c < alpha[mid])
         {
             cindex = cbv->rank0(cindex);
             it = 2*it + 1;
@@ -126,7 +126,7 @@ size_t WaveletTreeImplicit::rank(uint64_t c, size_t i) const
         else {
             cindex = cbv->rank1(cindex);
             it = 2*it + 2;
-            beg = mid + 1;
+            beg = mid;
         }
     }
     return cindex;
