@@ -1,8 +1,9 @@
 #include "wt_implicit.hpp"
-#include "bitvector.hpp"
+#include "wt_succint.hpp"
 #include "wt.hpp"
 
 #include <iostream>
+#include <cassert>
 
 using namespace std;
 
@@ -37,8 +38,6 @@ int main (void){
 	cout << "Select(L,1): " << wt2->select('l', 1) << endl;
 	cout << "Select(S,4): " << wt2->select('s', 4) << endl << endl;
 
-	delete wt;
-
 	cout << "mississippi\n\n";
 
 	WaveletTreeImplicit* wti = new WaveletTreeImplicit("mississippi");
@@ -49,6 +48,7 @@ int main (void){
 		 << endl << "Acesso em 8: " << (char)wti->access(8) // p
 		 << endl << endl;
 
+	cout << "Rank(M,1): " << wti->rank('m',1) << endl;  // 1
 	cout << "Rank(S,6): " << wti->rank('s',6) << endl;  // 3
 	cout << "Rank(I,6): " << wti->rank('i',7) << endl;  // 2
 	cout << "Rank(I,10): "<< wti->rank('i',10) << endl; // 3
@@ -61,13 +61,46 @@ int main (void){
 	cout << "Select(I,4): " << wti->select('i', 4) << endl;
 	cout << "Select(S,4): " << wti->select('s', 4) << endl << endl;
 
-	delete wti;
-
 	cout << "\nabracadabra\n\n";
 
 	WaveletTreeImplicit* wtii = new WaveletTreeImplicit("abracadabra");
 	wtii->print();
 	delete wtii;
+
+	WaveletTreeSuccint* wts = new WaveletTreeSuccint("mississippi");
+
+	cout << "SELECT(P,1): " << wts->select('p',1) << endl;
+
+	// ======================================================================|
+	// 	 ASSERTIVENESS AND CORRECTNESS OF THE IMPLEMENTATIONS IN COMPARISON  |
+	// ======================================================================|
+
+	string s = "mississippi";
+	int n = s.size();
+
+	for (int i = 0; i < n; i++) {
+        assert(wt->access(i) == wti->access(i));
+        assert(wt->access(i) == wts->access(i));
+    }
+
+    for (char c : string("imps"))
+	{
+        for (int i = 0; i <= n; i++)
+		{
+            assert(wt->rank(c, i) == wti->rank(c, i));
+            assert(wt->rank(c, i) == wts->rank(c, i));
+        }
+
+        int count = wt->rank(c, n);
+        for (int k = 1; k <= count; k++)
+		{
+            assert(wt->select(c, k) == wti->select(c, k));
+            assert(wt->select(c, k) == wts->select(c, k));
+        }
+    }
+	delete wt;
+	delete wti;
+	delete wts;
 
 	return 0;
 }
