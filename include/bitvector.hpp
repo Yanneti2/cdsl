@@ -5,7 +5,7 @@
 #ifndef BITVECTOR
 #define BITVECTOR
 
-#define NBITS __WORDSIZE
+#define NBITS 64
 
 #if NBITS == 64
 #define IS64BIT

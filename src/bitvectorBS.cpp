@@ -8,6 +8,10 @@
 
 #include "bitvectorBS.h"
 
+#ifndef bitMask
+#define bitMask(i) mask10[(i)]
+#endif
+
 const uint64_t mask10[65] = {
   0x0000000000000000,0x8000000000000000,0xC000000000000000,0xE000000000000000,
   0xF000000000000000,0xF800000000000000,0xFC00000000000000,0xFE00000000000000,
@@ -190,6 +194,14 @@ unsigned bitvectorBS::access(uint64_t i) {
   return 1;
 }
 
+/**
+   \brief Return 0 if V[i] == 0 or 1 if V[i] == 1.
+
+   If i > |B|-1 then the behavior is undefined.
+**/
+unsigned bitvectorBS::operator[](uint64_t i) const {
+    return (B[i / NBITS] & (bitMask(i % NBITS) ^ bitMask(i % NBITS + 1))) ? 1 : 0;
+}
 
 
 /**

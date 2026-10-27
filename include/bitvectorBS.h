@@ -49,6 +49,7 @@ class bitvectorBS {
   void preprocess();
 
   unsigned access(uint64_t i);
+  unsigned operator[](uint64_t i) const;
 
   uint64_t rank0(uint64_t i);
   uint64_t rank1(uint64_t i);
