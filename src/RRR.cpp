@@ -100,7 +100,7 @@ RRR::RRR(BitVector *B, bool fixSizeToWordSize) {
     vector<TYPE> pattern_to_class(1ULL << K_size, 0);
     lookuptable.assign(K_size + 1, vector<TYPE>());
     for (TYPE p = 0; p < (1ULL << K_size); p++) {
-        unsigned c = __popcount(p);
+        unsigned c = std::__popcount(p);
         pattern_to_class[p] = lookuptable[c].size();
         lookuptable[c].push_back(p);
     }
@@ -124,7 +124,7 @@ RRR::RRR(BitVector *B, bool fixSizeToWordSize) {
             }
         }
 
-        this->K[j] = __popcount(chunk);
+        this->K[j] = std::__popcount(chunk);
         offsets[j] = pattern_to_class[chunk];
         absolute += this->K[j];
         relative += this->K[j];
@@ -143,7 +143,7 @@ unsigned long long RRR::rank1(unsigned long long i) {
     const unsigned long long j = i / K_size;
     const unsigned r = i % K_size;
     const TYPE chunk = lookuptable[K[j]][offsets[j]];
-    return partial_ranks[j / K_per_block] + block_ranks[j] + __popcount(chunk >> (K_size - r));
+    return partial_ranks[j / K_per_block] + block_ranks[j] + std::__popcount(chunk >> (K_size - r));
 }
 
 unsigned long long RRR::rank0(unsigned long long i) {
