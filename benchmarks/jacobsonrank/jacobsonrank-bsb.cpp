@@ -110,8 +110,8 @@ int main(int argc, char *argv[]) {
         ss_start = std::chrono::high_resolution_clock::now();
         #ifdef selectstructure
         if (select0) {
-                        B.build_select0();
-j        } else if (select1) {
+            B.build_select0();
+        } else if (select1) {
             B.build_select1();
         }
         #endif
