@@ -14,8 +14,8 @@ using namespace std;
 void randomize_bitvector(bitvectorBS &B) {
     for (size_t i = B.size(); i > 0; i--) {
         size_t j = rand() % i;
-        int aux = B.access(i - 1);
-        if (B.access(j)) {
+        int aux = B[i - 1];
+        if (B[j]) {
             B.set(i - 1);
         } else {
             B.reset(i - 1);
