@@ -82,11 +82,11 @@ int main(int argc, char *argv[]) {
         srand(time(0));
         size_t mem_rank_structure_0 = malloc_count_current();
         bitvectorBS B(size);
-        B.preprocess();
         for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
             B.set(i);
         }
         randomize_bitvector(B);
+        B.preprocess();
         size_t mem_rank_structure_1 = malloc_count_current();
 
         // std::chrono::high_resolution_clock::time_point init_start;
