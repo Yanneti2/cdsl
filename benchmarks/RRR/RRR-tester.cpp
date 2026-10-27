@@ -54,7 +54,7 @@ int main(void) {
 
 
        start = std::chrono::high_resolution_clock::now();
-        for(uint64_t j = 0; j < 10000000000; j++){
+        for(uint64_t j = 0; j < 1000000000000000; j++){
             unsigned long long index = rand() % B.size();
             auto start = std::chrono::high_resolution_clock::now();
             R.rank1(index);
