@@ -60,7 +60,7 @@ int main(void) {
             R.rank1(index);
        }
        auto end = std::chrono::high_resolution_clock::now();
-       ns_time += (end - start).count();
+       ns_time = (end - start).count();
 
         std::cout << size << ";";
         std::cout << (ns_time/(long double)1000000) << ";";
