@@ -25,10 +25,6 @@ bool randomize_bit(size_t i) {
     return rand() % 2 == 0;
 }
 
-int main(int argc, char *argv[])
-{
-    if (argc <= 1)
-        throw invalid_argument("No benchmark flags were provided, check this folder's README.md for more informations.");
 
 bool randomize_bit_d(size_t i, unsigned d) {
     return rand() % 10000 < d;
@@ -46,9 +42,11 @@ int main(int argc, char *argv[]) {
     unsigned dens = 5000;
 
     long int dummy = 0;
-    string operation;
     bool d = false;
-    unsigned dens;
+    if (argc <= 1)
+    {
+        throw invalid_argument("No benchmark flags were provided, check this folder's README.md for more informations.");
+    }
     for (int i = 0; i < argc; i++) {
         if (std::strcmp(argv[i], "-v") == 0 || std::strcmp(argv[i], "--verbose") == 0)
             verbose = true;
@@ -105,8 +103,9 @@ int main(int argc, char *argv[]) {
             else
                 B1.append0();
         }
+        
 
-        BitVectorJ B1(size, randomize_bit_d, dens);
+
         B1.init();
         
         #ifdef selectstructure
