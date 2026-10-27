@@ -21,7 +21,7 @@ int main(void) {
     // Tempo de construcao da estrutura de select
     cout << "\"Size\";\"Time\";\"RS_Time\";\"RS_Memory\";\"SS_Memory\";\"SS_Time\"\n";
     long double ns_time = 0;
-    for (unsigned long long size = 1000; size < 10000000000; size *= 10) {
+    for (unsigned long long size = 1000; size < 1000000; size *= 10) {
         size_t initial_mem_usage = malloc_count_current();
 
 
@@ -45,9 +45,11 @@ int main(void) {
 
 
         // TODO: Implementar estrutura de select no RRR
+        // initial_mem_usage = malloc_count_current();
         // start = std::chrono::high_resolution_clock::now();
-        // R.build_select(&B)
+        // R.build_select(&B);
         // auto select_time = (start - std::chrono::high_resolution_clock::now()).count()/(long double)1000000;
+        // auto select_m_usage = malloc_count_current() - initial_mem_usage;
         auto select_time = -1;
         auto select_m_usage = -1;
 

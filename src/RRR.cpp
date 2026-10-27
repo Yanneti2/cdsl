@@ -79,57 +79,71 @@ unsigned long long binary_search(T *V, T target, unsigned long long beginning, u
     }
 }
 RRR::RRR(BitVector *B, bool fixSizeToWordSize) {
-    block_size = ceil(log2(B->size())) / 2 * floor(log2(B->size()));
-    total_blocks = (B->size() + block_size - 1) / block_size;
-    partial_ranks = (unsigned long long *) malloc(total_blocks * sizeof(unsigned long long));
+    const unsigned long long n = B->size();
+    const unsigned long long lg = n > 1 ? (unsigned long long) ceil(log2(n)) : 1;
 
-    K_size = ceil(log2(B->size())) / 2;
-    K_per_block = block_size / K_size;
-    total_K = (B->size() + K_size - 1) / K_size;
-    this->K = (uint16_t *) calloc(total_K, sizeof(uint16_t));
-    offsets = (uint16_t *) malloc(total_K * sizeof(uint16_t));
+    // Chunks (small blocks) of ~(log n)/2 bits; superblocks of ~log n chunks (~(log^2 n)/2 bits).
+    K_size = lg / 2 > 0 ? lg / 2 : 1;
+    K_per_block = lg;
+    block_size = (unsigned long long) K_size * K_per_block;
 
-    vector<TYPE> next(K_size + 1, 0);
-    vector<TYPE> pattern_to_class(1 << (K_size), 0);
-    for (TYPE i = 0; i < (1 << K_size); i++) {
-        unsigned long long popcount = __popcount(i);
-        if (popcount <= lookuptable.size()) {
-            lookuptable.push_back(vector<TYPE>());
-        }
+    total_K = (n + K_size - 1) / K_size;
+    total_blocks = (n + block_size - 1) / block_size;
 
-        lookuptable[popcount].push_back(i);
-        pattern_to_class[i] = next[__popcount(i)];
-        next[__popcount(i)] += 1;
+    // +1 sentinel entries so rank1(n) is valid even when n is a multiple of K_size / block_size.
+    partial_ranks = (unsigned long long *) calloc(total_blocks + 1, sizeof(unsigned long long));
+    block_ranks = (uint16_t *) calloc(total_K + 1, sizeof(uint16_t));
+    this->K = (uint16_t *) calloc(total_K + 1, sizeof(uint16_t));
+    offsets = (uint16_t *) calloc(total_K + 1, sizeof(uint16_t));
+
+    // lookuptable[c][o] = o-th pattern of K_size bits with popcount c (RRR class/offset decoding).
+    vector<TYPE> pattern_to_class(1ULL << K_size, 0);
+    lookuptable.assign(K_size + 1, vector<TYPE>());
+    for (TYPE p = 0; p < (1ULL << K_size); p++) {
+        unsigned c = __popcount(p);
+        pattern_to_class[p] = lookuptable[c].size();
+        lookuptable[c].push_back(p);
     }
 
-    unsigned long long block_counter = 0;
-    for (size_t i = 0; i < total_K; i++) {
-        uint16_t K_counter = __popcount(B->accessWord(i, K_size));
-        this->K[i] = K_counter;
-        if (i % K_per_block == 0) {
-            this->partial_ranks[i / K_per_block] = block_counter;
+    unsigned long long absolute = 0;
+    unsigned long long relative = 0;
+    for (unsigned long long j = 0; j <= total_K; j++) {
+        if (j % K_per_block == 0) {
+            partial_ranks[j / K_per_block] = absolute;
+            relative = 0;
         }
-        block_counter += K_counter;
-        offsets[i] = pattern_to_class[B->accessWord(i, K_size) >> (NBITS - K_size)];
-    }
+        block_ranks[j] = relative;
 
+        TYPE chunk = 0;
+        if (j < total_K) {
+            if ((j + 1) * K_size <= n) {
+                chunk = B->accessWord(j, K_size);
+            } else {
+                for (unsigned long long b = j * K_size; b < (j + 1) * K_size; b++)
+                    chunk = (chunk << 1) | (b < n ? (*B)[b] : 0);
+            }
+        }
+
+        this->K[j] = __popcount(chunk);
+        offsets[j] = pattern_to_class[chunk];
+        absolute += this->K[j];
+        relative += this->K[j];
+    }
 }
 
 RRR::~RRR() {
     free(offsets);
     free(K);
+    free(block_ranks);
     free(partial_ranks);
 }
 
+// O(1): superblock rank + chunk rank inside the superblock + table lookup inside the chunk.
 unsigned long long RRR::rank1(unsigned long long i) {
-    unsigned long long K_pos = i / K_size;
-    unsigned long long block = i / block_size;
-    unsigned long long first_K = block * K_per_block;
-    unsigned long long rank = partial_ranks[block];
-    for (unsigned long long i = first_K; i < K_pos; i++) rank += K[i];
-    rank += __popcount(lookuptable[K[K_pos]][offsets[K_pos]] >> (K_size - i % K_size));
-
-    return rank;
+    const unsigned long long j = i / K_size;
+    const unsigned r = i % K_size;
+    const TYPE chunk = lookuptable[K[j]][offsets[j]];
+    return partial_ranks[j / K_per_block] + block_ranks[j] + __popcount(chunk >> (K_size - r));
 }
 
 unsigned long long RRR::rank0(unsigned long long i) {
@@ -175,6 +189,11 @@ void RRR::print() {
         cout << K[i] << " ";
     }
     std::cout << endl;
+    cout << "BLOCK RANKS: ";
+    for (unsigned long long i = 0; i < total_K; i++) {
+        cout << block_ranks[i] << " ";
+    }
+    cout << endl;
     cout << "PARTIAL RANKS: ";
     for (unsigned long long i = 0; i < total_blocks; i++) {
         cout << partial_ranks[i] << " ";
@@ -187,12 +206,6 @@ void RRR::print() {
             cout << j << " ";
     }
     cout << endl;
-    unsigned long long total_blocks;
-    unsigned long long *partial_ranks;
-    unsigned long long total_K;
-    uint16_t K_size;
-    uint16_t *K;
-    uint16_t K_per_block;
 }
 
 #undef bitMask

@@ -18,8 +18,6 @@ mkdir -p "$out_dir"
 # Generating the operation time graphs
 # --------------------------------------------------
 
-# Uncomment this section to generate operation-time graphs.
-#
 flags=(--y-zero --interval-x 0,1024 --interval-y 0,32)
 
 for i in "${!op[@]}"; do
