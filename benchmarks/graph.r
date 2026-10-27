@@ -195,7 +195,7 @@ parse_args <- function(args) {
 
 load_data <- function(config) {
     frames <- lapply(seq_along(config$datasets), function(i) {
-        d <- read.csv(config$datasets[i], sep = ";")
+        d <- read.csv(config$datasets[i], sep = ";", col_names=TRUE)
 
         missing_cols <- setdiff(c(config$x_axis, config$y_axis), names(d))
         if (length(missing_cols) > 0) {
