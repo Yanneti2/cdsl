@@ -34,3 +34,11 @@ else()
         message("Using log as jacobson block size")
     endif()
 endif()
+
+
+if (SELECTSTRUCTURE)
+    message("Using Structure to improve jacobson seletion operation time")
+    target_compile_definitions(compact PRIVATE selectstructure)
+else()
+    message("Not using improve jacobson seletion operation time")
+endif()
