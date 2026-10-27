@@ -10,7 +10,12 @@
 #   --interval-x a,b            fixed x range (also restricts fits / comparisons)
 #   --interval-y a,b            fixed y range
 #   --x-axis NAME               x column (default: Size)
-#   --y-axis NAME               y column (default: Time)
+#   --y-axis COL[,COL,...]      y column (default: Time); one for all datasets, or
+#                               one per dataset, so a single CSV can feed several
+#                               (e.g. BV_Memory,RS_Memory with the same file twice)
+#   --y-label TEXT              y axis title (default: derived from --y-axis)
+#   --legend TEXT               legend title (default: Operation), e.g. Structure
+#   --x-values a,b,c            with --bars: only draw groups at these x values
 #   -t, --title TEXT            plot title
 #   -o, --output FILE           output file (default: result.png)
 #   --fit m1,m2,...             fit one model per dataset (or one for all):
@@ -52,9 +57,16 @@ default_config <- function() {
         do_intersect_data = FALSE,
         min_run           = 1L,
         bars              = NULL,
-        baseline          = NULL
+        baseline          = NULL,
+        y_label           = NULL,
+        legend_title      = "Operation",
+        x_values          = NULL
     )
 }
+
+# Internal name of the column that holds each dataset's y values (each dataset
+# may take them from a different CSV column, see --y-axis).
+Y_COL <- "Y_VALUE"
 
 # flag -> list(type, config keys it sets)
 FLAG_SPECS <- list(
@@ -70,7 +82,10 @@ FLAG_SPECS <- list(
     "--title"          = list(type = "string",   keys = "graph_title"),
     "-t"               = list(type = "string",   keys = "graph_title"),
     "--x-axis"         = list(type = "string",   keys = "x_axis"),
-    "--y-axis"         = list(type = "string",   keys = "y_axis"),
+    "--y-axis"         = list(type = "csv",      keys = "y_axis"),
+    "--y-label"        = list(type = "string",   keys = "y_label"),
+    "--legend"         = list(type = "string",   keys = "legend_title"),
+    "--x-values"       = list(type = "numbers",  keys = "x_values"),
     "--interval-x"     = list(type = "interval", keys = "x_interval"),
     "--interval-y"     = list(type = "interval", keys = "y_interval"),
     "--fit"            = list(type = "csv",      keys = "fit_models"),
@@ -109,6 +124,13 @@ parse_flag_value <- function(type, value, flag) {
         string   = value,
         interval = parse_interval(value, flag),
         csv      = trimws(strsplit(value, ",", fixed = TRUE)[[1]]),
+        numbers  = {
+            v <- suppressWarnings(as.numeric(trimws(strsplit(value, ",", fixed = TRUE)[[1]])))
+            if (length(v) == 0 || any(!is.finite(v))) {
+                stop(paste(flag, "requires comma-separated numbers, e.g. 64,256,1024"))
+            }
+            v
+        },
         integer  = {
             n <- suppressWarnings(as.integer(value))
             if (is.na(n) || n < 1) stop(paste(flag, "requires an integer >= 1"))
@@ -150,9 +172,29 @@ validate_config <- function(config) {
         }
     } else if (!is.null(config$baseline)) {
         stop("--baseline only makes sense with --bars normalize")
+    } else if (!is.null(config$x_values)) {
+        stop("--x-values only makes sense with --bars")
     }
 
+    # --y-axis: one column for all datasets, or one column per dataset
+    if (!length(config$y_axis) %in% c(1, n)) {
+        stop("--y-axis needs one column for all datasets, or one per dataset (",
+             n, " here)")
+    }
+    config$y_axis <- rep(config$y_axis, length.out = n)
+    if (is.null(config$y_label)) config$y_label <- default_y_label(config$y_axis)
+
     config
+}
+
+# Axis title when --y-label is not given: the column name when all datasets use
+# the same one; otherwise the part after the prefix (BV_Memory, RS_Memory ->
+# "Memory") when that is shared; otherwise "Value".
+default_y_label <- function(cols) {
+    if (length(unique(cols)) == 1) return(cols[1])
+
+    tails <- unique(sub("^[^_]*_", "", cols))
+    if (length(tails) == 1) tails else "Value"
 }
 
 parse_args <- function(args) {
@@ -195,13 +237,25 @@ parse_args <- function(args) {
 
 load_data <- function(config) {
     frames <- lapply(seq_along(config$datasets), function(i) {
-        d <- read.csv(config$datasets[i], sep = ";", header = TRUE)
+        raw  <- read.csv(config$datasets[i], sep = ";")
+        ycol <- config$y_axis[i]
 
-        missing_cols <- setdiff(c(config$x_axis, config$y_axis), names(d))
+        missing_cols <- setdiff(c(config$x_axis, ycol), names(raw))
         if (length(missing_cols) > 0) {
-            stop(sprintf("%s: missing column(s) %s", config$datasets[i],
-                         paste(missing_cols, collapse = ", ")))
+            stop(sprintf("%s: missing column(s) %s (available: %s)",
+                         config$datasets[i], paste(missing_cols, collapse = ", "),
+                         paste(names(raw), collapse = ", ")))
         }
+
+        # Keep only what we plot, so unrelated columns can't cause conflicts.
+        d <- data.frame(
+            clean_numeric(raw[[config$x_axis]], config$datasets[i], config$x_axis),
+            clean_numeric(raw[[ycol]],          config$datasets[i], ycol)
+        )
+        names(d) <- c(config$x_axis, Y_COL)
+
+        d <- d[is.finite(d[[config$x_axis]]) & is.finite(d[[Y_COL]]), ]
+        if (nrow(d) == 0) stop(config$datasets[i], ": no valid numeric rows")
 
         d$Operation <- config$dataset_names[i]
         d
@@ -210,13 +264,29 @@ load_data <- function(config) {
     tibble(bind_rows(frames))
 }
 
+# Converts a column to numbers. Values that are not numbers (stray text,
+# truncated lines, ...) become NA and are reported, so one bad row does not
+# turn the whole column into text.
+clean_numeric <- function(v, file, col) {
+    if (is.numeric(v)) return(v)
+
+    out <- suppressWarnings(as.numeric(trimws(as.character(v))))
+    bad <- which(is.na(out))
+    if (length(bad) > 0) {
+        message(sprintf(
+            "%s: column '%s' has %d non-numeric value(s), ignoring those rows (data row %s; first value: \"%s\")",
+            file, col, length(bad), paste(head(bad, 5), collapse = ", "), v[bad[1]]))
+    }
+    out
+}
+
 # Matrix of y values: one row per x shared by ALL datasets, one column per
 # dataset. Repeated measurements at the same x are averaged.
 aligned_matrix <- function(df, config) {
     per_dataset <- lapply(config$dataset_names, function(n) {
         d <- df[df$Operation == n, ]
-        d <- d[is.finite(d[[config$x_axis]]) & is.finite(d[[config$y_axis]]), ]
-        mean_y <- tapply(d[[config$y_axis]], d[[config$x_axis]], mean)
+        d <- d[is.finite(d[[config$x_axis]]) & is.finite(d[[Y_COL]]), ]
+        mean_y <- tapply(d[[Y_COL]], d[[config$x_axis]], mean)
         list(x = as.numeric(names(mean_y)), y = as.vector(mean_y))
     })
 
@@ -268,7 +338,7 @@ fit_datasets <- function(df, config) {
 
     fits <- lapply(seq_len(n), function(i) {
         d <- df[df$Operation == config$dataset_names[i], ]
-        fit_model(d[[config$x_axis]], d[[config$y_axis]], models[i],
+        fit_model(d[[config$x_axis]], d[[Y_COL]], models[i],
                   config$x_interval)
     })
     names(fits) <- config$dataset_names
@@ -460,7 +530,7 @@ add_marks <- function(plt, marks) {
 build_plot <- function(df, config, curves = NULL, marks = NULL) {
     plt <- ggplot(df, aes(
         x     = .data[[config$x_axis]],
-        y     = .data[[config$y_axis]],
+        y     = .data[[Y_COL]],
         color = Operation,
         shape = Operation
     )) + geom_point()
@@ -473,7 +543,8 @@ build_plot <- function(df, config, curves = NULL, marks = NULL) {
     plt <- plt +
         axis_scale(scale_x_continuous, config$log_x, config$x_zero, config$x_interval) +
         axis_scale(scale_y_continuous, config$log_y, config$y_zero, config$y_interval) +
-        labs(title = config$graph_title)
+        labs(title = config$graph_title, x = config$x_axis, y = config$y_label,
+             color = config$legend_title, shape = config$legend_title)
 
     add_marks(plt, marks)
 }
@@ -487,12 +558,21 @@ build_plot <- function(df, config, curves = NULL, marks = NULL) {
 bar_data <- function(df, config) {
     d <- df
     d$x <- d[[config$x_axis]]
-    d$y <- d[[config$y_axis]]
+    d$y <- d[[Y_COL]]
     d <- d[is.finite(d$x) & is.finite(d$y), ]
 
     if (!is.null(config$x_interval)) {
         d <- d[d$x >= config$x_interval[1] & d$x <= config$x_interval[2], ]
     }
+
+    if (!is.null(config$x_values)) {
+        absent <- setdiff(config$x_values, d$x)
+        if (length(absent) > 0) {
+            message("--x-values: no data at x = ", paste(absent, collapse = ", "))
+        }
+        d <- d[d$x %in% config$x_values, ]
+    }
+    if (nrow(d) == 0) stop("No data left to plot after filtering the x values")
 
     d <- d %>%
         group_by(Operation, x) %>%
@@ -539,10 +619,11 @@ build_bar_plot <- function(d, config) {
         coord_cartesian(clip = "off") +
         labs(title = config$graph_title,
              x     = config$x_axis,
+             fill  = config$legend_title,
              y     = if (normalize) {
-                 paste0(config$y_axis, " (relative to ", config$baseline, ")")
+                 paste0(config$y_label, " (relative to ", config$baseline, ")")
              } else {
-                 config$y_axis
+                 config$y_label
              })
 }
 
