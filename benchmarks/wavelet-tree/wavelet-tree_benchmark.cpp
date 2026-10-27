@@ -42,7 +42,7 @@ double run_benchmark(WTinterface &wt, char operation, vector<pair<size_t, size_t
         start = std::chrono::high_resolution_clock::now();
         for (pair<size_t, size_t> i : indexes)
         {
-            ct += wt.access(i.second);
+            ct += wt.access(i.first);
         }
         end = std::chrono::high_resolution_clock::now();
     }
@@ -98,6 +98,10 @@ Statistics run_interquartile_benchmark(StatsConfig config, WTinterface &wt, char
 
 double run_mean_benchmark(WTinterface &wt, char operation, vector<pair<size_t, size_t>> & indexes)
 {
+    double dummy = 0; // SIMPLE MEAN WARMUP
+    dummy += run_benchmark(wt, operation, indexes);
+    dummy += run_benchmark(wt, operation, indexes);
+
     double at = 0;
     for (int i = 0; i < SIMPLE_REPETITIONS; i++)
         at += run_benchmark(wt, operation, indexes);
