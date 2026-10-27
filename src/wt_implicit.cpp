@@ -86,12 +86,12 @@ uint64_t WaveletTreeImplicit::access(size_t i) const
         if ((*cbv)[cindex] == 0)
         {
             cindex = cbv->rank0(cindex);
-            it += 1;
+            it = 2*it + 1;
             end = (beg + end)/2;
         } 
         else{
             cindex = cbv->rank1(cindex);
-            it += 2;
+            it = 2*it + 2;
             beg = ((beg + end)/2) + 1;
         }
     }
