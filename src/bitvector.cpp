@@ -141,13 +141,11 @@ BitVector::BitVector(size_t size, bool (*fn)(size_t, unsigned), unsigned d) {
 
     if (!A)
         throw new std::bad_alloc();
-    
-    for (size_t i = 0; i < _size; i++) {
+    for (unsigned long i = 0; i < _size; i++) {
         if (fn(i, d))
             this->set1(i);
     }
 }
-
 
 BitVector::BitVector(size_t size, bool (*fn)(size_t)) {
     assert(sizeof(TYPE) * 8 == NBITS);
