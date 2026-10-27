@@ -21,7 +21,7 @@
 
 using namespace std;
 
-bool randomize_bit(unsigned long i) {
+bool randomize_bit(size_t i) {
     return rand() % 2 == 0;
 }
 
@@ -30,6 +30,12 @@ int main(int argc, char *argv[])
     if (argc <= 1)
         throw invalid_argument("No benchmark flags were provided, check this folder's README.md for more informations.");
 
+bool randomize_bit_d(size_t i, unsigned d) {
+    return rand() % 10000 < d;
+    return 0;
+}
+
+int main(int argc, char *argv[]) {
     bool verbose = false;
     bool select0 = false;
     bool select1 = false;
@@ -40,26 +46,31 @@ int main(int argc, char *argv[])
     unsigned dens = 5000;
 
     long int dummy = 0;
-
-    for (int i = 0; i < argc; i++)
-    {
-        const char* cur_arg = argv[i];
-
-        if (!strcmp(cur_arg, "-v") || !strcmp(cur_arg, "--verbose"))
+    string operation;
+    bool d = false;
+    unsigned dens;
+    for (int i = 0; i < argc; i++) {
+        if (std::strcmp(argv[i], "-v") == 0 || std::strcmp(argv[i], "--verbose") == 0)
             verbose = true;
-
-        if (!strcmp(cur_arg, "-r0") || !strcmp(cur_arg, "--rank0")) {
-            rank0 = true;
-            operation = "RANK 0";
-        } else if (!strcmp(cur_arg, "-r1") || !strcmp(cur_arg, "--rank1")) {
-            rank1 = true;
-            operation = "RANK 1";
-        } else if (!strcmp(cur_arg, "-s0") || !strcmp(cur_arg, "select0")) {
-            select0 = true;
-            operation = "SELECT 0";
-        } else if (!strcmp(cur_arg, "-s1") || !strcmp(cur_arg, "select1")) {
-            select1 = true;
-            operation = "SELECT 1";
+        if (std::strcmp(argv[i], "-d") == 0 || std::strcmp(argv[i], "--density") == 0){
+            d = true;
+            dens = std::atol(argv[i + 1]); 
+        }
+        if (std::strcmp(argv[i], "-op") == 0 || std::strcmp(argv[i], "--operation") == 0) {
+            if (std::strcmp(argv[i + 1], "rank0") == 0 || std::strcmp(argv[i + 1], "r0") == 0) {
+                rank0 = true;
+                operation = "RANK 0";
+            } 
+            else if (std::strcmp(argv[i + 1], "rank1") == 0 || std::strcmp(argv[i + 1], "r1") == 0) {
+                rank1 = true;
+                operation = "RANK 1";
+            } else if (std::strcmp(argv[i + 1], "select0") == 0 || std::strcmp(argv[i + 1], "s0") == 0) {
+                select0 = true;
+                operation = "SELECT 0";
+            } else if (std::strcmp(argv[i + 1], "select1") == 0 || std::strcmp(argv[i + 1], "s1") == 0) {
+                select1 = true;
+                operation = "SELECT 1";
+            }
         }
     }
 
@@ -95,6 +106,7 @@ int main(int argc, char *argv[])
                 B1.append0();
         }
 
+        BitVectorJ B1(size, randomize_bit_d, dens);
         B1.init();
         
         #ifdef selectstructure
