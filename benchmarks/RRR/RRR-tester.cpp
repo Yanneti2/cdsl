@@ -40,7 +40,6 @@ int main(void) {
         auto start = std::chrono::high_resolution_clock::now();
         RRR R(&B);
         auto rank_time = (std::chrono::high_resolution_clock::now() - start).count()/(long double)1000000;
-
         size_t rank_m_usage = malloc_count_current() - initial_mem_usage;
 
 
@@ -53,13 +52,16 @@ int main(void) {
         auto select_time = -1;
         auto select_m_usage = -1;
 
+
+       start = std::chrono::high_resolution_clock::now();
         for(auto j = 0; j < 1000000; j++){
             unsigned long long index = rand() % B.size();
             auto start = std::chrono::high_resolution_clock::now();
             R.rank1(index);
-            auto end = std::chrono::high_resolution_clock::now();
-            ns_time += (end - start).count();
-        }
+       }
+       auto end = std::chrono::high_resolution_clock::now();
+       ns_time += (end - start).count();
+
         std::cout << size << ";";
         std::cout << (ns_time/(long double)1000000) << ";";
         std::cout << rank_time << ";";
