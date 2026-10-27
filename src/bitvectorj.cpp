@@ -215,6 +215,8 @@ void BitVectorJ::build_select0() {
 
 // g++ -D selectstructure (ss??)
 size_t BitVectorJ::select0(size_t i) const {
+    if (i < 0 || i == 18446744073709551615) return -1;
+
     const size_t _size = size();
 
     if (i > rank0(_size)) return -1;
