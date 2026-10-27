@@ -129,9 +129,9 @@ size_t WaveletTreeSuccint::select(uint64_t c,  size_t i) const {
 
     while (depth--) {
         if (stack[depth].second) {
-            i = B.select1(B.rank1(depth * str_size + rankc[stack[depth].first]) + i) - depth * str_size;
+            i = B.select1(B.rank1(depth * str_size + rankc[stack[depth].first]) + i) - depth * str_size - rankc[stack[depth].first];
         } else {
-            i = B.select0(B.rank0(depth * str_size + rankc[stack[depth].first]) + i) - depth * str_size;
+            i = B.select0(B.rank0(depth * str_size + rankc[stack[depth].first]) + i) - depth * str_size - rankc[stack[depth].first];
         }
     }
     free(stack);
