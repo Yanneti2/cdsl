@@ -11,6 +11,7 @@ add_library(compact
         wt_succint.cpp
         uvector.cpp
         permutation.cpp
+	bitvectorBS.cpp
 )
 target_include_directories(compact PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
