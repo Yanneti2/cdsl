@@ -292,7 +292,7 @@ uint64_t bitvectorBS::select0(uint64_t j) {
    Return the index of the j-th 1 in B, or |B| if there are not j 1s in B.
 **/
 uint64_t bitvectorBS::select1(uint64_t j) {
-
+  if(j==0) return 0;
   if (j >= V->size())
     return bsize;
   

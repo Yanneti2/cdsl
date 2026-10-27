@@ -82,7 +82,8 @@ int main(int argc, char *argv[]) {
         srand(time(0));
         size_t mem_rank_structure_0 = malloc_count_current();
         bitvectorBS B(size);
-        for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
+	B.reset_all();
+	for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
             B.set(i);
         }
         randomize_bitvector(B);
