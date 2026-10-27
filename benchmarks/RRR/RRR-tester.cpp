@@ -21,7 +21,7 @@ int main(void) {
     // Tempo de construcao da estrutura de select
     cout << "\"Size\";\"Time\";\"RS_Time\";\"RS_Memory\";\"SS_Memory\";\"SS_Time\"\n";
     long double ns_time = 0;
-    for (unsigned long long size = 1000; size < 10000000000; size *= 10) {
+    for (unsigned long long size = 1000; size < 1000000000000000; size *= 10) {
         size_t initial_mem_usage = malloc_count_current();
 
 
@@ -54,7 +54,7 @@ int main(void) {
 
 
        start = std::chrono::high_resolution_clock::now();
-        for(uint64_t j = 0; j < 1000000000000000; j++){
+        for(auto j = 0; j < 1000000; j++){
             unsigned long long index = rand() % B.size();
             auto start = std::chrono::high_resolution_clock::now();
             R.rank1(index);
