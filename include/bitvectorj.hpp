@@ -1,4 +1,5 @@
 #include "bitvector.hpp"
+#include "uvector.hpp"
 
 #ifndef BITVECTORJACOBSON
 #define BITVECTORJACOBSON
@@ -12,8 +13,8 @@ private:
     unsigned chunk2_size;
     unsigned chunk2_per_chunk1;
 
-    size_t *layer1 = nullptr;
-    short *layer2 = nullptr;
+    UVector layer1;
+    UVector layer2;
 
     size_t *select_vector0 = nullptr;
     size_t *select_vector1 = nullptr;
