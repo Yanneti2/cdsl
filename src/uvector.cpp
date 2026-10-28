@@ -3,8 +3,11 @@
 
 using namespace std;
 
+UVector::UVector() {}
 UVector::UVector(unsigned word_size) : word_size(word_size) {}
 UVector::UVector(unsigned word_size, size_t size) : word_size(word_size), B(size * word_size, 0) {}
+
+UVector::~UVector() {}
 
 long long UVector::operator[](size_t i) const {
     return B.accessWord(i, word_size);
