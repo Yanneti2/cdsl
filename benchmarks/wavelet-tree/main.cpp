@@ -184,33 +184,35 @@ int main(int argc, char* argv[])
         }
         shuffle(rand_index);
         
-        size_t mem_prev = malloc_count_current();
+        size_t mem_prev = malloc_count_peak();
 
         WaveletTree wt(s);
 
         if (memory && (naive || omnia))
         {
-            size_t curr_mem = malloc_count_current();
+            size_t curr_mem = malloc_count_peak();
             wtb[order] = curr_mem - mem_prev;
         }
 
-        mem_prev = malloc_count_current();
+        malloc_count_reset_peak();
+        mem_prev = malloc_count_peak();
 
         WaveletTreeSuccint wts(s);
 
         if (memory && (succinct || omnia))
         {
-            size_t curr_mem = malloc_count_current();
+            size_t curr_mem = malloc_count_peak();
             wtsb[order] = curr_mem - mem_prev;
         }
 
-        mem_prev = malloc_count_current();
+        malloc_count_reset_peak();
+        mem_prev = malloc_count_peak();
 
         WaveletTreeImplicit wti(s);
 
-        if (memory && (succinct || omnia))
+        if (memory && (implicit || omnia))
         {
-            size_t curr_mem = malloc_count_current();
+            size_t curr_mem = malloc_count_peak();
             wtib[order] = curr_mem - mem_prev;
         }
 
