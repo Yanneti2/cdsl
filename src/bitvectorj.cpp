@@ -17,8 +17,7 @@
 extern uint32_t bitMask32[];
 extern uint64_t bitMask64[];
 
-template <typename T>
-size_t binary_search(T *V, T target, size_t beginning, size_t end) {
+size_t binary_search(const UVector &V, uint64_t target, size_t beginning, size_t end) {
     while(1) {
         if (end == beginning) {
             return end - 1;
@@ -32,8 +31,7 @@ size_t binary_search(T *V, T target, size_t beginning, size_t end) {
     }
 }
 
-template <typename T>
-size_t binary_search(T *V, T target, size_t beginning, size_t end, size_t factor) {
+size_t binary_search(const UVector &V, uint64_t target, size_t beginning, size_t end, size_t factor) {
     if (end == beginning) {
         return end;
     }
@@ -50,8 +48,7 @@ size_t binary_search(T *V, T target, size_t beginning, size_t end, size_t factor
     }
 }
 
-template <typename T>
-size_t binary_search(T *V, T target, size_t beginning, size_t end, size_t factor1, size_t factor2) {
+size_t binary_search(const UVector &V, uint64_t target, size_t beginning, size_t end, size_t factor1, size_t factor2) {
     factor2 = beginning;
     if (end == beginning) {
         return end;
@@ -96,26 +93,25 @@ void BitVectorJ::init() {
     chunk2_per_chunk1 = chunk1_size / chunk2_size;
     layer2_size = chunk2_per_chunk1 * (layer1_size - 1) + 1;
 
-    layer1 = (size_t *) malloc(layer1_size * sizeof(size_t));
-    layer2 = (short *) malloc(layer2_size * sizeof(short));
+    layer1 = UVector(ceil(log2(size())) + 1, layer1_size);
+    layer2 = UVector(ceil(log2(chunk1_size)) + 1, layer2_size);;
 
     size_t layer1_counter = 0;
     size_t layer2_counter = 0;
     for (size_t i = 0; i < layer2_size - 1; i++) {
         if (i % chunk2_per_chunk1 == 0) {
-            layer1[i / chunk2_per_chunk1] = layer1_counter;
+            layer1.set(i / chunk2_per_chunk1, layer1_counter);
             layer2_counter = 0;
         }
-        layer2[i] = layer2_counter;
+        layer2.set(i, layer2_counter);
         short pop_count = std::__popcount(accessWord(i, chunk2_size));
         layer1_counter += pop_count;
         layer2_counter += pop_count;
     }
-    layer1[layer1_size - 1] = layer1_counter;
-    layer2[layer2_size - 1] = 0;
+    layer1.set(layer1_size - 1, layer1_counter);
+    layer2.set(layer2_size - 1, 0);
 
     init_status = true;
-
 }
 
 bool BitVectorJ::is_initialized() const {
@@ -123,8 +119,6 @@ bool BitVectorJ::is_initialized() const {
 }
 
 BitVectorJ::~BitVectorJ() {
-    if (layer1) free(layer1);
-    if (layer2) free(layer2);
     if (select_vector0) free(select_vector0);
     if (select_vector1) free(select_vector1);
 }

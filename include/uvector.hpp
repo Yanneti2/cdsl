@@ -9,8 +9,10 @@ class UVector {
         unsigned word_size;
 
     public:
+        UVector();
         UVector(unsigned word_size);
         UVector(unsigned word_size, size_t size);
+        ~UVector();
 
         long long operator[](size_t i) const;
         void push_back(long long x);
