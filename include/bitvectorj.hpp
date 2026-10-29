@@ -16,8 +16,8 @@ private:
     UVector layer1;
     UVector layer2;
 
-    size_t *select_vector0 = nullptr;
-    size_t *select_vector1 = nullptr;
+    UVector select_vector0;
+    UVector select_vector1;
     unsigned select_j;
 
     bool init_status = false;

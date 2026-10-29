@@ -93,8 +93,8 @@ void BitVectorJ::init() {
     chunk2_per_chunk1 = chunk1_size / chunk2_size;
     layer2_size = chunk2_per_chunk1 * (layer1_size - 1) + 1;
 
-    layer1 = UVector(ceil(log2(size())) + 1, layer1_size);
-    layer2 = UVector(ceil(log2(chunk1_size)) + 1, layer2_size);;
+    layer1 = UVector(ceil(log2(size() + 1)), layer1_size);
+    layer2 = UVector(ceil(log2(chunk1_size + 1)), layer2_size);;
 
     size_t layer1_counter = 0;
     size_t layer2_counter = 0;
@@ -119,8 +119,6 @@ bool BitVectorJ::is_initialized() const {
 }
 
 BitVectorJ::~BitVectorJ() {
-    if (select_vector0) free(select_vector0);
-    if (select_vector1) free(select_vector1);
 }
 
 size_t BitVectorJ::rank0(size_t i) const {
@@ -162,24 +160,25 @@ void BitVectorJ::build_select1() {
 
     select_j = ceil(log2((long double) _size) * log((long double) _size));
     select_j = std::max(select_j, (unsigned) 1);
-    select_vector1 = (size_t *) malloc(((rank1(_size) + select_j - 1) / select_j + 1) * sizeof(size_t));
+    size_t select_size = (rank1(_size) + select_j - 1) / select_j + 1;
+    select_vector1 = UVector(ceil(log2(_size + 1)), select_size);
 
     size_t counter = 0;
-    select_vector1[0] = 0;
+    select_vector1.set(0, 0);
     for (size_t i = 0; i < _size; i++) {
         if ((*this)[i] == 0) continue;
 
         counter++;
         if (counter % select_j == 0) {
-            select_vector1[counter / select_j] = i + 1;
+            select_vector1.set(counter / select_j, i + 1);
         }
     }
 
     if (counter % select_j == 0 && counter != 0) {
-        select_vector1[counter / select_j] = size();
+        select_vector1.set(counter / select_j, _size);
     }
 
-    select_vector1[(rank1(size()) + select_j - 1) / select_j] = size();
+    select_vector1.set(select_size - 1, _size);
 }
 
 void BitVectorJ::build_select0() {
@@ -187,24 +186,25 @@ void BitVectorJ::build_select0() {
 
     select_j = ceil(log2((long double) _size) * log((long double) _size));
     select_j = std::max(select_j, (unsigned) 1);
-    select_vector0 = (size_t *) malloc(((rank0(_size) + select_j - 1) / select_j + 1) * sizeof(size_t));
+    size_t select_size = (rank0(_size) + select_j - 1) / select_j + 1;
+    select_vector1 = UVector(ceil(log2(_size + 1)), select_size);
 
     size_t counter = 0;
-    select_vector0[0] = 0;
+    select_vector0.set(0, 0);
     for (size_t i = 0; i < _size; i++) {
         if ((*this)[i] == 1) continue;
 
         counter++;
         if (counter % select_j == 0) {
-            select_vector0[counter / select_j] = i + 1;
+            select_vector0.set(counter / select_j, i + 1);
         }
     }
 
     if (counter % select_j == 0 && counter != 0) {
-        select_vector0[counter / select_j] = _size;
+        select_vector0.set(counter / select_j, _size);
     }
 
-    select_vector0[(rank0(_size) + select_j - 1) / select_j] = _size;
+    select_vector0.set(select_size - 1, _size);
 }
 
 // g++ -D selectstructure (ss??)
