@@ -88,6 +88,7 @@ int main(int argc, char *argv[]) {
     } else {
         cout << "\"Size\";\"Time\";\"BV_Memory\";\"RS_Time\";\"RS_Memory\";\"SS_Time\";\"SS_Memory\"\n";
     }
+    for (int i = 0; i < 10; i++) {
     for (size_t size = 16; size < (1 << 18) + 1; size += 16) {
         srand(time(0));
         size_t mem_rank_structure_0 = malloc_count_current();
@@ -197,4 +198,5 @@ int main(int argc, char *argv[]) {
                          << endl;
         }
     }
+}
 }
