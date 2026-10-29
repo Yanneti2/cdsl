@@ -140,7 +140,7 @@ void bitvectorBS::preprocess() {
     vsize += std::__popcount(B[i]);
 
   // Fill V:
-  V = new UVector(vsize+1,ceil(log2(bsize+1)));
+  V = new UVector(ceil(log2(bsize+1)), vsize+1);
   vsize = 0;
   for (uint64_t i=0; i<bsize; i++) 
     if (test(i))
