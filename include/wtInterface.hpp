@@ -1,6 +1,7 @@
 #ifndef WTinterfacea
 #define WTinterfacea
 
+#include <cstddef>
 #include <cstdint>
 
 class WTinterface {

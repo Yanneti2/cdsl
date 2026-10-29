@@ -10,7 +10,8 @@ class RRR {
 private:
     unsigned long long block_size;
     unsigned long long total_blocks;
-    unsigned long long *partial_ranks;
+    unsigned long long *partial_ranks;  // absolute rank at the start of each superblock
+    uint16_t *block_ranks;              // rank at the start of each chunk, relative to its superblock
     unsigned long long total_K;
     uint16_t K_size;
     uint16_t *K;

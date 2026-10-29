@@ -1,5 +1,7 @@
 #include "wavelet-tree_benchmark.hpp"
 #include "interquartil-stats.hpp"
+#include "wt_implicit.hpp"
+#include "malloc_count.h"
 #include "wt_succint.hpp"
 #include "wt.hpp"
 
@@ -18,6 +20,7 @@ bool verbose = false;
 bool selectc = false;
 bool hcoding = false;
 bool access = false;
+bool memory = false;
 bool omnia = false;
 bool naive = false;
 bool rankc = false;
@@ -39,6 +42,8 @@ void parse_args(int argc, char* argv[], uint64_t &args) {
 
         if (!strcmp(cur_arg, "-v") || !strcmp(cur_arg, "--verbose"))
             verbose = true;
+        else if (!strcmp(cur_arg, "-mem") || !strcmp(cur_arg, "--memory"))
+            memory = true;
 
         if (!strcmp(cur_arg, "-om") || !strcmp(cur_arg, "--omnia"))
             omnia = true;
@@ -83,9 +88,15 @@ void shuffle(vector<pair<size_t, size_t>> &V) {
     }
 }
 
-// {"access", {10000 : 54.32}}
+// {"access", {10000 : 54.32}}, BR: double or Statistiscs
 map<char, map<unsigned long long, BenchmarkResult>> wtres;
 map<char, map<unsigned long long, BenchmarkResult>> wtsres;
+map<char, map<unsigned long long, BenchmarkResult>> wtires;
+
+// build memory used per order
+map<unsigned long long, size_t> wtb;
+map<unsigned long long, size_t> wtsb;
+map<unsigned long long, size_t> wtib;
 
 int main(int argc, char* argv[])
 {
@@ -154,11 +165,11 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if (!interquartile && !mean)
+    if (!memory && (!interquartile && !mean))
         throw invalid_argument("No time calculation method provided, check this folder's README.md for more informations.");
 
     if (verbose) cout << "The following tests were made in a order 3-8 BitVector such that each and every operation for index [0...n-1] was made in random order.\n\n";
-    else if (!verbose && !((naive != succinct) != implicit)) cout << "\"Size\";\"Time\"\n";
+    // else if (!verbose && !((naive != succinct) != implicit)) cout << "\"Size\";\"Time\"\n";
 
     for (size_t order = 3; order < 9; order++)
     {
@@ -173,8 +184,35 @@ int main(int argc, char* argv[])
         }
         shuffle(rand_index);
         
+        size_t mem_prev = malloc_count_current();
+
         WaveletTree wt(s);
+
+        if (memory && (naive || omnia))
+        {
+            size_t curr_mem = malloc_count_current();
+            wtb[order] = curr_mem - mem_prev;
+        }
+
+        mem_prev = malloc_count_current();
+
         WaveletTreeSuccint wts(s);
+
+        if (memory && (succinct || omnia))
+        {
+            size_t curr_mem = malloc_count_current();
+            wtsb[order] = curr_mem - mem_prev;
+        }
+
+        mem_prev = malloc_count_current();
+
+        WaveletTreeImplicit wti(s);
+
+        if (memory && (succinct || omnia))
+        {
+            size_t curr_mem = malloc_count_current();
+            wtib[order] = curr_mem - mem_prev;
+        }
 
         if (verbose)
         {
@@ -194,25 +232,56 @@ int main(int argc, char* argv[])
         if (all || selectc) operations.push_back('s');
         if (all || access) operations.push_back('a');
 
-        for (char cur_op : operations)
+        if (!memory) // remove after benchmarking
         {
-            if (interquartile)
+            for (char cur_op : operations)
             {
-                if (!succinct || omnia)
-                    wtres[cur_op][n].stats = run_interquartile_benchmark(config, wt, cur_op, rand_index);
-                if (succinct || omnia)
-                    wtsres[cur_op][n].stats = run_interquartile_benchmark(config, wts, cur_op, rand_index);
-            }
-            else if (mean)
-            {
-                if (!succinct || omnia)
-                    wtres[cur_op][n].time = run_mean_benchmark(wt, cur_op, rand_index);
-                if (succinct || omnia)
-                    wtsres[cur_op][n].time = run_mean_benchmark(wts, cur_op, rand_index);
+                if (interquartile)
+                {
+                    if (naive || omnia)
+                        wtres[cur_op][n].stats = run_interquartile_benchmark(config, wt, cur_op, rand_index);
+                    if (succinct || omnia)
+                        wtsres[cur_op][n].stats = run_interquartile_benchmark(config, wts, cur_op, rand_index);
+                    if (implicit || omnia)
+                        wtires[cur_op][n].stats = run_interquartile_benchmark(config, wti, cur_op, rand_index);
+                }
+                else if (mean)
+                {
+                    if (naive || omnia)
+                        wtres[cur_op][n].time = run_mean_benchmark(wt, cur_op, rand_index);
+                    if (succinct || omnia)
+                        wtsres[cur_op][n].time = run_mean_benchmark(wts, cur_op, rand_index);
+                    if (implicit || omnia)
+                        wtires[cur_op][n].time = run_mean_benchmark(wti, cur_op, rand_index);
+                }
             }
         }
     }
     if (verbose) cout << "\n\n";
+    if (memory)
+    {
+        if (naive || omnia)
+        {
+            cout << "\"Size\";\"Memory\"\n";
+            for (auto duo : wtb)
+                cout << duo.first << ";" << duo.second << endl;
+            cout << "\n\n";
+        }
+        if (succinct || omnia)
+        {
+            cout << "\"Size\";\"Memory\"\n";
+            for (auto duo : wtsb)
+                cout << duo.first << ";" << duo.second << endl;
+            cout << "\n\n";
+        }
+        if (implicit || omnia)
+        {
+            cout << "\"Size\";\"Memory\"\n";
+            for (auto duo : wtib)
+                cout << duo.first << ";" << duo.second << endl;
+            cout << "\n\n";
+        }
+    }
     if (naive || omnia || (!succinct && !implicit))
     {
         for (auto el : wtres)
@@ -267,6 +336,36 @@ int main(int argc, char* argv[])
                         if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTreeSuccinct rankc operation time = " << res.second.time << " ns\n";
                         else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTreeSuccinct access operation time = " << res.second.time << " ns\n";
                         else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTreeSuccinct selectc operation time = " << res.second.time << " ns\n";
+                    }
+                    else cout << res.first << ";" << res.second.time << "\n";
+                }
+            }
+            cout << "\n";
+        }
+    }
+    if (implicit || omnia) {
+        for (auto el : wtires)
+        {
+            for (auto res : el.second)
+            {
+                if (interquartile)
+                {
+                    if (verbose)
+                    {
+                        if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTreeImplicit rankc operation time = " << res.second.stats->median << " ns\n";
+                        else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTreeImplicit access operation time = " << res.second.stats->median << " ns\n";
+                        else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTreeImplicit selectc operation time = " << res.second.stats->median << " ns\n";
+                        cout << "q1 : " << res.second.stats->q1 << "\n q3 : " << res.second.stats->q3 << "\n iqr : " << res.second.stats->iqr << "\n lower_bound : " << res.second.stats->lower_bound << "\n upper_bound : " << res.second.stats->upper_bound << "\n mean : " << res.second.stats->mean << "\n standard deviation : "  << res.second.stats->standard_deviation << "\n coefficient variation : " << res.second.stats->coefficient_variation << "\n\n"; 
+                    }
+                    else cout << res.first << ";" << res.second.stats->median << "\n";
+                }
+                else if (mean)
+                {
+                    if (verbose)
+                    {
+                        if (el.first == 'r') cout << "For order " << res.first << " Average WaveletTreeImplicit rankc operation time = " << res.second.time << " ns\n";
+                        else if (el.first == 'a') cout << "For order " << res.first << " Average WaveletTreeImplicit access operation time = " << res.second.time << " ns\n";
+                        else if (el.first == 's') cout << "For order " << res.first << " Average WaveletTreeImplicit selectc operation time = " << res.second.time << " ns\n";
                     }
                     else cout << res.first << ";" << res.second.time << "\n";
                 }

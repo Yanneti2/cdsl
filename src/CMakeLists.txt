@@ -9,8 +9,10 @@ add_library(compact
         huffman.cpp
         wt.cpp
         wt_succint.cpp
+        wt_implicit.cpp
         uvector.cpp
         permutation.cpp
+	bitvectorBS.cpp
 )
 target_include_directories(compact PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
@@ -32,4 +34,12 @@ else()
     else()
         message("Using log as jacobson block size")
     endif()
+endif()
+
+
+if (SELECTSTRUCTURE)
+    message("Using Structure to improve jacobson seletion operation time")
+    target_compile_definitions(compact PRIVATE selectstructure)
+else()
+    message("Not using improve jacobson seletion operation time")
 endif()

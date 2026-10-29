@@ -10,6 +10,7 @@ endif()
 # Por padrao utiliza LOG
 option(NBITS512 "Define tamanho do bloco do jacobson" OFF)
 option(NBITS "Define tamanho do bloco do jacobson" OFF)
+option(SELECTSTRUCTURE "Habilita uso de estrutura para acelerar operação de select em troca de maior uso de memória" OFF)
 
 add_subdirectory(dependencies/malloc_count)
 add_subdirectory(src)
