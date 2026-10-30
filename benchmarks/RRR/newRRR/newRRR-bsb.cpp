@@ -104,10 +104,8 @@ int main(int argc, char *argv[]) {
 
         unsigned long long upper_bound;
         if (select1) {
-            R.build_select(&B);
             upper_bound = R.rank1(size);
         } else if (select0) {
-            R.build_select(&B);
             upper_bound = R.rank0(size);
         } else {
             upper_bound = size;

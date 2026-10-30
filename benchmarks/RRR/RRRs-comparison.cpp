@@ -42,7 +42,7 @@ int main(void) {
         auto rank_time = (std::chrono::high_resolution_clock::now() - start).count()/(long double)1000000;
         size_t rank_m_usage = malloc_count_current() - initial_mem_usage;
 
-
+	B.print(true);
         // TODO: Implementar estrutura de select no RRR
         // initial_mem_usage = malloc_count_current();
         // start = std::chrono::high_resolution_clock::now();
@@ -52,8 +52,7 @@ int main(void) {
         auto select_time = -1;
         auto select_m_usage = -1;
 
-
-       start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         for(auto j = 0; j < 1000000; j++){
             unsigned long long index = rand() % B.size();
             auto start = std::chrono::high_resolution_clock::now();
@@ -62,15 +61,15 @@ int main(void) {
        auto end = std::chrono::high_resolution_clock::now();
        ns_time = (end - start).count();
 
-        std::cout << size << ";";
-        std::cout << "rank1: \n";
+        std::cout << "size: " << size << ";";
+        std::cout << "\n\nselect0: \n";
         for(auto j = 0; j < (1 << 10); j+=16){
-            if(j >= B.size()) return;
+            if(j >= R.rank0(B.size()-1)) break;
             // unsigned long long index = rand() % B.size();
-            std::cout << "index: " << j << " ; " << R.rank1(j) <<"\n";
+            std::cout << "index: " << j << " ; " << R.select0(&B, j) <<"\n\n";
         }
         std::cout << (ns_time/(long double)1000000) << ";";
-        std::cout << rank_time << ";";
+        std::cout << "select0: " << rank_time << ";";
         std::cout << rank_m_usage << ";";
         std::cout << select_time << ";";
         std::cout << select_m_usage << "\n";
