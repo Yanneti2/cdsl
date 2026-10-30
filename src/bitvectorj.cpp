@@ -187,7 +187,7 @@ void BitVectorJ::build_select0() {
     select_j = ceil(log2((long double) _size) * log((long double) _size));
     select_j = std::max(select_j, (unsigned) 1);
     size_t select_size = (rank0(_size) + select_j - 1) / select_j + 1;
-    select_vector1 = UVector(ceil(log2(_size + 1)), select_size);
+    select_vector0 = UVector(ceil(log2(_size + 1)), select_size);
 
     size_t counter = 0;
     select_vector0.set(0, 0);
