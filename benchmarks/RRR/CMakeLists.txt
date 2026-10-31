@@ -1,3 +1,5 @@
+add_subdirectory(newRRR)
+
 add_executable(RRR-benchmark
     RRR-tester.cpp
 )

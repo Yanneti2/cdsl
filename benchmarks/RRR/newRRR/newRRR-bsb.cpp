@@ -87,20 +87,22 @@ int main(int argc, char *argv[]) {
 
         cout << header;
     } else {
-        cout << "\"Size\";\"Time\";\"BV_Memory\"\n";
+        cout << "\"Size\";\"Time\";\"BV_Memory\";\"RS_Time\";\"RS_Memory\"\n";
     }
 
-    for (size_t size = 16; size < (1 << 18) + 1; size += 16) {
+    for (size_t ii = 0; ii < 10; ii++)
+    for (size_t size = 16; size < (1 << 16) + 1; size += 16) {
         srand(time(0));
+        size_t mem_rank_structure_0 = malloc_count_current();
         BitVector B(size, 0);
         for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
             B.set1(i);
         }
         randomize_bitvector(B);
         
-        size_t mem_rank_structure_0 = malloc_count_current();
-        RRR R(&B);
         size_t mem_rank_structure_1 = malloc_count_current();
+        RRR R(&B);
+        size_t mem_rank_structure_2 = malloc_count_current();
 
         unsigned long long upper_bound;
         if (select1) {
@@ -111,7 +113,6 @@ int main(int argc, char *argv[]) {
             upper_bound = size;
         }
         upper_bound++;
-        size_t mem_rank_structure_2 = malloc_count_current();
         
         vector<size_t> warmup(100000);
         vector<size_t> idx(100000);
@@ -124,7 +125,7 @@ int main(int argc, char *argv[]) {
 
         std::chrono::high_resolution_clock::time_point start;
         std::chrono::high_resolution_clock::time_point end;
-        size_t dont_kill_my_methods;
+        size_t dont_kill_my_methods = 0;
         if (rank0) {
             for (size_t i : warmup) {
                 dont_kill_my_methods += R.rank0(i);
@@ -136,11 +137,11 @@ int main(int argc, char *argv[]) {
             end = std::chrono::high_resolution_clock::now();
         } else if (rank1) {
             for (size_t i : warmup) {
-                dont_kill_my_methods += R.rank0(i);
+                dont_kill_my_methods += R.rank1(i);
             }
             start = std::chrono::high_resolution_clock::now();
             for (size_t i : idx) {
-                dont_kill_my_methods += R.rank0(i);
+                dont_kill_my_methods += R.rank1(i);
             }
             end = std::chrono::high_resolution_clock::now();
         } else if (select0) {
@@ -171,7 +172,7 @@ int main(int argc, char *argv[]) {
             cout << endl;
         } else {
             cout << size << ";" << elapsed_time.count() / (long double) 100000 
-                         << ";" << mem_rank_structure_2 - mem_rank_structure_0
+                         << ";" << mem_rank_structure_1 - mem_rank_structure_0
                          << endl;
         }
     }
