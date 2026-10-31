@@ -31,7 +31,7 @@ jac <- df_jacobson %>%
   group_by(Size) %>%
   summarise(
     Time_jac = mean(Time),
-    RS_Time = mean(RS_Time),
+    RS_Time = mean(BS_Time), # RS_TIME for jacob and rrr
     .groups = "drop"
   )
 
