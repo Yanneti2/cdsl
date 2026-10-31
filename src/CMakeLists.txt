@@ -6,6 +6,7 @@ add_library(compact
         parentheses_tree.cpp
         parentheses_tree_rmmq.cpp
         RRR.cpp
+        rrr.cpp
         huffman.cpp
         wt.cpp
         wt_succint.cpp

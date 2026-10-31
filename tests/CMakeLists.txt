@@ -31,6 +31,10 @@ add_executable(RRR-tester
 )
 target_link_libraries(RRR-tester compact)
 
+add_executable(rrr-tester
+	rrr.cpp
+)
+target_link_libraries(rrr-tester compact)
 
 add_executable(wt-tester
         wt-tester.cpp

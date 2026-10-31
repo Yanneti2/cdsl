@@ -3,6 +3,7 @@
 
 using namespace std;
 
+UVector::UVector() : word_size(16) {}
 UVector::UVector(unsigned word_size) : word_size(word_size) {}
 UVector::UVector(unsigned word_size, size_t size) : word_size(word_size), B(size * word_size, 0) {}
 

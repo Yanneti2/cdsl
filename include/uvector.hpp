@@ -9,6 +9,7 @@ class UVector {
         unsigned word_size;
 
     public:
+        UVector();
         UVector(unsigned word_size);
         UVector(unsigned word_size, size_t size);
 
