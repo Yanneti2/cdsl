@@ -240,17 +240,33 @@ load_data <- function(config) {
         raw  <- read.csv(config$datasets[i], sep = ";")
         ycol <- config$y_axis[i]
 
-        missing_cols <- setdiff(c(config$x_axis, ycol), names(raw))
+        ycols <- if (ycol == "RS_Memory+SS_Memory") {
+            c("RS_Memory", "SS_Memory")
+        } else {
+            ycol
+        }
+
+        missing_cols <- setdiff(c(config$x_axis, ycols), names(raw))
+
         if (length(missing_cols) > 0) {
             stop(sprintf("%s: missing column(s) %s (available: %s)",
                          config$datasets[i], paste(missing_cols, collapse = ", "),
                          paste(names(raw), collapse = ", ")))
         }
 
+        y <- if (ycol == "RS_Memory+SS_Memory") {
+            rs <- clean_numeric(raw[["RS_Memory"]], config$datasets[i], "RS_Memory")
+            ss <- clean_numeric(raw[["SS_Memory"]], config$datasets[i], "SS_Memory")
+
+            ifelse(ss == -1, rs, rs + ss)
+        } else {
+            clean_numeric(raw[[ycol]], config$datasets[i], ycol)
+        }
+
         # Keep only what we plot, so unrelated columns can't cause conflicts.
         d <- data.frame(
             clean_numeric(raw[[config$x_axis]], config$datasets[i], config$x_axis),
-            clean_numeric(raw[[ycol]],          config$datasets[i], ycol)
+            y
         )
         names(d) <- c(config$x_axis, Y_COL)
 

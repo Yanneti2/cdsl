@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 
         cout << header;
     } else {
-        cout << "\"Size\";\"Time\";\"BS_Memory\";\"BS_Time\"\n";
+        cout << "\"Size\";\"Time\";\"BV_Memory\";\"BV_Time\"\n";
     }
     for (int i = 0; i < 10; i++)
     {
