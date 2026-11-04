@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 BIN="./build/benchmarks/jacobsonrank/jacobsonrank-bsb"
-OUT="benchmarks/jacobsonrank/results"
+OUT="/results"
 
 mkdir -p "$OUT"
 
