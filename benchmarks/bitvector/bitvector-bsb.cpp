@@ -1,13 +1,14 @@
-#include "bitvector.hpp"
-#include <iostream>
-#include <chrono>
-#include <cstring>
-#include <cstdlib>
-#include <cmath>
-#include <algorithm>
-#include <stdlib.h>
-#include <vector>
 #include "malloc_count.h"
+#include "bitvector.hpp"
+
+#include <algorithm>
+#include <iostream>
+#include <stdlib.h>
+#include <cstdlib>
+#include <cstring>
+#include <chrono>
+#include <vector>
+#include <cmath>
 
 #ifdef _nbits
 #define _CHUNK_SIZE "NBITS & NBITS * NBITS"
@@ -20,6 +21,8 @@
 #endif
 
 using namespace std;
+
+const size_t DSIZE = 100000;
 
 void randomize_bitvector(BitVector &B) {
     for (size_t i = B.size(); i > 0; i--) {
@@ -41,13 +44,15 @@ void randomize_bitvector(BitVector &B) {
 
 
 int main(int argc, char *argv[]) {
-    bool verbose = false;
     bool rank0 = false;
     bool rank1 = false;
     bool select0 = false;
     bool select1 = false;
+    unsigned dens = 5000; // default
+    bool verbose = false;
+
     string operation;
-    unsigned dens = 5000;
+    srand(time(0)); // need to set a seed
 
     for (int i = 0; i < argc; i++) {
         if (std::strcmp(argv[i], "-v") == 0 || std::strcmp(argv[i], "--verbose") == 0)
@@ -68,8 +73,6 @@ int main(int argc, char *argv[]) {
             select1 = true;
             operation = "SELECT 1";
         }
-
-
     }
 
     if (verbose) {
@@ -83,93 +86,97 @@ int main(int argc, char *argv[]) {
             "UTILIZE AUXILIARY SELECT STRUCTURE\n"
             "=======================================================================\n\n"
             ;
-
         cout << header;
     } else {
         cout << "\"Size\";\"Time\";\"BV_Memory\"\n";
     }
-    for (int i = 0; i < 10; i ++) {
-    for (size_t size = 16; size < (1 << 18) + 1; size += 16) {
-        srand(time(0));
-        size_t mem_rank_structure_0 = malloc_count_current();
-        BitVector B(size, 0);
-        for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
-            B.set1(i);
+    for (size_t size = 16; size < (1 << 18) + 1; size += 16)
+    {
+        size_t avgmem = 0;
+        long double avgtime = 0;
+        for (int i = 0; i < 10; i ++)
+        {
+            size_t mem_rank_structure_0 = malloc_count_current();
+            BitVector B(size, 0);
+            for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
+                B.set1(i);
+            }
+            randomize_bitvector(B);
+            size_t mem_rank_structure_1 = malloc_count_current();
+
+            unsigned long long upper_bound;
+            if (select1) {
+                upper_bound = B.naive_rank1(size);
+            } else if (select0) {
+                upper_bound = B.naive_rank0(size);
+            } else {
+                upper_bound = size;
+            }
+            upper_bound++;
+
+            vector<size_t> warmup(DSIZE);
+            vector<size_t> idx(DSIZE);
+
+            for (size_t j = 0; j < DSIZE; j++)
+                warmup[j] = rand() % upper_bound;
+
+            for (size_t j = 0; j < DSIZE; j++)
+                idx[j] = rand() % upper_bound;
+
+            std::chrono::high_resolution_clock::time_point start;
+            std::chrono::high_resolution_clock::time_point end;
+
+            size_t dont_kill_my_methods;
+            if (rank0) {
+                for (size_t i : warmup) {
+                    dont_kill_my_methods += B.naive_rank0(i);
+                }
+                start = std::chrono::high_resolution_clock::now();
+                for (size_t i : idx) {
+                    dont_kill_my_methods += B.naive_rank0(i);
+                }
+                end = std::chrono::high_resolution_clock::now();
+            } else if (rank1) {
+                for (size_t i : warmup) {
+                    dont_kill_my_methods += B.naive_rank1(i);
+                }
+                start = std::chrono::high_resolution_clock::now();
+                for (size_t i : idx) {
+                    dont_kill_my_methods += B.naive_rank1(i);
+                }
+                end = std::chrono::high_resolution_clock::now();
+            } else if (select0) {
+                for (size_t i : warmup) {
+                    dont_kill_my_methods += B.naive_select0(i);
+                }
+                start = std::chrono::high_resolution_clock::now();
+                for (size_t i : idx) {
+                    dont_kill_my_methods += B.naive_select0(i);
+                }
+                end = std::chrono::high_resolution_clock::now();
+            } else if (select1) {
+                for (size_t i : warmup) {
+                    dont_kill_my_methods += B.naive_select1(i);
+                }
+                start = std::chrono::high_resolution_clock::now();
+                for (size_t i : idx) {
+                    dont_kill_my_methods += B.naive_select1(i);
+                }
+                end = std::chrono::high_resolution_clock::now();
+            }
+            std::chrono::duration<double, nano> elapsed_time{end - start};
+            cerr << dont_kill_my_methods << "\n";
+
+            avgtime += elapsed_time.count();
+            avgmem += mem_rank_structure_1 - mem_rank_structure_0;
         }
-        randomize_bitvector(B);
-        size_t mem_rank_structure_1 = malloc_count_current();
-
-        unsigned long long upper_bound;
-        if (select1) {
-            upper_bound = B.naive_rank1(size);
-        } else if (select0) {
-            upper_bound = B.naive_rank0(size);
-        } else {
-            upper_bound = size;
-        }
-        upper_bound++;
-
-        vector<size_t> warmup(100000);
-        vector<size_t> idx(100000);
-
-        for (size_t j = 0; j < 10000; j++)
-            warmup[j] = rand() % upper_bound;
-
-        for (size_t j = 0; j < 100000; j++)
-            idx[j] = rand() % upper_bound;
-
-        std::chrono::high_resolution_clock::time_point start;
-        std::chrono::high_resolution_clock::time_point end;
-        size_t dont_kill_my_methods;
-        if (rank0) {
-            for (size_t i : warmup) {
-                dont_kill_my_methods += B.naive_rank0(i);
-            }
-            start = std::chrono::high_resolution_clock::now();
-            for (size_t i : idx) {
-                dont_kill_my_methods += B.naive_rank0(i);
-            }
-            end = std::chrono::high_resolution_clock::now();
-        } else if (rank1) {
-            for (size_t i : warmup) {
-                dont_kill_my_methods += B.naive_rank1(i);
-            }
-            start = std::chrono::high_resolution_clock::now();
-            for (size_t i : idx) {
-                dont_kill_my_methods += B.naive_rank1(i);
-            }
-            end = std::chrono::high_resolution_clock::now();
-        } else if (select0) {
-            for (size_t i : warmup) {
-                dont_kill_my_methods += B.naive_select0(i);
-            }
-            start = std::chrono::high_resolution_clock::now();
-            for (size_t i : idx) {
-                dont_kill_my_methods += B.naive_select0(i);
-            }
-            end = std::chrono::high_resolution_clock::now();
-        } else if (select1) {
-            for (size_t i : warmup) {
-                dont_kill_my_methods += B.naive_select1(i);
-            }
-            start = std::chrono::high_resolution_clock::now();
-            for (size_t i : idx) {
-                dont_kill_my_methods += B.naive_select1(i);
-            }
-            end = std::chrono::high_resolution_clock::now();
-        }
-
-        std::chrono::duration<double, nano> elapsed_time{end - start};
-
-        cerr << dont_kill_my_methods << "\n";
-        if (verbose) { 
-            cout << "Size: " << size << "\nTime per " << operation << ": " << elapsed_time.count() / (long double) 100000 << " ns" << endl;
-            cout << endl;
-        } else {
-            cout << size << ";" << elapsed_time.count() / (long double) 100000 
-                         << ";" << mem_rank_structure_1 - mem_rank_structure_0
-                         << endl;
-        }
+        if (verbose) 
+            cout << "Size: " << size << "\nTime per " << operation << ": ";
+        else 
+            cout << size << ";" << avgtime / (long double) DSIZE;
+        cout << avgtime / (long double) DSIZE << ";" << avgmem / 10;
+        if (verbose)
+            cout << " ns";
+        cout << endl;
     }
-}
 }
