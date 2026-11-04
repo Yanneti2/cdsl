@@ -1,15 +1,19 @@
+#include "malloc_count.h"
 #include "bitvectorBS.h"
-#include <iostream>
-#include <chrono>
-#include <cstring>
-#include <cstdlib>
-#include <cmath>
+
 #include <algorithm>
 #include <stdlib.h>
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <chrono>
 #include <vector>
-#include "malloc_count.h"
+#include <cmath>
 
 using namespace std;
+
+const size_t DSIZE = 100000;
+const size_t WSIZE = 10000;
 
 void randomize_bitvector(bitvectorBS &B) {
     for (size_t i = B.size(); i > 0; i--) {
@@ -78,12 +82,14 @@ int main(int argc, char *argv[]) {
     } else {
         cout << "\"Size\";\"Time\";\"BV_Memory\";\"BV_Time\"\n";
     }
-    for (int i = 0; i < 10; i++)
+    srand(time(0));
+    for (size_t size = 16; size < (1 << 13) + 1; size += 16)
     {
-        for (size_t size = 16; size < (1 << 13) + 1; size += 16)
+        size_t avg_mem = 0;
+        long double avg_bt = 0;
+        long double avg_time = 0;
+        for (int i = 0; i < 10; i++)
         {
-            srand(time(0));
-
             std::chrono::high_resolution_clock::time_point start;
             std::chrono::high_resolution_clock::time_point end;
 
@@ -104,16 +110,6 @@ int main(int argc, char *argv[]) {
             B.preprocess();
             size_t mem_rank_structure_1 = malloc_count_current();
 
-            // std::chrono::high_resolution_clock::time_point init_start;
-            // std::chrono::high_resolution_clock::time_point init_end;
-            // init_start = std::chrono::high_resolution_clock::now();
-            // init_end = std::chrono::high_resolution_clock::now();
-            // size_t mem_rank_structure_2 = malloc_count_current();
-
-            // std::chrono::high_resolution_clock::time_point ss_start;
-            // std::chrono::high_resolution_clock::time_point ss_end;
-            // size_t mem_rank_structure_3 = malloc_count_current();
-
             unsigned long long upper_bound;
             if (select1) {
                 upper_bound = B.rank1(size);
@@ -124,13 +120,13 @@ int main(int argc, char *argv[]) {
             }
             upper_bound++;
 
-            vector<size_t> warmup(100000);
-            vector<size_t> idx(100000);
+            vector<size_t> warmup(DSIZE);
+            vector<size_t> idx(DSIZE);
 
-            for (size_t j = 0; j < 10000; j++)
+            for (size_t j = 0; j < DSIZE; j++)
                 warmup[j] = rand() % upper_bound;
 
-            for (size_t j = 0; j < 100000; j++)
+            for (size_t j = 0; j < DSIZE; j++)
                 idx[j] = rand() % upper_bound;
 
             size_t dont_kill_my_methods;
@@ -171,20 +167,22 @@ int main(int argc, char *argv[]) {
                 }
                 end = std::chrono::high_resolution_clock::now();
             }
-            elapsed_time = end - start;
-
             cerr << dont_kill_my_methods << "\n";
-            if (verbose) { 
-                cout << "Size: " << size << "\nTime per " << operation << ": " << elapsed_time.count() / (long double) 100000 << " ns" << endl;
-                cout << "Memory usage: " << mem_rank_structure_1 - mem_rank_structure_0 << endl;
-                cout << "Construction Time: " << build_time << " ns" << endl;
-                cout << endl;
-            } else {
-                cout << size << ";" << elapsed_time.count() / (long double) 100000 
-                            << ";" << mem_rank_structure_1 - mem_rank_structure_0
-                            << ";" << build_time
-                            << endl;
-            }
+            elapsed_time = end - start;
+            avg_mem += mem_rank_structure_1 - mem_rank_structure_0;
+            avg_time +=  elapsed_time.count();
+            avg_bt += build_time;
+        }
+        if (verbose) { 
+            cout << "Size: " << size << "\nTime per " << operation << ": " << avg_time / (long double) DSIZE << " ns" << endl;
+            cout << "Memory usage: " << avg_mem / 10 << endl;
+            cout << "Construction Time: " << avg_bt / 10 << " ns" << endl;
+            cout << endl;
+        } else {
+            cout << size << ";" << avg_time / DSIZE
+                        << ";" << avg_mem
+                        << ";" << avg_bt
+                        << endl;
         }
     }
 }

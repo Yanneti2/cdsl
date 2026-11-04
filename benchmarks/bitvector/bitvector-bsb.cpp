@@ -23,6 +23,7 @@
 using namespace std;
 
 const size_t DSIZE = 100000;
+const size_t WSIZE = 10000;
 
 void randomize_bitvector(BitVector &B) {
     for (size_t i = B.size(); i > 0; i--) {
@@ -88,7 +89,7 @@ int main(int argc, char *argv[]) {
             ;
         cout << header;
     } else {
-        cout << "\"Size\";\"Time\";\"BV_Memory\"\n";
+        cout << "\"Size\";\"Time\";\"BV_Memory\"\"BV_Memory\"\n";
     }
     for (size_t size = 16; size < (1 << 18) + 1; size += 16)
     {
@@ -114,10 +115,10 @@ int main(int argc, char *argv[]) {
             }
             upper_bound++;
 
-            vector<size_t> warmup(DSIZE);
+            vector<size_t> warmup(WSIZE);
             vector<size_t> idx(DSIZE);
 
-            for (size_t j = 0; j < DSIZE; j++)
+            for (size_t j = 0; j < WSIZE; j++)
                 warmup[j] = rand() % upper_bound;
 
             for (size_t j = 0; j < DSIZE; j++)
