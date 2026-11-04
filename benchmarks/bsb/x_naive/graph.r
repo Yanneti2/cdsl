@@ -3,39 +3,47 @@ suppressPackageStartupMessages({
   library(dplyr)
 })
 
-# Capturar os argumentos de execução
-# Uso: Rscript resolver_x.R arquivo_jacobson.csv arquivo_bitvector.csv
 args <- commandArgs(trailingOnly = TRUE)
 
-if (length(args) != 4) {
+if (length(args) != 5) {
   stop("Erro: Forneça exatamente os dois ficheiros como argumento.\nUso: Rscript resolver_x.R arquivo_jacobson.csv arquivo_bitvector.csv")
 }
 
-caminho_jacobson <- args[1]
-caminho_bitvector <- args[2]
+path0 <- args[1]
+path1 <- args[2]
 out_name_csv <- args[3]
 out_name_graph <- args[4]
+operation_name <- args[5]
 
-# Ler os ficheiros CSV
-df_jacobson <- read.csv(caminho_jacobson, sep = ";", header = TRUE, dec = ".")
-df_bitvector <- read.csv(caminho_bitvector, sep = ";", header = TRUE, dec = ".")
+df_0 <- read.csv(path0, sep = ";", header = TRUE, dec = ".")
+df_1 <- read.csv(path1, sep = ";", header = TRUE, dec = ".")
 
 # Unir os dois dataframes através do campo "Size" em comum
-# dados_unidos <- inner_join(df_jacobson, df_bitvector, by = "Size", suffix = c("_jac", "_bv"))
+# dados_unidos <- inner_join(df_0, df_1, by = "Size", suffix = c("_jac", "_bv"))
 
 # # --- CÁLCULO DE X ---
 # dados_unidos$x <- dados_unidos$RS_Time / (dados_unidos$Time_bv - dados_unidos$Time_jac)
 
 # Agrupar os dados por Size
-jac <- df_jacobson %>%
+if (operation_name == "jacobson" || operation_name == "rrr"){
+  jac <- df_0 %>%
   group_by(Size) %>%
   summarise(
     Time_jac = mean(Time),
-    RS_Time = mean(BS_Time), # RS_TIME for jacob and rrr
+    RS_Time = mean(RS_Time),
     .groups = "drop"
   )
+} else {
+   jac <- df_0 %>%
+  group_by(Size) %>%
+  summarise(
+    Time_jac = mean(Time),
+    RS_Time = mean(BV_Time),
+    .groups = "drop"
+  )
+}
 
-bv <- df_bitvector %>%
+bv <- df_1 %>%
   group_by(Size) %>%
   summarise(
     Time_bv = mean(Time),

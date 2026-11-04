@@ -11,6 +11,7 @@ for i in "${!densities[@]}"; do
             "../../RRR/results/rrr-bsb-${op}-d${name}.csv" \
             "../../bitvector/results/bitvector-bsb-${op}-d${name}.csv" \
             "rrr-${op}-d${name}.csv" \
-            "rrr-${op}-d${name}.png"
+            "rrr-${op}-d${name}.png" \
+            "rrr"
     done
 done
