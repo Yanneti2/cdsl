@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 
-BIN="./build/benchmarks/jacobsonrank/jacobsonrank-bsb"
-OUT="/results"
-
-mkdir -p "$OUT"
+BIN="../../build/benchmarks/bitvector/bitvector-bsb"
+OUT="./results"
 
 declare -A distributions=(
-    ["d50"]=""
+    ["d50"]="5000"
     ["d30"]="3000"
     ["d10"]="1000"
     ["d5"]="500"
@@ -19,21 +17,17 @@ declare -A distributions=(
 )
 operations=("r1" "r0" "s1" "s0")
 
+set -e
+
 for density in d50 d30 d10 d5 d1 d.1 d99.9 d90 d95 d99; do
 
     for op in "${operations[@]}"; do
 
         echo "Running: $op - $density"
 
-        if [[ -z "${distributions[$density]}" ]]; then
-            nice -n -20 "$BIN" "-$op" \
-                > "$OUT/jacobson-bsb-$op-$density.csv" \
-                2> stderr
-        else
-            nice -n -20 "$BIN" "-$op" -d "${distributions[$density]}" \
-                > "$OUT/jacobson-bsb-$op-$density.csv" \
-                2> stderr
-        fi
+        nice -n -20 "$BIN" "-$op" -d "${distributions[$density]}" \
+            > "$OUT/bitvectorrrrrrrr-bsb-$op-$density.csv" \
+            2> stderr
 
     done
 done

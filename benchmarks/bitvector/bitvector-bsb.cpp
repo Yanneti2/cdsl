@@ -173,8 +173,7 @@ int main(int argc, char *argv[]) {
         if (verbose) 
             cout << "Size: " << size << "\nTime per " << operation << ": ";
         else 
-            cout << size << ";" << avgtime / (long double) DSIZE;
-        cout << avgtime / (long double) DSIZE << ";" << avgmem / 10;
+            cout << size << ";" << avgtime / (long double) DSIZE << ";" << avgmem / 10;
         if (verbose)
             cout << " ns";
         cout << endl;
