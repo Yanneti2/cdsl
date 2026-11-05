@@ -14,6 +14,7 @@ using namespace std;
 
 const size_t DSIZE = 100000;
 const size_t WSIZE = 10000;
+const int REPETITIONS = 10;
 
 void randomize_bitvector(bitvectorBS &B) {
     for (size_t i = B.size(); i > 0; i--) {
@@ -88,7 +89,7 @@ int main(int argc, char *argv[]) {
         size_t avg_mem = 0;
         long double avg_bt = 0;
         long double avg_time = 0;
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < REPETITIONS; i++)
         {
             std::chrono::high_resolution_clock::time_point start;
             std::chrono::high_resolution_clock::time_point end;
@@ -174,15 +175,15 @@ int main(int argc, char *argv[]) {
             avg_bt += build_time;
         }
         if (verbose) { 
-            cout << "Size: " << size << "\nTime per " << operation << ": " << avg_time / (long double) DSIZE << " ns" << endl;
-            cout << "Memory usage: " << avg_mem / 10 << endl;
-            cout << "Construction Time: " << avg_bt / 10 << " ns" << endl;
+            cout << "Size: " << size << "\nTime per " << operation << ": " << avg_time / (long double) (DSIZE*REPETITIONS) << " ns" << endl;
+            cout << "Memory usage: " << avg_mem / REPETITIONS << endl;
+            cout << "Construction Time: " << avg_bt / REPETITIONS << " ns" << endl;
             cout << endl;
         } else {
-            cout << size << ";" << avg_time / DSIZE
-                        << ";" << avg_mem
-                        << ";" << avg_bt
-                        << endl;
+            cout << size << ";" << avg_time / (long double)(REPETITIONS*DSIZE)
+            << ";" << avg_mem / REPETITIONS
+            << ";" << avg_bt / REPETITIONS
+            << endl;
         }
     }
 }

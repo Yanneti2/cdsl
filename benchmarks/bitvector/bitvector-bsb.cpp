@@ -24,6 +24,7 @@ using namespace std;
 
 const size_t DSIZE = 100000;
 const size_t WSIZE = 10000;
+const int REPETITIONS = 10;
 
 void randomize_bitvector(BitVector &B) {
     for (size_t i = B.size(); i > 0; i--) {
@@ -95,7 +96,7 @@ int main(int argc, char *argv[]) {
     {
         size_t avgmem = 0;
         long double avgtime = 0;
-        for (int i = 0; i < 10; i ++)
+        for (int i = 0; i < REPETITIONS; i ++)
         {
             size_t mem_rank_structure_0 = malloc_count_current();
             BitVector B(size, 0);
@@ -174,9 +175,12 @@ int main(int argc, char *argv[]) {
         if (verbose) 
             cout << "Size: " << size << "\nTime per " << operation << ": ";
         else 
-            cout << size << ";" << avgtime / (long double) DSIZE << ";" << avgmem / 10;
+            cout << size << ";";
+        cout << avgtime / (long double) (REPETITIONS*DSIZE);
         if (verbose)
             cout << " ns";
+        else 
+            cout << ";" << avgmem / REPETITIONS;
         cout << endl;
     }
 }
