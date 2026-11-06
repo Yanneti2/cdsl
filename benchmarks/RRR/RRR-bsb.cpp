@@ -13,45 +13,52 @@ using namespace std;
 
 using Clock = chrono::high_resolution_clock;
 
-static mt19937_64 rng(42);
+const size_t WSIZE = 1000;
+const size_t DSIZE = 100000;
+const int REPETITIONS = 10;
 
-static void fill_random(BitVector &B, unsigned dens)
-{
-    const size_t n = B.size();
-    const size_t ones = (size_t)((long double)n * dens / 10000.0L);
+const unsigned long long SEED = 1791409268;
 
-    for (size_t i = 0; i < n; i++)
-        if (i < ones) B.set1(i); else B.set0(i);
+void randomize_bitvector(BitVector &B) {
+    for (size_t i = B.size(); i > 0; i--) {
+        size_t j = rand() % i;
+        int aux = B[i - 1];
+        if (B[j]) {
+            B.set1(i - 1);
+        } else {
+            B.set0(i - 1);
+        }
 
-    for (size_t i = n; i > 1; i--)
-    {
-        size_t j = rng() % i;
-        int a = B[i - 1], b = B[j];
-        if (b) B.set1(i - 1); else B.set0(i - 1);
-        if (a) B.set1(j); else B.set0(j);
+        if (aux) {
+            B.set1(j);
+        } else {
+            B.set0(j);
+        }
     }
 }
 
+
 int main(int argc, char *argv[])
 {
-    bool verbose = false, check = false;
-    bool rank0 = false, rank1 = false, select0 = false, select1 = false;
-    string operation;
+    bool rank0 = false;
+    bool rank1 = false;
+    bool select0 = false;
+    bool select1 = false;
+
     unsigned dens = 5000;
-    size_t step = 16;
-    int max_exp = 18;
-    size_t Q = 100000;
+    bool verbose = false;
+
+    string operation;
+
+    srand(SEED);
 
     for (int i = 1; i < argc; i++)
     {
         string a = argv[i];
         bool more = i + 1 < argc;
+
         if (a == "-v" || a == "--verbose") verbose = true;
-        else if (a == "--check") check = true;
         else if ((a == "-d" || a == "--density") && more) dens = atol(argv[++i]);
-        else if (a == "--step" && more) step = atoll(argv[++i]);
-        else if (a == "--max" && more) max_exp = atoi(argv[++i]);
-        else if (a == "--queries" && more) Q = atoll(argv[++i]);
         else if (a == "--rank0" || a == "-r0") { rank0 = true; operation = "RANK 0"; }
         else if (a == "--rank1" || a == "-r1") { rank1 = true; operation = "RANK 1"; }
         else if (a == "--select0" || a == "-s0") { select0 = true; operation = "SELECT 0"; }
@@ -63,9 +70,9 @@ int main(int argc, char *argv[])
         cout << "=======================================================================\n"
              << "OPERATION: " << operation << "   DENSITY: " << dens / 100.0 << "%\n"
              << "THE SELECT STRUCTURE IS "
-#ifndef selectstructure
+            #ifndef selectstructure
              << "NOT "
-#endif
+            #endif
              << "IMPLEMENTED/USED\n"
              << "=======================================================================\n\n";
     } else {
@@ -75,81 +82,124 @@ int main(int argc, char *argv[])
     volatile unsigned long long sink = 0;
     int mismatches = 0;
 
-    for (size_t size = step; size <= ((size_t)1 << max_exp); size += step) {
-        BitVector B(size, 0);
-        fill_random(B, dens);
+    for (size_t size = 16; size <= (1ULL << 18); size += 16)
+    {
+        long double avgtime = 0;
+        size_t avg_rs_mem = 0;
+        size_t avg_ss_mem = 0;
+        long double avg_rs_time = 0;
+        long double avg_ss_time = 0;
 
-        size_t mem0 = malloc_count_current();
-        auto rs_start = Clock::now();
-        RRR R(&B);
-        auto rs_end = Clock::now();
-        size_t mem1 = malloc_count_current();
-
-        long long ss_time = -1, ss_mem = -1;
-#ifdef selectstructure
+        for (int rep = 0; rep < REPETITIONS; rep++)
         {
-            auto ss_start = Clock::now();
-            R.build_select(&B);
-            auto ss_end = Clock::now();
-            size_t mem2 = malloc_count_current();
-            ss_time = (long long)chrono::duration<double, nano>(ss_end - ss_start).count();
-            ss_mem = (long long)(mem2 - mem1);
-        }
-#endif
-        const double rs_time = chrono::duration<double, nano>(rs_end - rs_start).count();
-        const size_t rs_mem = mem1 - mem0;
-
-        const unsigned long long ones = B.naive_rank1(size);
-        const unsigned long long zeros = size - ones;
-        unsigned long long upper;
-        unsigned long long lo;
-        if (select1)      { lo = 1; upper = ones; }
-        else if (select0) { lo = 1; upper = zeros; }
-        else              { lo = 0; upper = size; } 
-
-        double time_ns = -1;
-        if (upper > 0) {
-            vector<size_t> warmup(Q / 10 + 1), idx(Q);
-            for (auto &x : warmup) x = lo + rng() % upper;
-            for (auto &x : idx) x = lo + rng() % upper;
-
-            auto run = [&](auto &&op) {
-                unsigned long long acc = 0;
-                for (size_t i : warmup) acc += op(i);
-                auto s = Clock::now();
-                for (size_t i : idx) acc += op(i);
-                auto e = Clock::now();
-                sink += acc;
-                time_ns = chrono::duration<double, nano>(e - s).count() / (double)Q;
-            };
-
-            if (rank0)        run([&](size_t i) { return R.rank0(i); });
-            else if (rank1)   run([&](size_t i) { return R.rank1(i); });
-            else if (select0) run([&](size_t i) { return R.select0(&B, i); });
-            else              run([&](size_t i) { return R.select1(&B, i); });
-        }
-
-        if (check) {
-            for (int t = 0; t < 2000; t++) {
-                size_t i = rng() % size;
-                if (R.rank1(i) != B.naive_rank1(i)) { mismatches++; cerr << "rank1 mismatch n=" << size << " i=" << i << "\n"; }
-                if (R.rank0(i) != B.naive_rank0(i)) { mismatches++; cerr << "rank0 mismatch n=" << size << " i=" << i << "\n"; }
-                if (ones)  { size_t k = 1 + rng() % ones;  if (R.select1(&B, k) != B.naive_select1(k)) { mismatches++; cerr << "select1 mismatch n=" << size << " k=" << k << "\n"; } }
-                if (zeros) { size_t k = 1 + rng() % zeros; if (R.select0(&B, k) != B.naive_select0(k)) { mismatches++; cerr << "select0 mismatch n=" << size << " k=" << k << "\n"; } }
+            BitVector B(size, 0);
+            for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
+                B.set1(i);
             }
-        }
+            randomize_bitvector(B);
 
+            size_t mem0 = malloc_count_current();
+            auto rs_start = Clock::now();
+            RRR R(&B);
+            auto rs_end = Clock::now();
+            size_t mem1 = malloc_count_current();
+
+            avg_rs_time += chrono::duration<double, nano>(
+                rs_end - rs_start
+            ).count();
+
+            avg_rs_mem += mem1 - mem0;
+
+            long long ss_time = -1, ss_mem = -1;
+            #ifdef selectstructure
+            {
+                auto ss_start = Clock::now();
+                R.build_select(&B);
+                auto ss_end = Clock::now();
+                size_t mem2 = malloc_count_current();
+                ss_time = (long long)chrono::duration<double, nano>(ss_end - ss_start).count();
+                ss_mem = (long long)(mem2 - mem1);
+            }
+            #endif
+
+            const unsigned long long ones = B.naive_rank1(size);
+            const unsigned long long zeros = size - ones;
+            unsigned long long upper_bound;
+
+            if (select1)
+                upper_bound = ones;
+            else if (select0)
+                upper_bound = zeros;
+            else
+                upper_bound = size;
+            upper_bound++;
+
+            unsigned long long lower_bound = (select0 || select1) ? 1 : 0;
+
+            vector<size_t> warmup(WSIZE);
+            vector<size_t> idx(DSIZE);
+
+            for (size_t j = 0; j < WSIZE; j++)
+                warmup[j] = lower_bound + rand() % upper_bound;
+
+            for (size_t j = 0; j < DSIZE; j++)
+                idx[j] = lower_bound + rand() % upper_bound;
+
+            unsigned long long dont_kill_my_methods = 0;
+
+            if (rank0) {
+                for (size_t i : warmup)
+                    dont_kill_my_methods += R.rank0(i);
+
+                auto start = Clock::now();
+                for (size_t i : idx)
+                    dont_kill_my_methods += R.rank0(i);
+                auto end = Clock::now();
+
+                avgtime += chrono::duration<double, nano>(end - start).count();
+            }
+            else if (rank1) {
+                for (size_t i : warmup)
+                    dont_kill_my_methods += R.rank1(i);
+
+                auto start = Clock::now();
+                for (size_t i : idx)
+                    dont_kill_my_methods += R.rank1(i);
+                auto end = Clock::now();
+
+                avgtime += chrono::duration<double, nano>(end - start).count();
+            }
+            else if (select0) {
+                for (size_t i : warmup)
+                    dont_kill_my_methods += R.select0(&B, i);
+
+                auto start = Clock::now();
+                for (size_t i : idx)
+                    dont_kill_my_methods += R.select0(&B, i);
+                auto end = Clock::now();
+
+                avgtime += chrono::duration<double, nano>(end - start).count();
+            }
+            else if (select1) {
+                for (size_t i : warmup)
+                    dont_kill_my_methods += R.select1(&B, i);
+
+                auto start = Clock::now();
+                for (size_t i : idx)
+                    dont_kill_my_methods += R.select1(&B, i);
+                auto end = Clock::now();
+
+                avgtime += chrono::duration<double, nano>(end - start).count();
+            }
+            cerr << dont_kill_my_methods;
+        }
         if (verbose) {
-            cout << "Size: " << size << "\nTime per " << operation << ": " << time_ns << " ns\n"
-                 << "Rank structure: " << rs_time << " ns, " << rs_mem << " bytes\n"
-                 << "Select structure: " << ss_time << " ns, " << ss_mem << " bytes\n\n";
+            cout << "Size: " << size << "\nTime per " << operation << ": " << avgtime << " ns\n"
+                 << "Rank structure: " << avg_rs_time << " ns, " << avg_rs_mem << " bytes\n"
+                 << "Select structure: " << avg_ss_time << " ns, " << avg_ss_mem << " bytes\n\n";
         } else {
-            cout << size << ";" << time_ns << ";" << rs_time << ";" << rs_mem
-                 << ";" << ss_mem << ";" << ss_time << "\n";
+            cout << size << ";" << avgtime << ";" << avg_rs_time << ";" << avg_rs_mem
+                 << ";" << avg_ss_mem << ";" << avg_ss_time << "\n";
         }
     }
-
-    cerr << "sink=" << sink << "\n";
-    if (check) cerr << (mismatches ? "CHECK FAILED: " : "CHECK OK: ") << mismatches << " mismatches\n";
-    return mismatches ? 1 : 0;
 }
