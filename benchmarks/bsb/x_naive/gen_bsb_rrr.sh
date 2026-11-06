@@ -8,7 +8,7 @@ for i in "${!densities[@]}"; do
 
     for op in "${operations[@]}"; do
         Rscript graph.r \
-            "../../RRR/results/rrr-bsb-${op}-d${name}.csv" \
+            "../../RRR/results/bsb-rrr-${op}-d${name}.csv" \
             "../../bitvector/results/bitvector-bsb-${op}-d${name}.csv" \
             "rrr-${op}-d${name}.csv" \
             "rrr-${op}-d${name}.png" \
