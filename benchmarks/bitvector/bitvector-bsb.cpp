@@ -22,9 +22,11 @@
 
 using namespace std;
 
-const size_t DSIZE = 100000;
-const size_t WSIZE = 10000;
+const size_t WSIZE = 1000;
 const int REPETITIONS = 10;
+const size_t DSIZE = 100000;
+
+const unsigned long long SEED = 1791409268;
 
 void randomize_bitvector(BitVector &B) {
     for (size_t i = B.size(); i > 0; i--) {
@@ -51,10 +53,12 @@ int main(int argc, char *argv[]) {
     bool select0 = false;
     bool select1 = false;
     unsigned dens = 5000; // default
+    
     bool verbose = false;
 
     string operation;
-    srand(time(0)); // need to set a seed
+
+    srand(SEED);
 
     for (int i = 0; i < argc; i++) {
         if (std::strcmp(argv[i], "-v") == 0 || std::strcmp(argv[i], "--verbose") == 0)
@@ -90,7 +94,7 @@ int main(int argc, char *argv[]) {
             ;
         cout << header;
     } else {
-        cout << "\"Size\";\"Time\";\"BV_Memory\"\"BV_Memory\"\n";
+        cout << "\"Size\";\"Time\";\"BV_Memory\"\n";
     }
     for (size_t size = 16; size < (1 << 18) + 1; size += 16)
     {
@@ -128,7 +132,7 @@ int main(int argc, char *argv[]) {
             std::chrono::high_resolution_clock::time_point start;
             std::chrono::high_resolution_clock::time_point end;
 
-            size_t dont_kill_my_methods;
+            size_t dont_kill_my_methods = 0;
             if (rank0) {
                 for (size_t i : warmup) {
                     dont_kill_my_methods += B.naive_rank0(i);

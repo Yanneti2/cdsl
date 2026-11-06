@@ -22,9 +22,11 @@
 
 using namespace std;
 
-const size_t DSIZE = 100000;
 const size_t WSIZE = 10000;
 const int REPETITIONS = 10;
+const size_t DSIZE = 100000;
+
+const unsigned long long SEED = 1791409268;
 
 void randomize_bitvector(BitVector &B) {
     for (size_t i = B.size(); i > 0; i--) {
@@ -56,6 +58,8 @@ int main(int argc, char *argv[])
     string operation;
 
     unsigned dens = 5000;
+
+    srand(SEED);
 
     for (int i = 0; i < argc; i++) {
         if (std::strcmp(argv[i], "-v") == 0 || std::strcmp(argv[i], "--verbose") == 0)
@@ -103,8 +107,6 @@ int main(int argc, char *argv[])
         size_t avg_ssmem = 0;
         for (int i = 0; i < REPETITIONS; i++)
         {
-            srand(time(0));
-
             size_t mem_rank_structure_0 = malloc_count_current();
             BitVectorJ B(size, 0);
             for (size_t i = 0; i < B.size() * (long double) dens / (double) WSIZE; i++) {

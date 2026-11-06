@@ -12,9 +12,11 @@
 
 using namespace std;
 
-const size_t DSIZE = 100000;
-const size_t WSIZE = 10000;
+const size_t WSIZE = 1000;
 const int REPETITIONS = 10;
+const size_t DSIZE = 100000;
+
+const unsigned long long SEED = 1791409268;
 
 void randomize_bitvector(bitvectorBS &B) {
     for (size_t i = B.size(); i > 0; i--) {
@@ -41,8 +43,12 @@ int main(int argc, char *argv[]) {
     bool rank1 = false;
     bool select0 = false;
     bool select1 = false;
+
     string operation;
+    
     unsigned dens = 5000;
+
+    srand(SEED);
 
     for (int i = 0; i < argc; i++) {
         if (std::strcmp(argv[i], "-v") == 0 || std::strcmp(argv[i], "--verbose") == 0)
@@ -83,7 +89,6 @@ int main(int argc, char *argv[]) {
     } else {
         cout << "\"Size\";\"Time\";\"BV_Memory\";\"BV_Time\"\n";
     }
-    srand(time(0));
     for (size_t size = 16; size < (1 << 13) + 1; size += 16)
     {
         size_t avg_mem = 0;
