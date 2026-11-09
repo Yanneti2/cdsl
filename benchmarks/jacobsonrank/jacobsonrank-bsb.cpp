@@ -29,6 +29,7 @@ const size_t DSIZE = 100000;
 const unsigned long long SEED = 1791409268;
 
 void randomize_bitvector(BitVector &B) {
+    srand(2425710);   
     for (size_t i = B.size(); i > 0; i--) {
         size_t j = rand() % i;
         int aux = B[i - 1];
@@ -43,6 +44,9 @@ void randomize_bitvector(BitVector &B) {
         } else {
             B.set0(j);
         }
+    }
+    if(B.size() == 128) {
+        B.print(0);
     }
 }
 
@@ -97,6 +101,7 @@ int main(int argc, char *argv[])
     } else {
         cout << "\"Size\";\"Time\";\"BV_Memory\";\"RS_Time\";\"RS_Memory\";\"SS_Time\";\"SS_Memory\"\n";
     }
+<<<<<<< HEAD
     for (size_t size = 16; size < (1 << 18) + 1; size += 16)
     {
         long double avg_opt = 0;
@@ -208,6 +213,15 @@ int main(int argc, char *argv[])
             avg_rsmem += mem_rank_structure_2 - mem_rank_structure_1;
             avg_sst += ss_elapsed_time.count();
             avg_ssmem += mem_rank_structure_3 - mem_rank_structure_2;
+=======
+    for (int i = 0; i < 10; i++) {
+    for (size_t size = 16; size < (1 << 16) + 1; size += 16) {
+        srand(time(0));
+        size_t mem_rank_structure_0 = malloc_count_current();
+        BitVectorJ B(size, 0);
+        for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
+            B.set1(i);
+>>>>>>> 6ab54d8 (test now use the same bv(b))
         }
         if (verbose) { 
             cout << "Size: " << size << "\nTime per " << operation << ": "
