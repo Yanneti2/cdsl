@@ -30,7 +30,6 @@ const size_t MAX_SIZE = 10000;
 const unsigned long long SEED = 1791409268;
 
 void randomize_bitvector(BitVector &B) {
-    srand(2425710);   
     for (size_t i = B.size(); i > 0; i--) {
         size_t j = rand() % i;
         int aux = B[i - 1];
@@ -155,7 +154,7 @@ int main(int argc, char *argv[])
 
             std::chrono::high_resolution_clock::time_point start;
             std::chrono::high_resolution_clock::time_point end;
-            size_t dont_kill_my_methods;
+            size_t dont_kill_my_methods = 0;
             
             if (rank0) {
                 for (size_t i : warmup) {
