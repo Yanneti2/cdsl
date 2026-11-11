@@ -101,8 +101,7 @@ int main(int argc, char *argv[])
     } else {
         cout << "\"Size\";\"Time\";\"BV_Memory\";\"RS_Time\";\"RS_Memory\";\"SS_Time\";\"SS_Memory\"\n";
     }
-<<<<<<< HEAD
-    for (size_t size = 16; size < (1 << 18) + 1; size += 16)
+    for (size_t size = 16; size < (1 << 16) + 1; size += 16)
     {
         long double avg_opt = 0;
         size_t avg_bvmem = 0;
@@ -213,15 +212,6 @@ int main(int argc, char *argv[])
             avg_rsmem += mem_rank_structure_2 - mem_rank_structure_1;
             avg_sst += ss_elapsed_time.count();
             avg_ssmem += mem_rank_structure_3 - mem_rank_structure_2;
-=======
-    for (int i = 0; i < 10; i++) {
-    for (size_t size = 16; size < (1 << 16) + 1; size += 16) {
-        srand(time(0));
-        size_t mem_rank_structure_0 = malloc_count_current();
-        BitVectorJ B(size, 0);
-        for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
-            B.set1(i);
->>>>>>> 6ab54d8 (test now use the same bv(b))
         }
         if (verbose) { 
             cout << "Size: " << size << "\nTime per " << operation << ": "
