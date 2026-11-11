@@ -27,7 +27,7 @@ mkdir -p "$out_dir"
 #        f1="../../RRR/results/rrr-bsb-${op[i]}-d${d}.csv"
 #        f2="../../bitvector/results/bitvector-bsb-${op[i]}-d${d}.csv"
 #
-#        Rscript graph.r \
+#        Rscript ../../graph.r \
 #            "$f1" "$struct1" \
 #            "$f2" "$struct2" \
 #            "${flags[@]}" \
@@ -56,7 +56,7 @@ for i in "${!op[@]}"; do
         f3="../../bitvectorBS/results/bitvectorBS-bsb-${op[i]}-d${d}.csv"
         f4="../../RRR/results/rrr-bsb-${op[i]}-d${d}.csv"
 
-        Rscript graph.r \
+        Rscript ../../graph.r \
             "$f2" "$struct2" \
             "$f1" "$struct1" \
             "$f3" "$struct3" \
