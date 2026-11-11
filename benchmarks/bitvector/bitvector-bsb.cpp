@@ -25,6 +25,7 @@ using namespace std;
 const size_t WSIZE = 1000;
 const int REPETITIONS = 10;
 const size_t DSIZE = 100000;
+const size_t MAX_SIZE = 10000;
 
 const unsigned long long SEED = 1791409268;
 
@@ -96,11 +97,9 @@ int main(int argc, char *argv[]) {
     } else {
         cout << "\"Size\";\"Time\";\"BV_Memory\"\n";
     }
-    for (size_t size = 16; size < (1 << 18) + 1; size += 16)
+    for (int i = 0; i < REPETITIONS; i ++)
     {
-        size_t avgmem = 0;
-        long double avgtime = 0;
-        for (int i = 0; i < REPETITIONS; i ++)
+        for (size_t size = 16; size <= MAX_SIZE; size += 16)
         {
             size_t mem_rank_structure_0 = malloc_count_current();
             BitVector B(size, 0);
@@ -173,18 +172,16 @@ int main(int argc, char *argv[]) {
             std::chrono::duration<double, nano> elapsed_time{end - start};
             cerr << dont_kill_my_methods << "\n";
 
-            avgtime += elapsed_time.count();
-            avgmem += mem_rank_structure_1 - mem_rank_structure_0;
+            if (verbose) 
+                cout << "Size: " << size << "\nTime per " << operation << ": ";
+            else 
+                cout << size << ";";
+            cout << elapsed_time.count();
+            if (verbose)
+                cout << " ns";
+            else 
+                cout << ";" << mem_rank_structure_1 - mem_rank_structure_0;
+            cout << endl;
         }
-        if (verbose) 
-            cout << "Size: " << size << "\nTime per " << operation << ": ";
-        else 
-            cout << size << ";";
-        cout << avgtime / (long double) (REPETITIONS*DSIZE);
-        if (verbose)
-            cout << " ns";
-        else 
-            cout << ";" << avgmem / REPETITIONS;
-        cout << endl;
     }
 }

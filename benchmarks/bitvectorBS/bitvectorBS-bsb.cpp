@@ -15,6 +15,7 @@ using namespace std;
 const size_t WSIZE = 1000;
 const int REPETITIONS = 10;
 const size_t DSIZE = 100000;
+const size_t MAX_SIZE = 10000;
 
 const unsigned long long SEED = 1791409268;
 
@@ -89,12 +90,9 @@ int main(int argc, char *argv[]) {
     } else {
         cout << "\"Size\";\"Time\";\"BV_Memory\";\"BV_Time\"\n";
     }
-    for (size_t size = 16; size < (1 << 13) + 1; size += 16)
+    for (int i = 0; i < REPETITIONS; i++)
     {
-        size_t avg_mem = 0;
-        long double avg_bt = 0;
-        long double avg_time = 0;
-        for (int i = 0; i < REPETITIONS; i++)
+        for (size_t size = 16; size <= MAX_SIZE; size += 16)
         {
             std::chrono::high_resolution_clock::time_point start;
             std::chrono::high_resolution_clock::time_point end;
@@ -175,20 +173,19 @@ int main(int argc, char *argv[]) {
             }
             cerr << dont_kill_my_methods << "\n";
             elapsed_time = end - start;
-            avg_mem += mem_rank_structure_1 - mem_rank_structure_0;
-            avg_time +=  elapsed_time.count();
-            avg_bt += build_time;
-        }
-        if (verbose) { 
-            cout << "Size: " << size << "\nTime per " << operation << ": " << avg_time / (long double) (DSIZE*REPETITIONS) << " ns" << endl;
-            cout << "Memory usage: " << avg_mem / REPETITIONS << endl;
-            cout << "Construction Time: " << avg_bt / REPETITIONS << " ns" << endl;
-            cout << endl;
-        } else {
-            cout << size << ";" << avg_time / (long double)(REPETITIONS*DSIZE)
-            << ";" << avg_mem / REPETITIONS
-            << ";" << avg_bt / REPETITIONS
-            << endl;
+
+            if (verbose) 
+            { 
+                cout << "Size: " << size << "\nTime per " << operation << ": " << elapsed_time.count() << " ns" << endl;
+                cout << "Memory usage: " <<  mem_rank_structure_1 - mem_rank_structure_0 << endl;
+                cout << "Construction Time: " << build_time << " ns" << endl;
+                cout << endl;
+            } else {
+                cout << size << ";" << elapsed_time.count()
+                << ";" << mem_rank_structure_1 - mem_rank_structure_0
+                << ";" << build_time
+                << endl;
+            }
         }
     }
 }

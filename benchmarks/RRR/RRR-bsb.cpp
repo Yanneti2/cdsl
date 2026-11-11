@@ -14,8 +14,9 @@ using namespace std;
 using Clock = chrono::high_resolution_clock;
 
 const size_t WSIZE = 1000;
-const size_t DSIZE = 100000;
 const int REPETITIONS = 10;
+const size_t DSIZE = 100000;
+const size_t MAX_SIZE = 10000;
 
 const unsigned long long SEED = 1791409268;
 
@@ -78,19 +79,9 @@ int main(int argc, char *argv[])
     } else {
         cout << "\"Size\";\"Time\";\"RS_Time\";\"RS_Memory\";\"SS_Memory\";\"SS_Time\"\n";
     }
-
-    volatile unsigned long long sink = 0;
-    int mismatches = 0;
-
-    for (size_t size = 16; size <= (1ULL << 18); size += 16)
+    for (int rep = 0; rep < REPETITIONS; rep++)
     {
-        long double avgtime = 0;
-        size_t avg_rs_mem = 0;
-        size_t avg_ss_mem = 0;
-        long double avg_rs_time = 0;
-        long double avg_ss_time = 0;
-
-        for (int rep = 0; rep < REPETITIONS; rep++)
+        for (size_t size = 16; size <= MAX_SIZE; size += 16)
         {
             BitVector B(size, 0);
             for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
@@ -104,48 +95,49 @@ int main(int argc, char *argv[])
             auto rs_end = Clock::now();
             size_t mem1 = malloc_count_current();
 
-            avg_rs_time += chrono::duration<double, nano>(
+            double rs_time = chrono::duration<double, nano>(
                 rs_end - rs_start
             ).count();
 
-            avg_rs_mem += mem1 - mem0;
+            size_t rs_mem = mem1 - mem0;
 
-            long long ss_time = -1, ss_mem = -1;
-            #ifdef selectstructure
-            {
-                auto ss_start = Clock::now();
-                R.build_select(&B);
-                auto ss_end = Clock::now();
-                size_t mem2 = malloc_count_current();
-                ss_time = (long long)chrono::duration<double, nano>(ss_end - ss_start).count();
-                ss_mem = (long long)(mem2 - mem1);
-            }
-            #endif
+            // long long ss_time = -1, ss_mem = -1;
+            // #ifdef selectstructure
+            // {
+            //     auto ss_start = Clock::now();
+            //     R.build_select(&B);
+            //     auto ss_end = Clock::now();
+            //     size_t mem2 = malloc_count_current();
+            //     ss_time = (long long)chrono::duration<double, nano>(ss_end - ss_start).count();
+            //     ss_mem = (long long)(mem2 - mem1);
+            // }
+            // #endif
 
-            const unsigned long long ones = B.naive_rank1(size);
-            const unsigned long long zeros = size - ones;
-            unsigned long long upper_bound;
+            // const unsigned long long ones = B.naive_rank1(size);
+            // const unsigned long long zeros = size - ones;
+            // unsigned long long upper_bound;
 
-            if (select1)
-                upper_bound = ones;
-            else if (select0)
-                upper_bound = zeros;
-            else
-                upper_bound = size;
-            upper_bound++;
+            // if (select1)
+            //     upper_bound = ones;
+            // else if (select0)
+            //     upper_bound = zeros;
+            // else
+            //     upper_bound = size;
+            // upper_bound++;
 
-            unsigned long long lower_bound = (select0 || select1) ? 1 : 0;
+            // unsigned long long lower_bound = (select0 || select1) ? 1 : 0;
 
             vector<size_t> warmup(WSIZE);
             vector<size_t> idx(DSIZE);
 
             for (size_t j = 0; j < WSIZE; j++)
-                warmup[j] = lower_bound + rand() % upper_bound;
+                warmup[j] = rand() % size; // lower bound + rand % upper_bound
 
             for (size_t j = 0; j < DSIZE; j++)
-                idx[j] = lower_bound + rand() % upper_bound;
+                idx[j] =  rand() % size;
 
             unsigned long long dont_kill_my_methods = 0;
+            double time = 0;
 
             if (rank0) {
                 for (size_t i : warmup)
@@ -156,7 +148,7 @@ int main(int argc, char *argv[])
                     dont_kill_my_methods += R.rank0(i);
                 auto end = Clock::now();
 
-                avgtime += chrono::duration<double, nano>(end - start).count();
+                time += chrono::duration<double, nano>(end - start).count();
             }
             else if (rank1) {
                 for (size_t i : warmup)
@@ -167,7 +159,7 @@ int main(int argc, char *argv[])
                     dont_kill_my_methods += R.rank1(i);
                 auto end = Clock::now();
 
-                avgtime += chrono::duration<double, nano>(end - start).count();
+                time += chrono::duration<double, nano>(end - start).count();
             }
             else if (select0) {
                 for (size_t i : warmup)
@@ -178,7 +170,7 @@ int main(int argc, char *argv[])
                     dont_kill_my_methods += R.select0(&B, i);
                 auto end = Clock::now();
 
-                avgtime += chrono::duration<double, nano>(end - start).count();
+                time += chrono::duration<double, nano>(end - start).count();
             }
             else if (select1) {
                 for (size_t i : warmup)
@@ -189,17 +181,19 @@ int main(int argc, char *argv[])
                     dont_kill_my_methods += R.select1(&B, i);
                 auto end = Clock::now();
 
-                avgtime += chrono::duration<double, nano>(end - start).count();
+                time += chrono::duration<double, nano>(end - start).count();
             }
             cerr << dont_kill_my_methods;
-        }
-        if (verbose) {
-            cout << "Size: " << size << "\nTime per " << operation << ": " << avgtime << " ns\n"
-                 << "Rank structure: " << avg_rs_time << " ns, " << avg_rs_mem << " bytes\n"
-                 << "Select structure: " << avg_ss_time << " ns, " << avg_ss_mem << " bytes\n\n";
-        } else {
-            cout << size << ";" << avgtime << ";" << avg_rs_time << ";" << avg_rs_mem
-                 << ";" << avg_ss_mem << ";" << avg_ss_time << "\n";
+
+            if (verbose) {
+            cout << "Size: " << size << "\nTime per " << operation << ": " << time << " ns\n"
+                 << "Rank structure: " << rs_time << " ns, " << rs_mem << " bytes\n";
+                //  << "Select structure: " << ss_time << " ns, " << avg_ss_mem << " bytes\n\n";
+            } else {
+                cout << size << ";" << time << ";" << rs_time << ";" << rs_mem
+                    // << ";" << avg_ss_mem << ";" << avg_ss_time 
+                    << "\n";
+            }
         }
     }
 }

@@ -25,6 +25,7 @@ using namespace std;
 const size_t WSIZE = 10000;
 const int REPETITIONS = 10;
 const size_t DSIZE = 100000;
+const size_t MAX_SIZE = 10000;
 
 const unsigned long long SEED = 1791409268;
 
@@ -101,15 +102,9 @@ int main(int argc, char *argv[])
     } else {
         cout << "\"Size\";\"Time\";\"BV_Memory\";\"RS_Time\";\"RS_Memory\";\"SS_Time\";\"SS_Memory\"\n";
     }
-    for (size_t size = 16; size < (1 << 16) + 1; size += 16)
+    for (int i = 0; i < REPETITIONS; i++)
     {
-        long double avg_opt = 0;
-        size_t avg_bvmem = 0;
-        long double avg_rst = 0;
-        size_t avg_rsmem = 0;
-        long double avg_sst = 0;
-        size_t avg_ssmem = 0;
-        for (int i = 0; i < REPETITIONS; i++)
+        for (size_t size = 16; size <= MAX_SIZE; size += 16)
         {
             size_t mem_rank_structure_0 = malloc_count_current();
             BitVectorJ B(size, 0);
@@ -206,23 +201,18 @@ int main(int argc, char *argv[])
 
             cerr << dont_kill_my_methods << "\n";
 
-            avg_opt += elapsed_time.count();
-            avg_bvmem += mem_rank_structure_1 - mem_rank_structure_0;
-            avg_rst += init_elapsed_time.count();
-            avg_rsmem += mem_rank_structure_2 - mem_rank_structure_1;
-            avg_sst += ss_elapsed_time.count();
-            avg_ssmem += mem_rank_structure_3 - mem_rank_structure_2;
-        }
-        if (verbose) { 
-            cout << "Size: " << size << "\nTime per " << operation << ": "
-            << avg_opt / (long double)(REPETITIONS*DSIZE) << " ns" << endl
-            << "Memory usage: " << (avg_bvmem + avg_rsmem + avg_ssmem) / REPETITIONS
-            << endl << endl;
-        } else {
-            cout << size << ";" << avg_opt / (long double)(REPETITIONS*DSIZE)
-            << ";" << avg_bvmem / REPETITIONS << ";" << avg_rst / REPETITIONS
-            << ";" << avg_rsmem / REPETITIONS << ";" << avg_sst / REPETITIONS
-            << ";" << avg_ssmem / REPETITIONS << endl;
+            if (verbose)
+            { 
+                cout << "Size: " << size << "\nTime per " << operation << ": "
+                << elapsed_time.count() << " ns" << endl
+                << "Memory usage: " << mem_rank_structure_3 - mem_rank_structure_0
+                << endl << endl;
+            } else {
+                cout << size << ";" << elapsed_time.count()
+                << ";" << mem_rank_structure_1 - mem_rank_structure_0 << ";" << init_elapsed_time.count()
+                << ";" << mem_rank_structure_2 - mem_rank_structure_1 << ";" << ss_elapsed_time.count()
+                << ";" << mem_rank_structure_3 - mem_rank_structure_2 << endl;
+            }
         }
     }
 }
