@@ -176,12 +176,12 @@ int main(int argc, char *argv[]) {
 
             if (verbose) 
             { 
-                cout << "Size: " << size << "\nTime per " << operation << ": " << elapsed_time.count() << " ns" << endl;
+                cout << "Size: " << size << "\nTime per " << operation << ": " << elapsed_time.count() / DSIZE << " ns" << endl;
                 cout << "Memory usage: " <<  mem_rank_structure_1 - mem_rank_structure_0 << endl;
                 cout << "Construction Time: " << build_time << " ns" << endl;
                 cout << endl;
             } else {
-                cout << size << ";" << elapsed_time.count()
+                cout << size << ";" << elapsed_time.count() / DSIZE
                 << ";" << mem_rank_structure_1 - mem_rank_structure_0
                 << ";" << build_time
                 << endl;

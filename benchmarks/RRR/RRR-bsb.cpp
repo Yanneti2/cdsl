@@ -186,11 +186,11 @@ int main(int argc, char *argv[])
             cerr << dont_kill_my_methods;
 
             if (verbose) {
-            cout << "Size: " << size << "\nTime per " << operation << ": " << time << " ns\n"
+            cout << "Size: " << size << "\nTime per " << operation << ": " << time  / DSIZE<< " ns\n"
                  << "Rank structure: " << rs_time << " ns, " << rs_mem << " bytes\n";
                 //  << "Select structure: " << ss_time << " ns, " << avg_ss_mem << " bytes\n\n";
             } else {
-                cout << size << ";" << time << ";" << rs_time << ";" << rs_mem
+                cout << size << ";" << time / DSIZE<< ";" << rs_time << ";" << rs_mem
                     // << ";" << avg_ss_mem << ";" << avg_ss_time 
                     << "\n";
             }

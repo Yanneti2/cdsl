@@ -45,9 +45,9 @@ void randomize_bitvector(BitVector &B) {
             B.set0(j);
         }
     }
-    if(B.size() == 128) {
-        B.print(0);
-    }
+    // if(B.size() == 128) {
+    //     B.print(0);
+    // }
 }
 
 
@@ -203,11 +203,11 @@ int main(int argc, char *argv[])
             if (verbose)
             { 
                 cout << "Size: " << size << "\nTime per " << operation << ": "
-                << elapsed_time.count() << " ns" << endl
+                << elapsed_time.count() / DSIZE << " ns" << endl
                 << "Memory usage: " << mem_rank_structure_3 - mem_rank_structure_0
                 << endl << endl;
             } else {
-                cout << size << ";" << elapsed_time.count()
+                cout << size << ";" << elapsed_time.count() / DSIZE
                 << ";" << mem_rank_structure_1 - mem_rank_structure_0 << ";" << init_elapsed_time.count()
                 << ";" << mem_rank_structure_2 - mem_rank_structure_1 << ";" << ss_elapsed_time.count()
                 << ";" << mem_rank_structure_3 - mem_rank_structure_2 << endl;

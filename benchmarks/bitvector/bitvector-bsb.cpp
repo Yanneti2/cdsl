@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
                 cout << "Size: " << size << "\nTime per " << operation << ": ";
             else 
                 cout << size << ";";
-            cout << elapsed_time.count();
+            cout << elapsed_time.count() / (long double) DSIZE;
             if (verbose)
                 cout << " ns";
             else 
