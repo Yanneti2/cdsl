@@ -1,325 +1,303 @@
 #!/usr/bin/env Rscript
 #
+# Break-even analysis of rank/select structures vs. a naive bit vector.
+#
+# For every (size, density), a structure S pays off after n operations when
+#     C_S / n + T_S < T_naive      <=>      n > C_S / (T_naive - T_S)
+# (C_S = construction time, T_S = time per operation). The smallest such
+# integer n is reported; if T_S >= T_naive the structure never pays off.
+#
 # Uso:
-#   Rscript compare_structures.R {Dataset.csv} {Nome} [{Dataset.csv} {Nome} ...] [flags]
+#   Rscript breakeven_heatmap.R {Dataset.csv} {Nome} [{Dataset.csv} {Nome} ...] [flags]
 #
-# Exemplos:
-#   Rscript compare_structures.R \
-#     bitvector-bsb-r0-d10.csv BitVector \
-#     bitvectorBS-bsb-r0-d10.csv BitVectorBS \
-#     bsb-rrr-r0-d10.csv RRR \
-#     jacobson-bsb-r0-d10.csv Jacobson \
-#     --metric Op_Time --bars normalize --baseline BitVector -o time_norm.png
+# Um CSV por (estrutura, densidade), repetindo o mesmo Nome. A densidade vem da
+# coluna "Density" ou do nome do arquivo ("-d30", "-d0.1"). A operação vem de
+# --operation ou do nome do arquivo ("-r1-", "-s0-" ...).
 #
+# Flags:
+#   --baseline NOME      estrutura de referência (default: naive)
+#   --order a,b,c        da mais "fria" à mais "quente" (default: bs,jacobson,rrr)
+#   --max-size N         tamanho máximo comparado (default: 10000)
+#   --sizes a,b,c        tamanhos alvo (default: 128,256,...,8192,10000)
+#   --densities a,b,c    densidades esperadas (default: 0.1,1,5,10,30,50,70,90,95,99,99.9)
+#   --operation TXT      rótulo da operação (default: deduzido do arquivo)
+#   --table-out ARQ      tabela de saída: .xlsx (default) ou .csv
+#   --x-axis COL         coluna do tamanho (default: Size)
+#   --density-col COL    coluna da densidade (default: Density)
+#   --title/-t TXT       título do heatmap
+#   --output/-o ARQ      PNG do heatmap (default: breakeven.png)
 
 suppressPackageStartupMessages({
     library(ggplot2)
-    library(tibble)
     library(dplyr)
 })
 
-# ---------------------------------------------------------------- config ----
-
-default_config <- function() {
-    list(
-        datasets          = character(),
-        dataset_names     = character(),
-        metric            = "Op_Time", # Op_Time, Const_Time, Total_Mem, Speedup, Mem_Ratio
-        log_x             = FALSE,
-        log_y             = FALSE,
-        x_zero            = FALSE,
-        y_zero            = FALSE,
-        output_file       = "result.png",
-        graph_title       = NULL,
-        x_axis            = "Size",
-        x_interval        = NULL,
-        y_interval        = NULL,
-        fit_models        = NULL,
-        do_intersect      = FALSE,
-        do_intersect_data = FALSE,
-        min_run           = 1L,
-        bars              = NULL,
-        baseline          = "BitVector",
-        y_label           = NULL,
-        legend_title      = "Estrutura",
-        x_values          = NULL,
-        summary_table     = TRUE
-    )
-}
-
-Y_COL <- "Y_VALUE"
-BAR_MODES <- c("linear", "log", "normalize")
-
-FLAG_SPECS <- list(
-    "--metric"         = list(type = "string",   keys = "metric"),
-    "--log-x"          = list(type = "switch",   keys = "log_x"),
-    "--log-y"          = list(type = "switch",   keys = "log_y"),
-    "--x-zero"         = list(type = "switch",   keys = "x_zero"),
-    "--y-zero"         = list(type = "switch",   keys = "y_zero"),
-    "--origin-zero"    = list(type = "switch",   keys = c("x_zero", "y_zero")),
-    "--intersect"      = list(type = "switch",   keys = "do_intersect"),
-    "--intersect-data" = list(type = "switch",   keys = "do_intersect_data"),
-    "--output"         = list(type = "string",   keys = "output_file"),
-    "-o"               = list(type = "string",   keys = "output_file"),
-    "--title"          = list(type = "string",   keys = "graph_title"),
-    "-t"               = list(type = "string",   keys = "graph_title"),
-    "--x-axis"         = list(type = "string",   keys = "x_axis"),
-    "--y-label"        = list(type = "string",   keys = "y_label"),
-    "--legend"         = list(type = "string",   keys = "legend_title"),
-    "--x-values"       = list(type = "numbers",  keys = "x_values"),
-    "--interval-x"     = list(type = "interval", keys = "x_interval"),
-    "--interval-y"     = list(type = "interval", keys = "y_interval"),
-    "--fit"            = list(type = "csv",      keys = "fit_models"),
-    "--min-run"        = list(type = "integer",  keys = "min_run"),
-    "--bars"           = list(type = "string",   keys = "bars"),
-    "--baseline"       = list(type = "string",   keys = "baseline")
-)
-
-parse_interval <- function(value, flag) {
-    if (length(value) != 1 || is.na(value)) stop(paste(flag, "requer dois limites, ex: 0,100"))
-    value <- gsub("^\\[|\\]$", "", value)
-    bounds <- suppressWarnings(as.numeric(trimws(strsplit(value, ",", fixed = TRUE)[[1]])))
-    if (length(bounds) != 2 || any(!is.finite(bounds)) || bounds[1] >= bounds[2]) {
-        stop(paste("Intervalo inválido para", flag))
-    }
-    bounds
-}
-
-parse_flag_value <- function(type, value, flag) {
-    switch(type,
-        string   = value,
-        interval = parse_interval(value, flag),
-        csv      = trimws(strsplit(value, ",", fixed = TRUE)[[1]]),
-        numbers  = suppressWarnings(as.numeric(trimws(strsplit(value, ",", fixed = TRUE)[[1]]))),
-        integer  = suppressWarnings(as.integer(value)),
-        stop(paste("Tipo de flag desconhecido:", type))
-    )
-}
+# ---------------------------------------------------------------- args ----
 
 parse_args <- function(args) {
-    if (length(args) == 0) stop("Nenhum arquivo de entrada fornecido.")
-    config <- default_config()
-    index  <- 1
-
-    while (index <= length(args)) {
-        arg  <- args[index]
-        spec <- FLAG_SPECS[[arg]]
-
-        if (!is.null(spec)) {
-            if (spec$type == "switch") {
-                for (key in spec$keys) config[[key]] <- TRUE
-            } else {
-                if (index >= length(args)) stop(paste(arg, "requer um valor"))
-                index <- index + 1
-                config[[spec$keys]] <- parse_flag_value(spec$type, args[index], arg)
-            }
-        } else if (length(config$datasets) == length(config$dataset_names)) {
-            config$datasets <- c(config$datasets, arg)
+    cfg <- list(
+        datasets = character(), names = character(),
+        baseline = "naive", order = c("bs", "jacobson", "rrr"),
+        x_axis = "Size", density_col = "Density",
+        title = "Choosing Rank and Select Structures on Low Order Bit Vectors: Break-even Operation Count",
+        output = "breakeven.png",
+        max_size = 10000,
+        sizes = c(128, 256, 512, 1024, 2048, 4096, 8192, 10000),
+        densities = c(0.1, 1, 5, 10, 30, 50, 70, 90, 95, 99, 99.9),
+        operation = NULL,
+        table_out = "breakeven_table.xlsx"
+    )
+    flags <- list(
+        "--baseline" = "baseline", "--order" = "order",
+        "--max-size" = "max_size", "--sizes" = "sizes", "--densities" = "densities",
+        "--operation" = "operation", "--table-out" = "table_out",
+        "--x-axis" = "x_axis", "--density-col" = "density_col",
+        "--title" = "title", "-t" = "title",
+        "--output" = "output", "-o" = "output"
+    )
+    nums <- function(s) as.numeric(trimws(strsplit(s, ",")[[1]]))
+    i <- 1
+    while (i <= length(args)) {
+        a <- args[i]
+        if (!is.null(flags[[a]])) {
+            if (i >= length(args)) stop(paste(a, "requer um valor"))
+            i <- i + 1
+            key <- flags[[a]]
+            cfg[[key]] <- switch(key,
+                order     = trimws(strsplit(args[i], ",")[[1]]),
+                sizes     = nums(args[i]),
+                densities = nums(args[i]),
+                max_size  = as.numeric(args[i]),
+                args[i])
+        } else if (length(cfg$datasets) == length(cfg$names)) {
+            cfg$datasets <- c(cfg$datasets, a)
         } else {
-            config$dataset_names <- c(config$dataset_names, arg)
+            cfg$names <- c(cfg$names, a)
         }
-        index <- index + 1
+        i <- i + 1
     }
-
-    if (length(config$datasets) == 0) stop("Forneça os arquivos .csv")
-    if (length(config$datasets) != length(config$dataset_names)) {
-        stop("Cada dataset CSV deve ter um nome de identificação associado.")
-    }
-
-    if (is.null(config$y_label)) {
-        config$y_label <- switch(config$metric,
-            "Op_Time"    = "Tempo por Operação (ns/op)",
-            "Const_Time" = "Tempo de Construção Total",
-            "Total_Mem"  = "Memória Total (Bytes)",
-            "Speedup"    = "Speedup vs Baseline (BitVector)",
-            "Mem_Ratio"  = "Razão de Memória vs Baseline",
-            config$metric
-        )
-    }
-
-    config
+    if (length(cfg$datasets) == 0) stop("Forneça os arquivos .csv")
+    if (length(cfg$datasets) != length(cfg$names)) stop("Cada CSV precisa de um nome.")
+    cfg
 }
 
-# ------------------------------------------------------------- data loading ----
+# --------------------------------------------------------------- loading ----
 
-# Processa colunas heterogêneas dos CSVs e calcula métricas unificadas
-process_csv_data <- function(filepath, dataset_name, x_axis_name) {
-    raw <- read.csv(filepath, sep = ";")
+sum_cols <- function(raw, cols) {
+    cols <- intersect(cols, names(raw))
+    if (length(cols) == 0) return(rep(0, nrow(raw)))
+    rowSums(sapply(raw[cols], function(col) {
+        v <- as.numeric(col)
+        ifelse(is.na(v) | v == -1, 0, v)
+    }))
+}
 
-    if (!x_axis_name %in% names(raw)) {
-        stop(sprintf("%s: coluna x '%s' não encontrada.", filepath, x_axis_name))
-    }
+guess_operation <- function(path) {
+    b <- basename(path)
+    m <- regmatches(b, regexpr("(^|[-_])[rs][01](?=[-_.])", b, perl = TRUE))
+    if (length(m) == 0) "op" else sub("^[-_]", "", m)
+}
 
-    x_vals <- as.numeric(raw[[x_axis_name]])
+load_one <- function(path, name, cfg) {
+    raw <- read.csv(path, sep = ";")
+    if (!cfg$x_axis %in% names(raw)) stop(sprintf("%s: coluna '%s' não encontrada.", path, cfg$x_axis))
 
-    # 1. Tempo por Operação
-    op_time <- if ("Time" %in% names(raw)) as.numeric(raw[["Time"]]) else NA
-
-    # 2. Tempo de Construção Total (Soma de BV_Time, RS_Time, SS_Time, ignorando -1)
-    const_cols <- intersect(c("BV_Time", "RS_Time", "SS_Time"), names(raw))
-    const_time <- if (length(const_cols) > 0) {
-        rowSums(sapply(raw[const_cols], function(col) {
-            val <- as.numeric(col)
-            ifelse(is.na(val) | val == -1, 0, val)
-        }))
+    dens <- if (cfg$density_col %in% names(raw)) {
+        as.numeric(raw[[cfg$density_col]])
     } else {
-        rep(0, nrow(raw))
-    }
-
-    # 3. Memória Total (Soma de BV_Memory, RS_Memory, SS_Memory, ignorando -1)
-    mem_cols <- intersect(c("BV_Memory", "RS_Memory", "SS_Memory"), names(raw))
-    total_mem <- if (length(mem_cols) > 0) {
-        rowSums(sapply(raw[mem_cols], function(col) {
-            val <- as.numeric(col)
-            ifelse(is.na(val) | val == -1, 0, val)
-        }))
-    } else {
-        rep(0, nrow(raw))
+        m <- regmatches(basename(path), regexpr("[-_]d[0-9]+(\\.[0-9]+)?", basename(path)))
+        if (length(m) == 0) stop(sprintf("%s: densidade não encontrada (coluna ou '-dNN' no nome).", path))
+        rep(as.numeric(sub("[-_]d", "", m)), nrow(raw))
     }
 
     data.frame(
-        Size       = x_vals,
-        Op_Time    = op_time,
-        Const_Time = const_time,
-        Total_Mem  = total_mem,
-        Operation  = dataset_name,
+        Size       = as.numeric(raw[[cfg$x_axis]]),
+        Density    = round(dens, 3),
+        Op_Time    = as.numeric(raw[["Time"]]),
+        Const_Time = sum_cols(raw, c("BV_Time", "RS_Time", "SS_Time")),
+        Total_Mem  = sum_cols(raw, c("BV_Memory", "RS_Memory", "SS_Memory")),
+        Structure  = name,
+        Operation  = if (is.null(cfg$operation)) guess_operation(path) else cfg$operation,
         stringsAsFactors = FALSE
     )
 }
 
-load_all_data <- function(config) {
-    frames <- lapply(seq_along(config$datasets), function(i) {
-        process_csv_data(config$datasets[i], config$dataset_names[i], config$x_axis)
-    })
-    df <- bind_rows(frames)
-
-    # Cálculo de métricas relativas ao baseline (BitVector)
-    if (config$baseline %in% config$dataset_names) {
-        base_df <- df %>%
-            filter(Operation == config$baseline) %>%
-            group_by(Size) %>%
-            summarise(
-                Base_Op_Time   = mean(Op_Time, na.rm = TRUE),
-                Base_Total_Mem = mean(Total_Mem, na.rm = TRUE),
-                .groups = "drop"
-            )
-
-        df <- df %>%
-            left_join(base_df, by = "Size") %>%
-            mutate(
-                Speedup   = Base_Op_Time / Op_Time,
-                Mem_Ratio = Total_Mem / Base_Total_Mem
-            )
-    }
-
-    df[[Y_COL]] <- df[[config$metric]]
-    df <- df[is.finite(df[[config$x_axis]]) & is.finite(df[[Y_COL]]), ]
-    tibble(df)
+# Escolhe os tamanhos-alvo dentre os existentes (mais próximo em escala log).
+select_sizes <- function(sizes, cfg) {
+    u <- sort(unique(sizes[is.finite(sizes) & sizes > 0 & sizes <= cfg$max_size]))
+    if (length(u) == 0) stop("Nenhum tamanho <= --max-size nos datasets.")
+    tg <- cfg$sizes[cfg$sizes <= cfg$max_size]
+    unique(sapply(tg, function(s) u[which.min(abs(log(u) - log(s)))]))
 }
 
-# ----------------------------------------------------------- summary report ----
+# Média apenas das repetições de uma mesma (estrutura, operação, tamanho, densidade).
+load_all <- function(cfg) {
+    all  <- bind_rows(lapply(seq_along(cfg$datasets), function(i) load_one(cfg$datasets[i], cfg$names[i], cfg)))
+    keep <- select_sizes(all$Size, cfg)
+    df <- all %>%
+        filter(Size %in% keep) %>%
+        group_by(Structure, Operation, Size, Density) %>%
+        summarise(Op_Time = mean(Op_Time, na.rm = TRUE),
+                  Const_Time = mean(Const_Time, na.rm = TRUE),
+                  Total_Mem = mean(Total_Mem, na.rm = TRUE), .groups = "drop")
+    attr(df, "sizes") <- keep
+    df
+}
 
-print_summary_report <- function(df, config) {
-    cat("\n=== RESUMO COMPARATIVO DE ESTRUTURAS DE DADOS ===\n")
-    cat(sprintf("Baseline selecionado: %s\n\n", config$baseline))
+# ------------------------------------------------------------ break-even ----
 
-    summary_stats <- df %>%
-        group_by(Operation) %>%
-        summarise(
-            `Op Time Médio`    = round(mean(Op_Time, na.rm = TRUE), 2),
-            `Const Time Médio` = round(mean(Const_Time, na.rm = TRUE), 2),
-            `Memória Média`    = round(mean(Total_Mem, na.rm = TRUE), 2),
-            `Speedup Médio`    = if ("Speedup" %in% names(.)) round(mean(Speedup, na.rm = TRUE), 2) else NA,
-            .groups = "drop"
+# Grade completa (estrutura x operação x tamanho x densidade). Combinações sem
+# dados ficam com NA e status "no_data".
+build_results <- function(df, cfg) {
+    grid <- expand.grid(
+        Structure = unique(df$Structure), Operation = unique(df$Operation),
+        Size = attr(df, "sizes"), Density = round(cfg$densities, 3),
+        stringsAsFactors = FALSE
+    )
+    base <- df %>%
+        filter(Structure == cfg$baseline) %>%
+        select(Operation, Size, Density, Base_Time = Op_Time)
+    if (nrow(base) == 0) stop("Baseline '", cfg$baseline, "' não encontrado nos datasets.")
+
+    grid %>%
+        left_join(df, by = c("Structure", "Operation", "Size", "Density")) %>%
+        left_join(base, by = c("Operation", "Size", "Density")) %>%
+        mutate(
+            gain = Base_Time - Op_Time,
+            status = case_when(
+                Structure == cfg$baseline                                   ~ ifelse(is.na(Op_Time), "no_data", "baseline"),
+                is.na(Op_Time) | is.na(Const_Time) | is.na(Base_Time)       ~ "no_data",
+                gain <= 0                                                   ~ "never",
+                TRUE                                                        ~ "pays_off"
+            ),
+            # menor n inteiro com C/n + T_s < T_naive  (desigualdade estrita)
+            n = ifelse(status == "pays_off", floor(Const_Time / gain) + 1, NA_real_)
+        )
+}
+
+build_table <- function(res, cfg) {
+    lv <- c(cfg$baseline, setdiff(cfg$order, cfg$baseline),
+            setdiff(unique(res$Structure), c(cfg$order, cfg$baseline)))
+    res %>%
+        mutate(Structure = factor(Structure, levels = lv)) %>%
+        arrange(Operation, Size, Density, Structure) %>%
+        transmute(
+            Structure_name = as.character(Structure),
+            operation      = Operation,
+            size           = Size,
+            density        = Density,
+            avg_time       = round(Op_Time, 2),
+            avg_mem        = round(Total_Mem, 2),
+            a_partir_de_quantos_x_compensa_construir = n,
+            status         = status
+        ) %>%
+        as.data.frame()
+}
+
+write_table <- function(tab, path) {
+    if (grepl("\\.csv$", path, ignore.case = TRUE)) {
+        write.table(tab, path, sep = ";", row.names = FALSE, quote = FALSE, na = "")
+    } else {
+        if (!requireNamespace("writexl", quietly = TRUE)) {
+            stop("Instale o pacote writexl: install.packages(\"writexl\")  (ou use --table-out arquivo.csv)")
+        }
+        writexl::write_xlsx(list(breakeven = tab), path)
+    }
+}
+
+# ------------------------------------------------------------------ plot ----
+
+format_n <- function(n) {
+    ifelse(n >= 1e6, sprintf("%.1fM", n / 1e6),
+    ifelse(n >= 1e4, sprintf("%.0fk", n / 1e3),
+    ifelse(n >= 1e3, sprintf("%.1fk", n / 1e3), sprintf("%.0f", n))))
+}
+
+build_plot <- function(res, cfg) {
+    win <- res %>%
+        filter(status == "pays_off") %>%
+        group_by(Size, Density) %>%
+        slice(which.min(n)) %>%          # estrutura com MENOR nº de operações
+        ungroup() %>%
+        select(Size, Density, Winner = Structure, n)
+
+    has_base <- res %>%
+        filter(Structure == cfg$baseline, status == "baseline") %>%
+        distinct(Size, Density) %>%
+        mutate(has_base = TRUE)
+
+    cells <- res %>%
+        distinct(Size, Density) %>%
+        left_join(win, by = c("Size", "Density")) %>%
+        left_join(has_base, by = c("Size", "Density")) %>%
+        mutate(
+            Structure = case_when(
+                !is.na(Winner)  ~ Winner,
+                !is.na(has_base) ~ cfg$baseline,
+                TRUE            ~ "no data"
+            ),
+            label = case_when(
+                !is.na(n)        ~ format_n(n),
+                Structure == "no data" ~ "n/a",
+                TRUE             ~ "\u2014"
+            )
         )
 
-    print(as.data.frame(summary_stats), row.names = FALSE)
-    cat("\n===================================================\n\n")
-}
+    # frio -> quente na ordem pedida; baseline cinza
+    present <- setdiff(unique(res$Structure), cfg$baseline)
+    lv  <- cfg$order[cfg$order %in% present]
+    lv  <- c(lv, setdiff(present, lv))
+    pal <- setNames(colorRampPalette(c("#f1c40f", "#e67e22", "#d32f2f"))(length(lv)), lv)
+    pal[cfg$baseline] <- "#bdbdbd"
+    pal["no data"]    <- "#f5f5f5"
 
-# ------------------------------------------------------------- plotting --------
+    cells$Structure <- factor(cells$Structure, levels = c(lv, cfg$baseline, "no data"))
+    sz <- sort(unique(cells$Size))
+    ds <- sort(unique(cells$Density))
+    cells$Size_f <- factor(format_n(cells$Size), levels = format_n(rev(sz)))
+    cells$Dens_f <- factor(cells$Density, levels = ds,
+                           labels = format(ds, trim = TRUE, drop0trailing = TRUE))
 
-axis_scale <- function(scale_fn, use_log, zero, interval) {
-    scale_fn(
-        trans = if (use_log) "log10" else "identity",
-        limits = if (!is.null(interval)) interval else if (zero) c(if (use_log) 1 else 0, NA) else c(NA, NA),
-        expand = if (!is.null(interval)) expansion(mult = 0) else if (zero) expansion(mult = c(0, 0.05)) else waiver()
-    )
-}
-
-line_plot <- function(df, config) {
-    plt <- ggplot(df, aes(x = Size, y = .data[[Y_COL]], color = Operation, shape = Operation)) +
-        geom_line(alpha = 0.6) +
-        geom_point(size = 1.5) +
-        axis_scale(scale_x_continuous, config$log_x, config$x_zero, config$x_interval) +
-        axis_scale(scale_y_continuous, config$log_y, config$y_zero, config$y_interval) +
+    ggplot(cells, aes(x = Dens_f, y = Size_f, fill = Structure)) +
+        geom_tile(color = "white", linewidth = 0.8) +
+        geom_text(aes(label = label), size = 3.5, fontface = "bold") +
+        scale_fill_manual(values = pal, drop = FALSE,
+                          labels = function(x) ifelse(x == cfg$baseline,
+                                                      paste0(x, " (no structure pays off)"), x)) +
         labs(
-            title = ifelse(is.null(config$graph_title), paste("Comparação de", config$y_label), config$graph_title),
-            x     = config$x_axis,
-            y     = config$y_label,
-            color = config$legend_title,
-            shape = config$legend_title
+            title    = cfg$title,
+            subtitle = sprintf("Baseline: %s | color: structure that amortizes construction with the fewest operations | number: operations needed",
+                               cfg$baseline),
+            x = "Density (%)", y = "Bit vector size (bits)", fill = "Structure"
         ) +
-        theme_minimal(base_size = 12)
-    plt
-}
-
-bar_plot <- function(df, config) {
-    d <- df %>%
-        group_by(Operation, Size) %>%
-        summarise(y = mean(.data[[Y_COL]], na.rm = TRUE), .groups = "drop")
-
-    if (!is.null(config$x_values)) {
-        d <- d %>% filter(Size %in% config$x_values)
-    }
-
-    if (config$bars == "normalize") {
-        base_d <- d %>% filter(Operation == config$baseline) %>% select(Size, base_y = y)
-        d <- d %>%
-            inner_join(base_d, by = "Size") %>%
-            mutate(
-                y = y / base_y,
-                label = paste0(round(y, 2), "x")
-            )
-    }
-
-    d$Size_Fact <- factor(d$Size, levels = sort(unique(d$Size)))
-    dodge <- position_dodge(width = 0.9)
-
-    plt <- ggplot(d, aes(x = Size_Fact, y = y, fill = Operation)) +
-        geom_col(position = dodge, width = 0.8) +
-        labs(
-            title = ifelse(is.null(config$graph_title), paste("Comparação em Barras -", config$y_label), config$graph_title),
-            x     = config$x_axis,
-            y     = if (config$bars == "normalize") paste(config$y_label, "(Relativo a", config$baseline, ")") else config$y_label,
-            fill  = config$legend_title
-        ) +
-        theme_minimal(base_size = 12)
-
-    if (config$bars == "normalize") {
-        plt <- plt +
-            geom_hline(yintercept = 1, linetype = "dashed", color = "grey40") +
-            geom_text(aes(label = label), position = dodge, vjust = -0.4, size = 3)
-    }
-    plt
+        theme_minimal(base_size = 12) +
+        theme(panel.grid = element_blank(),
+              plot.title = element_text(face = "bold", size = 12),
+              plot.subtitle = element_text(size = 8))
 }
 
 # ------------------------------------------------------------------ main ----
 
 main <- function(args) {
-    config <- parse_args(args)
-    df <- load_all_data(config)
+    cfg <- parse_args(args)
+    df  <- load_all(cfg)
+    res <- build_results(df, cfg)
 
-    if (config$summary_table) {
-        print_summary_report(df, config)
+    tab <- build_table(res, cfg)
+    write_table(tab, cfg$table_out)
+    cat(sprintf("Tabela salva em: %s (%d linhas)\n", cfg$table_out, nrow(tab)))
+
+    nd <- res %>% filter(status == "no_data") %>% nrow()
+    if (nd > 0) cat(sprintf("Aviso: %d combinações sem dados (status = no_data).\n", nd))
+
+    ops <- unique(df$Operation)
+    if (length(ops) > 1) {
+        warning("Mais de uma operação detectada (", paste(ops, collapse = ", "),
+                "): heatmap não gerado. Rode uma vez por operação ou use --operation.")
+    } else {
+        ggsave(cfg$output, build_plot(res, cfg), width = 10, height = 5.5, dpi = 300)
+        cat(sprintf("Gráfico salvo com sucesso em: %s\n", cfg$output))
     }
-
-    plt <- if (is.null(config$bars)) line_plot(df, config) else bar_plot(df, config)
-
-    ggsave(config$output_file, plt, width = 9, height = 5.5, dpi = 300)
-    cat(sprintf("Gráfico salvo com sucesso em: %s\n", config$output_file))
 }
 
-if (!interactive()) {
-    main(commandArgs(trailingOnly = TRUE))
-}
+if (!interactive()) main(commandArgs(trailingOnly = TRUE))
