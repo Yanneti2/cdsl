@@ -1,9 +1,5 @@
 #!/usr/bin/env Rscript
 #
-# compare_structures.R - Script de comparação de Estruturas de Dados Compactas
-# Baseado no graph.r, com suporte a cálculo automático de métricas derivadas
-# e normalização em relação ao BitVector (Baseline).
-#
 # Uso:
 #   Rscript compare_structures.R {Dataset.csv} {Nome} [{Dataset.csv} {Nome} ...] [flags]
 #
