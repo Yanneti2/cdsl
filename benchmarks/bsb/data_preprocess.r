@@ -1,7 +1,6 @@
 library(dplyr)
 
 args <- commandArgs(trailingOnly = TRUE)
-print(args)
 
 output_file <- "output.csv"
 input_file <- ""
@@ -42,7 +41,7 @@ if (input_file == "") {
 }
 
 data <- read.csv(input_file, sep = ";")
-data$x <- as.numeric(as.character(data$x))
+data[[group]] <- as.numeric(as.character(data[[group]]))
 
 data <- data %>%
   group_by(.data[[group_by]]) %>%
