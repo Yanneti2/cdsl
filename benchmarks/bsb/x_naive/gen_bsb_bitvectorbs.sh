@@ -8,8 +8,8 @@ for i in "${!densities[@]}"; do
 
     for op in "${operations[@]}"; do
         Rscript graph.r \
-            "../../bitvectorBS/results/bitvectorBS-bsb-${op}-d${name}.csv" \
-            "../../bitvector/results/bitvector-bsb-${op}-d${name}.csv" \
+            "../data/bitvectorBS/bsb-bitvectorBS-${op}-d${name}.csv" \
+            "../data/bitvector/bsb-bitvector-${op}-d${name}.csv" \
             "bitvectorBS-${op}-d${name}.csv" \
             "bitvectorBS-${op}-d${name}.png" \
             "bitvectorBS"
