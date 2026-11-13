@@ -26,7 +26,7 @@ for structure in "${structure[@]}"; do
 
         for op in "${operations[@]}"; do
 
-            Rscript data_preprocess.r "./data/$structure/bsb-$structure-$op-$density.csv"\
+            Rscript preprocess.r "./data/$structure/bsb-$structure-$op-$density.csv"\
                     -o "$OUT/$structure/bsb-$structure-$op-$density.csv"\
                 2> stderr
 
