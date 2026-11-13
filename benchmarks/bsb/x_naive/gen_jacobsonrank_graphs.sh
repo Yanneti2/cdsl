@@ -10,8 +10,8 @@ operation_names=("rank1" "rank0" "select1" "select0")
 
 for i in "${!op[@]}"; do
    for d in "${distributions[@]}"; do
-       f1="../jacobsonrank/results/jacobson-bsb-${op[i]}-d${d}.csv"
-       f2="../bitvector/results/bitvector-bsb-${op[i]}-d${d}.csv"
+       f1="../data/jacobsonrank/bsb-jacobson-${op[i]}-d${d}.csv"
+       f2="../data/bitvector/bsb-bitvector-${op[i]}-d${d}.csv"
 
        Rscript ../graph.r \
            "$f1" "$struct1" \
