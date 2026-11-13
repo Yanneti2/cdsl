@@ -1,23 +1,24 @@
 #!/usr/bin/env bash
 
-DENSITIES=(5 10 30 50 70 90 95 99 99.9) # .1 1
+DIR="../x_naive/"
+DENSITIES=(.1 1 5 10 30 50 70 90 95 99 99.9)
+STRUCTURES=(bitvectorBS jacobson rrr)
+OPERATIONS=(r1 r0 s1 s0)
 
 args=()
-add() {  # add <arquivo> <nome>
-    if [ -f "$1" ]; then
-        args+=("$1" "$2")
-    else
-        echo "aviso: $1 não encontrado, ignorando" >&2
-    fi
-}
+for op in "${OPERATIONS[@]}"; do 
+    for d in "${DENSITIES[@]}"; do
+        for s in "${STRUCTURES[@]}"; do
+            f="${DIR}${s}/${s}-${op}-d${d}.csv"
+            if [ -f "$f" ]; then
+                args+=("$f" "$s")
+            else
+                echo "aviso: $f não encontrado, ignorando" >&2
+            fi
+        done
+    done
 
-for d in "${DENSITIES[@]}"; do
-    add "../../bitvector/results/bitvector-bsb-r1-d${d}.csv"     naive
-    add "../../bitvectorBS/results/bitvectorBS-bsb-r1-d${d}.csv" bs
-    add "../../jacobsonrank/results/jacobson-bsb-r1-d${d}.csv"   jacobson
-    add "../../RRR/results/bsb-rrr-r1-d${d}.csv"                 rrr
+    Rscript table_graph.r "${args[@]}" \
+    --order bs,jacobson,rrr --max-size 10000 \
+    -o htable-${op}.png --table-out htable-${op}.xlsx "$@"
 done
-
-Rscript heat_graph.r "${args[@]}" \
-    --baseline naive --order bs,jacobson,rrr --max-size 10000 \
-    -o breakeven.png --table-out breakeven_table.xlsx "$@"
