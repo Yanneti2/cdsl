@@ -14,6 +14,7 @@ declare -A distributions=(
     ["d90"]="9000"
     ["d95"]="9500"
     ["d99"]="9900"
+    ["d70"]="7000"
 )
 operations=("r1" "r0" "s1" "s0")
 
