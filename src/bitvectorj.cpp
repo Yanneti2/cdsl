@@ -85,8 +85,8 @@ void BitVectorJ::init() {
 
     #else
     const long double logN = log2((long double) size());
-    chunk1_size = ceil(logN) * floor(logN);
-    chunk2_size = chunk1_size / ceil(logN);
+    chunk1_size = logN > 0 ? ceil(logN) * floor(logN) : 1;
+    chunk2_size = logN > 0 ? chunk1_size / ceil(logN) : 1;
     #endif
 
     layer1_size = (size() + chunk1_size - 1) / chunk1_size + 1;

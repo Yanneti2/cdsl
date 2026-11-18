@@ -79,11 +79,11 @@ unsigned long long binary_search(T *V, T target, unsigned long long beginning, u
     }
 }
 RRR::RRR(BitVector *B, bool fixSizeToWordSize) {
-    block_size = ceil(log2(B->size())) / 2 * floor(log2(B->size()));
+    block_size = ceil(log2(B->size())) / 2 * floor(log2(B->size())) >= 1 ? ceil(log2(B->size())) / 2 * floor(log2(B->size())) : 1;
     total_blocks = (B->size() + block_size - 1) / block_size;
     partial_ranks = (unsigned long long *) malloc(total_blocks * sizeof(unsigned long long));
 
-    K_size = ceil(log2(B->size())) / 2;
+    K_size = ceil(log2(B->size())) / 2 >= 1 ? ceil(log2(B->size())) / 2 : 1;
     K_per_block = block_size / K_size;
     total_K = (B->size() + K_size - 1) / K_size;
     this->K = (uint16_t *) calloc(total_K, sizeof(uint16_t));
@@ -112,7 +112,6 @@ RRR::RRR(BitVector *B, bool fixSizeToWordSize) {
         block_counter += K_counter;
         offsets[i] = pattern_to_class[B->accessWord(i, K_size) >> (NBITS - K_size)];
     }
-
 }
 
 RRR::~RRR() {
@@ -187,12 +186,6 @@ void RRR::print() {
             cout << j << " ";
     }
     cout << endl;
-    unsigned long long total_blocks;
-    unsigned long long *partial_ranks;
-    unsigned long long total_K;
-    uint16_t K_size;
-    uint16_t *K;
-    uint16_t K_per_block;
 }
 
 #undef bitMask
