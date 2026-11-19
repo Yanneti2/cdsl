@@ -115,6 +115,7 @@ int main(int argc, char *argv[])
                 B.set1(i);
             }
             randomize_bitvector(B);
+            B.shrink_to_fit();
 
             size_t mem_rank_structure_1 = malloc_count_current();
 
