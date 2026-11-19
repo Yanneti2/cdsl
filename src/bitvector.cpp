@@ -101,7 +101,7 @@ BitVector::BitVector(size_t size) {
 
     _cap = (size + NBITS - 1) / NBITS;
     _cap = (_cap == 0) ? 1 : _cap;
-    _size = 0;
+    _size = size;
 
     A = (TYPE *) calloc(_cap, sizeof(TYPE));
 
