@@ -1,6 +1,7 @@
 #include "interquartil-stats.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include <vector>
 #include <cmath>
 
@@ -22,6 +23,33 @@
 
     ideally, (standard_deviation / mean) < 5%
 */
+
+void print_time_diff(struct timespec start, struct timespec stop)
+{
+  long diff = (stop.tv_sec * 1000000000 - start.tv_sec * 1000000000)
+    + (stop.tv_nsec - start.tv_nsec);
+
+  printf("%ld.%ld\n", diff / 1000000000, diff % 1000000000);
+}
+
+void add_time(struct timespec start, struct timespec stop, struct timespec* total)
+{
+  long diff = (stop.tv_sec * 1000000000 + stop.tv_nsec) -
+    (start.tv_sec * 1000000000 +start.tv_nsec);
+  total->tv_sec += (total->tv_nsec + diff) / 1000000000;
+  total->tv_nsec = (total->tv_nsec + diff) % 1000000000;
+}
+
+// returns a long time in nanoseconds
+long get_time(struct timespec total)
+{
+    return (long) (total.tv_sec * 1000000000) + total.tv_nsec;
+}
+
+void print_time(struct timespec total)
+{
+    printf("%d.%ld s", (int) total.tv_sec, (long) total.tv_nsec);
+}
 
 double get_median(const vector<double>& arr)
 {

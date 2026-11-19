@@ -1,9 +1,11 @@
+#include "interquartil-stats.hpp"
 #include "malloc_count.h"
 #include "bitvectorBS.h"
 
 #include <algorithm>
 #include <stdlib.h>
 #include <iostream>
+#include <optional>
 #include <cstring>
 #include <cstdlib>
 #include <chrono>
@@ -42,6 +44,7 @@ int main(int argc, char *argv[]) {
     bool verbose = false;
     bool rank0 = false;
     bool rank1 = false;
+    bool c_time = false;
     bool select0 = false;
     bool select1 = false;
 
@@ -56,6 +59,9 @@ int main(int argc, char *argv[]) {
             verbose = true;
         if (std::strcmp(argv[i], "-d") == 0 || std::strcmp(argv[i], "--density") == 0)
             dens = std::atol(argv[i + 1]);
+
+        if (std::strcmp(argv[i], "-ct") == 0 || std::strcmp(argv[i], "--ctime") == 0)
+            c_time = true;
 
         if (std::strcmp(argv[i], "--rank0") == 0 || std::strcmp(argv[i], "-r0") == 0) {
             rank0 = true;
@@ -92,19 +98,33 @@ int main(int argc, char *argv[]) {
     }
     for (int i = 0; i < REPETITIONS; i++)
     {
-        for (size_t size = 16; size <= MAX_SIZE; size += 16)
+        for (size_t size = 1; size <= MAX_SIZE; size ++)
         {
             std::chrono::high_resolution_clock::time_point start;
             std::chrono::high_resolution_clock::time_point end;
 
+            struct timespec begin,stop;
+            struct timespec total = {0,0};
+
             size_t mem_rank_structure_0 = malloc_count_current();
 
-            start = std::chrono::high_resolution_clock::now();
-            bitvectorBS B(size);
-            end = std::chrono::high_resolution_clock::now();
+            optional<bitvectorBS> opt;
+            double build_time;
 
-            std::chrono::duration<double, nano> elapsed_time{end - start};
-            double build_time = elapsed_time.count();
+            if (c_time){
+                clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);      
+                opt.emplace(size);              
+                clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+                add_time(begin,stop,&total);
+                build_time = get_time(total);
+            } else {
+                start = std::chrono::high_resolution_clock::now();
+                opt.emplace(size);
+                end = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double, nano> elapsed_time{end - start};
+                build_time = elapsed_time.count();
+            }
+            bitvectorBS& B = *opt;
 
             B.reset_all();
             for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
@@ -112,9 +132,10 @@ int main(int argc, char *argv[]) {
             }
             randomize_bitvector(B);
             B.preprocess();
+
             size_t mem_rank_structure_1 = malloc_count_current();
 
-            unsigned long long upper_bound;
+            unsigned long long upper_bound = 1;
             if (select1) {
                 upper_bound = B.rank1(size);
             } else if (select0) {
@@ -122,7 +143,7 @@ int main(int argc, char *argv[]) {
             } else {
                 upper_bound = size;
             }
-            upper_bound++;
+            // upper_bound++;
 
             vector<size_t> warmup(DSIZE);
             vector<size_t> idx(DSIZE);
@@ -133,56 +154,96 @@ int main(int argc, char *argv[]) {
             for (size_t j = 0; j < DSIZE; j++)
                 idx[j] = rand() % upper_bound;
 
-            size_t dont_kill_my_methods;
+            size_t dont_kill_my_methods = 0;
             if (rank0) {
                 for (size_t i : warmup) {
                     dont_kill_my_methods += B.rank0(i);
                 }
-                start = std::chrono::high_resolution_clock::now();
-                for (size_t i : idx) {
-                    dont_kill_my_methods += B.rank0(i);
+                if (c_time){
+                    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);                    
+                    for (size_t i : idx)
+                        dont_kill_my_methods += B.rank0(i);
+                    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+                } else {
+                    start = std::chrono::high_resolution_clock::now();
+                    for (size_t i : idx) {
+                        dont_kill_my_methods += B.rank0(i);
+                    }
+                    end = std::chrono::high_resolution_clock::now();
                 }
-                end = std::chrono::high_resolution_clock::now();
             } else if (rank1) {
                 for (size_t i : warmup) {
                     dont_kill_my_methods += B.rank1(i);
                 }
-                start = std::chrono::high_resolution_clock::now();
-                for (size_t i : idx) {
-                    dont_kill_my_methods += B.rank1(i);
+                if (c_time) {
+                    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);                    
+                    for (size_t i : idx)
+                        dont_kill_my_methods += B.rank1(i);
+                    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+                } else {
+                    start = std::chrono::high_resolution_clock::now();
+                    for (size_t i : idx) {
+                        dont_kill_my_methods += B.rank1(i);
+                    }
+                    end = std::chrono::high_resolution_clock::now();
                 }
-                end = std::chrono::high_resolution_clock::now();
             } else if (select0) {
                 for (size_t i : warmup) {
                     dont_kill_my_methods += B.select0(i);
                 }
-                start = std::chrono::high_resolution_clock::now();
-                for (size_t i : idx) {
-                    dont_kill_my_methods += B.select0(i);
+                if (c_time) {
+                    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
+                    for (size_t i : idx) {
+                        dont_kill_my_methods += B.select0(i);
+                    }     
+                    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+                } else {
+                    start = std::chrono::high_resolution_clock::now();
+                    for (size_t i : idx) {
+                        dont_kill_my_methods += B.select0(i);
+                    }
+                    end = std::chrono::high_resolution_clock::now();
                 }
-                end = std::chrono::high_resolution_clock::now();
             } else if (select1) {
                 for (size_t i : warmup) {
                     dont_kill_my_methods += B.select1(i);
                 }
-                start = std::chrono::high_resolution_clock::now();
-                for (size_t i : idx) {
-                    dont_kill_my_methods += B.select1(i);
+                if (c_time) {
+                    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
+                    for (size_t i : idx) {
+                        dont_kill_my_methods += B.select1(i);
+                    }
+                    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+                } else {
+                    start = std::chrono::high_resolution_clock::now();
+                    for (size_t i : idx) {
+                        dont_kill_my_methods += B.select1(i);
+                    }
+                    end = std::chrono::high_resolution_clock::now();
                 }
-                end = std::chrono::high_resolution_clock::now();
             }
             cerr << dont_kill_my_methods << "\n";
-            elapsed_time = end - start;
 
             if (verbose) 
-            { 
-                cout << "Size: " << size << "\nTime per " << operation << ": " << elapsed_time.count() / DSIZE << " ns" << endl;
+                cout << "Size: " << size << "\nTime per " << operation << ": ";
+            else
+                cout << size << ";";
+
+            if (c_time) {
+                add_time(begin,stop,&total);
+                cout << get_time(total) / DSIZE;
+            } else {
+                std::chrono::duration<double, nano> elapsed_time{end - start};
+                cout << elapsed_time.count() / DSIZE;
+            }
+
+            if (verbose) {
+                cout << " ns" << endl;
                 cout << "Memory usage: " <<  mem_rank_structure_1 - mem_rank_structure_0 << endl;
                 cout << "Construction Time: " << build_time << " ns" << endl;
                 cout << endl;
             } else {
-                cout << size << ";" << elapsed_time.count() / DSIZE
-                << ";" << mem_rank_structure_1 - mem_rank_structure_0
+                cout << ";" << mem_rank_structure_1 - mem_rank_structure_0
                 << ";" << build_time
                 << endl;
             }

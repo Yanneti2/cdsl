@@ -7,6 +7,7 @@ target_include_directories(RRR-benchmark PRIVATE ${CMAKE_SOURCE_DIR}/dependencie
 
 add_executable(RRR-bsb
     RRR-bsb.cpp
+    ../interquartil-stats.cpp
 )
 target_link_libraries(RRR-bsb compact malloc_count)
 

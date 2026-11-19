@@ -1,5 +1,6 @@
 #include <optional>
 #include <vector>
+#include <ctime>
 
 using namespace std;
 
@@ -42,9 +43,14 @@ struct BenchmarkResult {
     optional<Statistics> stats;
 };
 
+void add_time(struct timespec start, struct timespec stop, struct timespec* total);
+void print_time_diff(struct timespec start, struct timespec stop);
+void print_time(struct timespec total);
+long get_time(struct timespec total);
+
+Statistics calculate_interquartil(const vector<double>& original_samples, const StatsConfig& config);
+double get_standard_deviation(const vector<double>& arr, double mean);
 double get_median(const vector<double>& arr);
 double get_mean(const vector<double>& arr);
-double get_standard_deviation(const vector<double>& arr, double mean);
-Statistics calculate_interquartil(const vector<double>& original_samples, const StatsConfig& config);
 
 #endif

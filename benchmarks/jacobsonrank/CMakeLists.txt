@@ -13,6 +13,7 @@ endif()
 
 add_executable(jacobsonrank-bsb
     jacobsonrank-bsb.cpp
+    ../interquartil-stats.cpp
 )
 target_link_libraries(jacobsonrank-bsb compact malloc_count)
 target_include_directories(jacobsonrank-bsb PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/malloc_count)
