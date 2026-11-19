@@ -93,8 +93,8 @@ void BitVectorJ::init() {
     chunk2_per_chunk1 = chunk1_size / chunk2_size;
     layer2_size = chunk2_per_chunk1 * (layer1_size - 1) + 1;
 
-    layer1 = UVector(ceil(log2(size() + 1)), layer1_size);
-    layer2 = UVector(ceil(log2(chunk1_size + 1)), layer2_size);;
+    layer1 = UVector(ceil(log2(naive_popcount() + 1)), layer1_size);
+    layer2 = UVector(ceil(log2(chunk1_size + 1)), layer2_size);
 
     size_t layer1_counter = 0;
     size_t layer2_counter = 0;
