@@ -24,3 +24,7 @@ void UVector::set(size_t i, long long x) {
 size_t UVector::size() const {
     return B.size() / word_size;
 }
+
+void UVector::shrink_to_fit() {
+    B.shrink_to_fit();
+}
