@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
 
             std::chrono::high_resolution_clock::time_point ss_start;
             std::chrono::high_resolution_clock::time_point ss_end;
-            long double ss_time;
+            long double ss_time = 0;
 
             #ifdef selectstructure
             if (select0) {
