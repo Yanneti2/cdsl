@@ -29,12 +29,21 @@ target_link_libraries(louds-tester compact)
 add_executable(RRR-tester
 	RRR-tester.cpp
 )
-target_link_libraries(RRR-tester compact)
+target_link_libraries(RRR-tester compact malloc_count)
+
+target_include_directories(RRR-tester PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/malloc_count)
 
 add_executable(rrr-tester
-	rrr.cpp
+	rrr-tester.cpp
 )
-target_link_libraries(rrr-tester compact)
+target_link_libraries(rrr-tester compact malloc_count)
+
+target_include_directories(rrr-tester PRIVATE ${CMAKE_SOURCE_DIR}/dependencies/malloc_count)
+
+add_executable(comp-rrr
+        comp-rrr.cpp
+)
+target_link_libraries(comp-rrr compact)
 
 add_executable(wt-tester
         wt-tester.cpp

@@ -123,7 +123,6 @@ RRR::RRR(BitVector *B, bool fixSizeToWordSize) {
                     chunk = (chunk << 1) | (b < n ? (*B)[b] : 0);
             }
         }
-
         this->K[j] = __popcount(chunk);
         offsets[j] = pattern_to_class[chunk];
         absolute += this->K[j];

@@ -12,7 +12,7 @@
 using namespace std;
 
 int main(void) {
-    srand(time(0));
+    srand(1791409268);
     // CSV no formato:
     // tamanho do bitvector;
     // Tempo medio por operacao;
