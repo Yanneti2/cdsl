@@ -101,7 +101,7 @@ BitVector::BitVector(size_t size) {
 
     _cap = (size + NBITS - 1) / NBITS;
     _cap = (_cap == 0) ? 1 : _cap;
-    _size = 0;
+    _size = size;
 
     A = (TYPE *) calloc(_cap, sizeof(TYPE));
 
@@ -324,6 +324,15 @@ void BitVector::set(TYPE x, unsigned size, size_t i) {
 size_t BitVector::size() const { return _size; }
 size_t BitVector::cap() const { return _cap; }
 
+void BitVector::shrink_to_fit() {
+    size_t ncap = (_size + NBITS - 1) / NBITS;
+    TYPE *AA = (TYPE*) realloc(A, ncap * sizeof(TYPE));
+    if (!AA)
+        throw std::bad_alloc();
+
+    this->A = AA;
+    this->_cap = ncap;
+}
 /**
     Coloca uma sequencia predefinida de bits ao final do bitvector.
 **/

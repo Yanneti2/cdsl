@@ -93,8 +93,8 @@ void BitVectorJ::init() {
     chunk2_per_chunk1 = chunk1_size / chunk2_size;
     layer2_size = chunk2_per_chunk1 * (layer1_size - 1) + 1;
 
-    layer1 = UVector(ceil(log2(size() + 1)), layer1_size);
-    layer2 = UVector(ceil(log2(chunk1_size + 1)), layer2_size);;
+    layer1 = UVector(ceil(log2(naive_popcount() + 1)), layer1_size);
+    layer2 = UVector(ceil(log2(chunk1_size + 1)), layer2_size);
 
     size_t layer1_counter = 0;
     size_t layer2_counter = 0;
@@ -111,6 +111,9 @@ void BitVectorJ::init() {
     layer1.set(layer1_size - 1, layer1_counter);
     layer2.set(layer2_size - 1, 0);
 
+    layer1.shrink_to_fit();
+    layer2.shrink_to_fit();
+    this->shrink_to_fit();
     init_status = true;
 }
 
@@ -179,6 +182,7 @@ void BitVectorJ::build_select1() {
     }
 
     select_vector1.set(select_size - 1, _size);
+    select_vector1.shrink_to_fit();
 }
 
 void BitVectorJ::build_select0() {
@@ -205,12 +209,11 @@ void BitVectorJ::build_select0() {
     }
 
     select_vector0.set(select_size - 1, _size);
+    select_vector0.shrink_to_fit();
 }
 
 // g++ -D selectstructure (ss??)
 size_t BitVectorJ::select0(size_t i) const {
-    if (i < 0 || i == 18446744073709551615) return -1;
-
     const size_t _size = size();
 
     if (i > rank0(_size)) return -1;

@@ -18,6 +18,7 @@ class UVector {
         void push_back(long long x);
         void set(size_t i, long long x);
         size_t size() const;
+        void shrink_to_fit();
 };
 
 #endif

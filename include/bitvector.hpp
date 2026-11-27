@@ -63,6 +63,7 @@ public:
     size_t naive_select0(size_t i) const;
     size_t naive_select1(size_t i) const;
 
+    void shrink_to_fit();
     // The following methods are outdated and should be updated
     void extend(BitVector *B);
     void put(BitVector *B, unsigned long i);

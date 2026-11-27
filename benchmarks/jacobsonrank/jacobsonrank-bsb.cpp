@@ -115,6 +115,7 @@ int main(int argc, char *argv[])
                 B->set1(i);
             }
             randomize_bitvector(*B);
+            B->shrink_to_fit();
 
             size_t mem_rank_structure_1 = malloc_count_current();
 
@@ -142,7 +143,7 @@ int main(int argc, char *argv[])
 
             std::chrono::high_resolution_clock::time_point ss_start;
             std::chrono::high_resolution_clock::time_point ss_end;
-            long double ss_time;
+            long double ss_time = 0;
 
             #ifdef selectstructure
             if (select0) {
