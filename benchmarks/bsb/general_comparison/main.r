@@ -23,6 +23,9 @@
 #   --intersect                 highlight where the best (lowest) FIT changes
 #   --intersect-data            highlight where the best (lowest) DATA POINT changes
 #   --min-run N                 with --intersect-data: ignore winner changes that
+#   --intersect-all             highlight every crossing between every pair (uses
+#                               the fits with --fit, otherwise the data points;
+#                               --min-run applies to the data version)
 #                               last fewer than N consecutive points (noise filter)
 #   --bars MODE                 grouped bar chart instead of points/lines: one
 #                               group per x value, one bar per dataset.
@@ -46,7 +49,6 @@ default_config <- function() {
         log_y             = FALSE,
         x_zero            = FALSE,
         y_zero            = FALSE,
-        do_intersect_all  = FALSE,
         output_file       = "result.png",
         graph_title       = NULL,
         x_axis            = "Size",
@@ -61,6 +63,7 @@ default_config <- function() {
         baseline          = NULL,
         y_label           = NULL,
         legend_title      = "Operation",
+        do_intersect_all  = FALSE,
         x_values          = NULL
     )
 }
@@ -68,6 +71,54 @@ default_config <- function() {
 # Internal name of the column that holds each dataset's y values (each dataset
 # may take them from a different CSV column, see --y-axis).
 Y_COL <- "Y_VALUE"
+
+
+
+# ----------------------------------------------------------------- style ----
+
+# The first three come from the slide; the last three are extras I chose
+# to go with them, for plots with more datasets.
+PALETTE <- c("#F6921E", "#112A52", "#38646b",
+             "#5B7DB1", "#8C4A12", "#FBC47F")
+
+NAVY <- "#112A52"
+SAGE <- "#38646b"
+INK  <- "#29323D"
+GRID <- "#DDDDDD"
+AXIS <- "#888888"
+
+# Colours follow the command-line order: first dataset = orange.
+dataset_colors <- function(config) {
+    n <- length(config$dataset_names)
+    cols <- if (n <= length(PALETTE)) PALETTE[seq_len(n)]
+            else grDevices::colorRampPalette(PALETTE)(n)
+    setNames(cols, config$dataset_names)
+}
+
+theme_bsb <- function(base_size = 14) {
+    theme_minimal(base_size = base_size) +
+        theme(
+            text               = element_text(color = INK),
+            axis.text          = element_text(color = INK),
+            plot.title         = element_text(color = NAVY, face = "bold"),
+            panel.grid.major.y = element_line(color = GRID),
+            panel.grid.major.x = element_blank(),
+            panel.grid.minor   = element_blank(),
+            axis.line          = element_line(color = AXIS),
+            axis.ticks         = element_line(color = AXIS),
+            legend.position    = "bottom",
+            legend.box         = "horizontal",
+            plot.margin        = margin(
+                                        t = 15,
+                                        r = 25,
+                                        b = 20,
+                                        l = 15
+            )
+        )
+}
+
+
+
 
 # flag -> list(type, config keys it sets)
 FLAG_SPECS <- list(
@@ -78,7 +129,6 @@ FLAG_SPECS <- list(
     "--origin-zero"    = list(type = "switch",   keys = c("x_zero", "y_zero")),
     "--intersect"      = list(type = "switch",   keys = "do_intersect"),
     "--intersect-data" = list(type = "switch",   keys = "do_intersect_data"),
-    "--intersect-all"  = list(type = "switch",   keys = "do_intersect_all"),
     "--output"         = list(type = "string",   keys = "output_file"),
     "-o"               = list(type = "string",   keys = "output_file"),
     "--title"          = list(type = "string",   keys = "graph_title"),
@@ -93,6 +143,7 @@ FLAG_SPECS <- list(
     "--fit"            = list(type = "csv",      keys = "fit_models"),
     "--min-run"        = list(type = "integer",  keys = "min_run"),
     "--bars"           = list(type = "string",   keys = "bars"),
+    "--intersect-all"  = list(type = "switch",   keys = "do_intersect_all"),
     "--baseline"       = list(type = "string",   keys = "baseline")
 )
 
@@ -150,15 +201,17 @@ validate_config <- function(config) {
         stop("You need to set a name to your dataset\n",
              "format: graph.r {Dataset.csv} {Title} [flags]")
     }
+    if (config$do_intersect_all && n < 2) {
+        stop("Intersections need at least two datasets")
+    }
+    if (config$do_intersect_all && !is.null(config$bars)) {
+        stop("--bars cannot be combined with --intersect-all")
+    }
     if (config$do_intersect && is.null(config$fit_models)) {
         stop("--intersect compares fitted curves, so it needs --fit")
     }
     if ((config$do_intersect || config$do_intersect_data) && n < 2) {
         stop("Intersections need at least two datasets")
-    }
-    if (config$do_intersect_all && n < 2) stop("Intersections need at least two datasets")
-    if (!is.null(config$bars) && config$do_intersect_all) {
-        stop("--bars cannot be combined with --intersect-all")
     }
 
     if (!is.null(config$bars)) {
@@ -238,15 +291,6 @@ parse_args <- function(args) {
     validate_config(config)
 }
 
-figure_size <- function(config, n_groups = NULL) {
-    w <- 9; h <- 5.5
-    if (!is.null(n_groups)) {
-        w <- min(20, max(7, 3 + 0.35 * n_groups * length(config$dataset_names)))
-    }
-    c(if (is.null(config$width))  w else config$width,
-      if (is.null(config$height)) h else config$height)
-}
-
 
 # ------------------------------------------------------------------ data ----
 
@@ -286,12 +330,10 @@ load_data <- function(config) {
         names(d) <- c(config$x_axis, Y_COL)
 
         d <- d[is.finite(d[[config$x_axis]]) & is.finite(d[[Y_COL]]), ]
-
         if (!is.null(config$x_interval)) {
             xi <- d[[config$x_axis]]
             d  <- d[xi >= config$x_interval[1] & xi <= config$x_interval[2], ]
         }
-
         if (nrow(d) == 0) stop(config$datasets[i], ": no valid numeric rows")
 
         d$Operation <- config$dataset_names[i]
@@ -501,7 +543,7 @@ fit_marks <- function(fits, xs) {
     build_marks(roots, ys, ch$from, ch$to, names(fits))
 }
 
-# Todos os cruzamentos entre pares de curvas ajustadas.
+# Every crossing between every pair of fitted curves.
 all_fit_marks <- function(fits, xs) {
     nm  <- names(fits)
     out <- list()
@@ -513,16 +555,17 @@ all_fit_marks <- function(fits, xs) {
             idx <- which(s[-1] * s[-length(s)] < 0)
 
             for (k in idx) {
-                r <- uniroot(diff_fn, c(xs[k], xs[k + 1]))$root
-                out[[length(out) + 1]] <- build_marks(
-                    r, fits[[i]]$f(r), i, j, nm)
+                r    <- uniroot(diff_fn, c(xs[k], xs[k + 1]))$root
+                from <- if (s[k] < 0) i else j   # lower before the crossing
+                to   <- i + j - from
+                out[[length(out) + 1]] <- build_marks(r, fits[[i]]$f(r), from, to, nm)
             }
         }
     }
     bind_rows(out)
 }
 
-# Todos os cruzamentos entre pares, medidos nos pontos de dados.
+# Every crossing between every pair, measured on the data points.
 all_data_marks <- function(df, config) {
     m <- aligned_matrix(df, config)
     if (length(m$x) < 2) {
@@ -546,6 +589,17 @@ all_data_marks <- function(df, config) {
         }
     }
     bind_rows(out)
+}
+
+report_crossings <- function(marks) {
+    if (is.null(marks) || nrow(marks) == 0) {
+        message("Crossing: none found.")
+        return(invisible())
+    }
+    for (k in seq_len(nrow(marks))) {
+        message(sprintf("Crossing: %s drops below %s at x = %.4f, y = %.4f",
+                        marks$to[k], marks$from[k], marks$x[k], marks$y[k]))
+    }
 }
 
 report_marks <- function(marks, what) {
@@ -574,13 +628,6 @@ log_major_breaks <- function(limits) {
     10^(lo:hi)
 }
 
-op_palette <- function(names) {
-    pal <- c("#E69F00", "#56B4E9", "#009E73", "#D55E00",
-             "#CC79A7", "#0072B2", "#999999", "#F0E442")
-    if (length(names) > length(pal)) pal <- scales::hue_pal()(length(names))
-    setNames(pal[seq_along(names)], names)
-}
-
 # Same rules for both axes.
 axis_scale <- function(scale_fn, use_log, zero, interval, top = 0.05) {
     scale_fn(
@@ -605,17 +652,18 @@ axis_scale <- function(scale_fn, use_log, zero, interval, top = 0.05) {
     )
 }
 
+
 add_marks <- function(plt, marks) {
     if (is.null(marks) || nrow(marks) == 0) return(plt)
 
     plt +
         geom_vline(data = marks, aes(xintercept = x),
-                   linetype = "dashed", color = "grey40") +
+                   linetype = "dashed", color = SAGE) +
         geom_point(data = marks, aes(x = x, y = y), inherit.aes = FALSE,
                    size = 2.5, shape = 21, fill = "white",
-                   color = "black", stroke = 0.9) +
+                   color = INK, stroke = 0.9) +
         geom_text(data = marks, aes(x = x, y = y, label = label),
-                  inherit.aes = FALSE, hjust = 0, vjust = -1,
+                  inherit.aes = FALSE, hjust = 0, vjust = -1, color = INK,
                   check_overlap = TRUE)
 }
 
@@ -624,25 +672,29 @@ build_plot <- function(df, config, curves = NULL, marks = NULL) {
         x     = .data[[config$x_axis]],
         y     = .data[[Y_COL]],
         color = Operation,
-    )) + geom_point(shape = 16, size = 1, show.legend = TRUE)
-
-    guides(color = guide_legend(override.aes = list(shape = 16, size = 2.5)))
+        # shape = Operation
+    )) + geom_point(size = .1)
 
     if (!is.null(curves)) {
         plt <- plt + geom_line(data = curves, aes(x = x, y = y, color = Operation),
-                               inherit.aes = FALSE)
+                               inherit.aes = FALSE, linewidth = 0.9)
     }
 
     plt <- plt +
+        scale_color_manual(values = dataset_colors(config),
+                           breaks = config$dataset_names) +
+        scale_shape_discrete(breaks = config$dataset_names) +
+        guides(color = guide_legend(override.aes = list(size = 2.5))) +
         axis_scale(scale_x_continuous, config$log_x, config$x_zero, config$x_interval) +
         axis_scale(scale_y_continuous, config$log_y, config$y_zero, config$y_interval) +
-        scale_color_manual(values = op_palette(config$dataset_names)) +
         labs(title = config$graph_title, x = config$x_axis, y = config$y_label,
-             color = config$legend_title)
+             color = config$legend_title
+             #shape = config$legend_title
+             ) +
+        theme_bsb()
 
     add_marks(plt, marks)
 }
-
 
 # ------------------------------------------------------------ bar chart -----
 
@@ -703,11 +755,14 @@ build_bar_plot <- function(d, config) {
 
     if (normalize) {
         plt <- plt +
-            geom_hline(yintercept = 1, linetype = "dotted", color = "grey40") +
-            geom_text(aes(label = label), position = dodge, vjust = -0.4, size = 3.2)
+            geom_hline(yintercept = 1, linetype = "dotted", color = SAGE) +
+            geom_text(aes(label = label), position = dodge, vjust = -0.4,
+                      size = 3.2, color = INK)
     }
 
     plt +
+        scale_fill_manual(values = dataset_colors(config)) +
+        theme_bsb() +
         axis_scale(scale_y_continuous, config$bars == "log", TRUE,
                    config$y_interval, top = if (normalize) 0.1 else 0.05) +
         coord_cartesian(clip = "off") +
@@ -723,6 +778,8 @@ build_bar_plot <- function(d, config) {
 
 
 # ------------------------------------------------------------------ main ----
+
+# Points (and optionally fitted curves and "best changes" markers).
 
 line_figure <- function(df, config) {
     curves <- NULL
@@ -749,8 +806,9 @@ line_figure <- function(df, config) {
     }
 
     if (config$do_intersect_all) {
-        found <- if (!is.null(fits)) all_fit_marks(fits, xs) else all_data_marks(df, config)
-        report_marks(found, "Crossing")
+        found <- if (!is.null(fits)) all_fit_marks(fits, xs)
+                 else all_data_marks(df, config)
+        report_crossings(found)
         marks <- bind_rows(marks, found)
     }
 
@@ -767,25 +825,19 @@ main <- function(args) {
     })
 
     df  <- load_data(config)
-
-    if (is.null(config$bars)) {
-        plt  <- line_figure(df, config)
-        size <- figure_size(config)
-    } else {
-        d    <- bar_data(df, config)
-        plt  <- build_bar_plot(d, config)
-        size <- figure_size(config, nlevels(d$Size))
-    }
-    ggsave(config$output_file, plt, device = "png",
-        width = size[1], height = size[2], dpi = 300)
-        
     plt <- if (is.null(config$bars)) {
         line_figure(df, config)
     } else {
         build_bar_plot(bar_data(df, config), config)
     }
 
-    ggsave(config$output_file, plt, device = "png")
+    ggsave(config$output_file,
+           plt,
+           width = 8,
+           height = 8,
+           units = "in",
+           dpi = 300
+    )
 }
 
 if (!interactive()) main(commandArgs(trailingOnly = TRUE))

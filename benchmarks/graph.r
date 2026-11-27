@@ -549,7 +549,7 @@ build_plot <- function(df, config, curves = NULL, marks = NULL) {
         y     = .data[[Y_COL]],
         color = Operation,
         shape = Operation
-    )) + geom_point()
+    )) + geom_point(size=.1)
 
     if (!is.null(curves)) {
         plt <- plt + geom_line(data = curves, aes(x = x, y = y, color = Operation),

@@ -2,20 +2,24 @@
 #
 #
 # Uso:
-#   Rscript heat_graph {Comparacao.csv} {Nome} [{Comparacao.csv} {Nome} ...] [flags]
+#   Rscript table_graph.r {Comparacao.csv} {Nome} [{Comparacao.csv} {Nome} ...] [flags]
 #
 #
 # Flags:
-#   --order a,b,c        estruturas, da mais "fria" à mais "quente" (default: bs,jacobson,rrr)
-#   --max-size N         tamanho máximo (default: 10000)
-#   --sizes a,b,c        tamanhos alvo (default: 64,128,256,512,1024,2048,4096,8192)
-#   --densities a,b,c    densidades (default: .1,1,5,10,30,50,70, 90,95,99,99.9)
-#   --x-axis COL         coluna do tamanho (default: Size)
-#   --value-col COL      coluna do break-even (default: x, senão a 2ª coluna)
-#   --density-col COL    coluna da densidade (default: Density)
-#   --title/-t TXT       título
-#   --output/-o ARQ      PNG do heatmap (default: breakeven.png)
-#   --table-out ARQ      tabela de saída .xlsx (default) ou .csv
+#   --order a,b,c         estruturas, da mais "fria" à mais "quente" (default: bs,jacobson,rrr)
+#   --max-size N          tamanho máximo (default: 10000)
+#   --sizes a,b,c         tamanhos alvo (default: 64,128,256,512,1024,2048,4096,8192)
+#   --densities a,b,c     densidades (default: .1,1,5,10,30,50,70,90,95,99,99.9)
+#   --x-axis COL          coluna do tamanho (default: Size)
+#   --value-col COL       coluna do break-even (default: x, senão a 2ª coluna)
+#   --density-col COL     coluna da densidade (default: Density)
+#   --title/-t TXT        título
+#   --output/-o ARQ       PNG do heatmap (default: breakeven.png)
+#   --table-out ARQ       tabela de saída .xlsx (default) ou .csv
+#   --memory ARQ          CSV com overhead de memória (Structure;Size;Density;Overhead)
+#   --memory-output ARQ   PNG do heatmap separado de memória (default: memory.png)
+#   --memory-combined ARQ PNG do heatmap combinado (operações + overhead na mesma célula)
+#   --memory-in-cell      inclui overhead abaixo do nº de operações no gráfico principal (-o)
 
 suppressPackageStartupMessages({
     library(ggplot2)
@@ -34,20 +38,26 @@ parse_args <- function(args) {
         max_size = 10000,
         sizes = c(64, 128, 256, 512, 1024, 2048, 4096, 8192),
         densities = c(.1, 1, 5, 10, 30, 50, 70, 90, 95, 99, 99.9),
-        table_out = "breakeven_table.xlsx"
+        table_out = "breakeven_table.xlsx",
+        memory = "", memory_output = "memory.png",
+        memory_combined = "", memory_in_cell = FALSE
     )
     flags <- list(
         "--order" = "order", "--max-size" = "max_size", "--sizes" = "sizes",
         "--densities" = "densities", "--x-axis" = "x_axis",
         "--value-col" = "value_col", "--density-col" = "density_col",
         "--title" = "title", "-t" = "title",
-        "--output" = "output", "-o" = "output", "--table-out" = "table_out"
+        "--output" = "output", "-o" = "output", "--table-out" = "table_out",
+        "--memory" = "memory", "--memory-output" = "memory_output",
+        "--memory-combined" = "memory_combined"
     )
     nums <- function(s) as.numeric(trimws(strsplit(s, ",")[[1]]))
     i <- 1
     while (i <= length(args)) {
         a <- args[i]
-        if (!is.null(flags[[a]])) {
+        if (a == "--memory-in-cell") {
+            cfg$memory_in_cell <- TRUE
+        } else if (!is.null(flags[[a]])) {
             if (i >= length(args)) stop(paste(a, "requer um valor"))
             i <- i + 1
             key <- flags[[a]]
@@ -174,7 +184,21 @@ format_n <- function(n) {
     ifelse(n >= 1e3, sprintf("%.1fk", n / 1e3), sprintf("%.0f", n))))
 }
 
-STRUCT_COLORS <- c(bs = "#f1c40f", jacobson = "#e67e22", rrr = "#d32f2f")
+STRUCT_COLORS <- c(bitvectorBS = "#F6921E", bs = "#F6921E",
+                   jacobson = "#112A52", rrr = "#8C4A12")
+EXTRA_COLORS  <- c("#5B7DB1", "#8C4A12", "#FBC47F")
+NAVY <- "#112A52"
+INK  <- "#29323D"
+
+make_palette <- function(present, cfg) {
+    lv <- c(cfg$order[cfg$order %in% present], setdiff(present, cfg$order))
+    pal <- setNames(rep(NA_character_, length(lv)), lv)
+    known <- intersect(lv, names(STRUCT_COLORS))
+    pal[known] <- STRUCT_COLORS[known]
+    other <- names(pal)[is.na(pal)]
+    if (length(other) > 0) pal[other] <- rep(EXTRA_COLORS, length.out = length(other))
+    list(lv = lv, pal = c(naive = "#38636B", pal, none = "#BDBDBD"))
+}
 
 build_plot <- function(res, cfg) {
     win <- res %>%
@@ -203,39 +227,125 @@ build_plot <- function(res, cfg) {
             )
         )
 
-    present <- unique(res$Structure)
-    lv <- c(cfg$order[cfg$order %in% present], setdiff(present, cfg$order))
-    pal <- setNames(rep(NA_character_, length(lv)), lv)
-    known <- intersect(lv, names(STRUCT_COLORS))
-    pal[known] <- STRUCT_COLORS[known]
-    other <- names(pal)[is.na(pal)]
-    if (length(other) > 0) pal[other] <- colorRampPalette(c("#f1c40f", "#d32f2f"))(length(other))
-    pal <- c(naive = "#2ecc71", pal, none = "#3498db")
+    pp  <- make_palette(unique(res$Structure), cfg)
+    lv  <- pp$lv
+    pal <- pp$pal
 
-    cells$Structure <- factor(cells$Structure, levels = c("naive", lv, "none"))
-    sz <- sort(unique(cells$Size))
+    cells$Structure <- factor(cells$Structure, levels = c("naive", lv))
+    sz <- sort(unique(cells$Size), decreasing = TRUE)
     ds <- sort(unique(cells$Density))
     cells$Size_f <- factor(format_n(cells$Size), levels = format_n(rev(sz)))
     cells$Dens_f <- factor(cells$Density, levels = ds,
                            labels = format(ds, trim = TRUE, drop0trailing = TRUE))
 
+    rgbm <- col2rgb(pal[as.character(cells$Structure)])
+    lum  <- colSums(rgbm * c(0.299, 0.587, 0.114))
+    text_color <- ifelse(lum < 140, "white", INK)
+
     ggplot(cells, aes(x = Dens_f, y = Size_f, fill = Structure)) +
-        geom_tile(color = "white", linewidth = 0.8) +
-        geom_text(aes(label = label), size = 3.5, fontface = "bold") +
-        scale_fill_manual(values = pal, drop = FALSE,
-                          labels = function(x) ifelse(x == "none", "none (no data)", x)) +
+        geom_tile(color = "white", linewidth = 0.8, show.legend = TRUE) +
+        geom_text(aes(label = label), size = 3.5, fontface = "bold",
+                  color = text_color) +
+        scale_fill_manual(values = pal, drop = FALSE) +
         labs(
-            title    = cfg$title,
-            subtitle = "color: structure that pays off with the fewest operations (naive if none does) | number: operations needed",
-            x = "Density (%)", y = "Bit vector size (bits)", fill = "Best choice"
-        ) +
+             title    = cfg$title,
+             subtitle = "color: structure that pays off with the fewest operations (naive if none does) | number: operations needed",
+             x = "Density (%)", y = "Bit vector size (bits)", fill = "Best choice"
+             ) +
         theme_minimal(base_size = 12) +
-        theme(panel.grid = element_blank(),
-              plot.title = element_text(face = "bold", size = 12),
+        theme(text = element_text(color = INK),
+              axis.text = element_text(color = INK),
+              panel.grid = element_blank(),
+              plot.title = element_text(color = NAVY, face = "bold", size = 12),
               plot.subtitle = element_text(size = 8))
 }
 
 # ------------------------------------------------------------------ main ----
+
+load_memory <- function(path) {
+    raw <- read.table(path, sep = ";", header = TRUE,
+                      colClasses = "character", check.names = FALSE,
+                      stringsAsFactors = FALSE)
+    data.frame(Structure = raw$Structure,
+               Size      = to_num(raw$Size),
+               Density   = round(to_num(raw$Density), 3),
+               Overhead  = to_num(raw$Overhead),
+               stringsAsFactors = FALSE) %>%
+        group_by(Structure, Size, Density) %>%
+        summarise(Overhead = mean(Overhead, na.rm = TRUE), .groups = "drop")
+}
+
+format_overhead <- function(v) {
+    ifelse(is.na(v), "n/a",
+    ifelse(round(v) == 0, "0%",
+           sprintf("%+.0f%%", v)))
+}
+
+build_combined_plot <- function(res, cfg) {
+    base_p <- build_plot(res, cfg)
+    mem    <- load_memory(cfg$memory)
+
+    cells <- base_p$data %>%
+        mutate(Structure_chr = as.character(Structure)) %>%
+        left_join(mem, by = c("Structure_chr" = "Structure", "Size", "Density")) %>%
+        mutate(
+            Overhead  = ifelse(Structure_chr == "naive", 0, Overhead),
+            mem_label = format_overhead(Overhead)
+        )
+
+    pp  <- make_palette(unique(res$Structure), cfg)
+    pal <- pp$pal
+
+    rgbm <- col2rgb(pal[cells$Structure_chr])
+    lum  <- colSums(rgbm * c(0.299, 0.587, 0.114))
+    text_color <- ifelse(lum < 140, "white", INK)
+
+    ggplot(cells, aes(x = Dens_f, y = Size_f, fill = Structure)) +
+        geom_tile(color = "white", linewidth = 0.8, show.legend = TRUE) +
+        geom_text(aes(label = label), size = 3.3, fontface = "bold",
+                  color = text_color, vjust = -0.15) +
+        geom_text(aes(label = mem_label), size = 2.4, fontface = "plain",
+                  color = text_color, alpha = 0.85, vjust = 1.35) +
+        scale_fill_manual(values = pal, drop = FALSE) +
+        labs(
+            title    = cfg$title,
+            subtitle = "color: best structure (naive if none) | top: operations needed | bottom: memory overhead vs naive",
+            x = "Density (%)", y = "Bit vector size (bits)", fill = "Best choice"
+        ) +
+        theme_minimal(base_size = 12) +
+        theme(text = element_text(color = INK),
+              axis.text = element_text(color = INK),
+              panel.grid = element_blank(),
+              plot.title = element_text(color = NAVY, face = "bold", size = 12),
+              plot.subtitle = element_text(size = 8))
+}
+
+build_memory_plot <- function(res, cfg) {
+    mem <- load_memory(cfg$memory)
+
+    # same cells and winners as the first heatmap
+    cells <- build_plot(res, cfg)$data %>%
+        mutate(Structure = as.character(Structure)) %>%
+        left_join(mem, by = c("Structure", "Size", "Density")) %>%
+        mutate(Overhead = ifelse(Structure == "naive", 0, Overhead),
+               label = format_overhead(Overhead))
+
+    rng  <- range(cells$Overhead, na.rm = TRUE)
+    high <- !is.na(cells$Overhead) & cells$Overhead > mean(rng)
+
+    ggplot(cells, aes(x = Dens_f, y = Size_f, fill = Overhead)) +
+        geom_tile(color = "white", linewidth = 0.8) +
+        geom_text(aes(label = label), size = 3.5, fontface = "bold",
+                  color = ifelse(high, "white", "black")) +
+        scale_fill_gradient(low = "#F2F2F2", high = "#112A52",
+                            na.value = "grey70") +
+        labs(title = paste0(cfg$title, " — Memory Overhead"),
+             x = "Density (%)", y = "Bit vector size (bits)",
+             fill = "Overhead (%)") +
+        theme_minimal(base_size = 12) +
+        theme(panel.grid = element_blank(),
+              plot.title = element_text(color = NAVY, face = "bold", size = 12))
+}
 
 main <- function(args) {
     cfg <- parse_args(args)
@@ -260,8 +370,26 @@ main <- function(args) {
     nd <- sum(res$status == "no_data")
     if (nd > 0) cat(sprintf("Aviso: %d combinações sem dados (status = no_data).\n", nd))
 
-    ggsave(cfg$output, build_plot(res, cfg), width = 10, height = 5.5, dpi = 300)
+    main_plot <- if (cfg$memory_in_cell && nzchar(cfg$memory)) {
+        build_combined_plot(res, cfg)
+    } else {
+        build_plot(res, cfg)
+    }
+    ggsave(cfg$output, main_plot, width = 10, height = 5.5, dpi = 300)
     cat(sprintf("Gráfico salvo com sucesso em: %s\n", cfg$output))
+
+    if (nzchar(cfg$memory)) {
+        if (nzchar(cfg$memory_output)) {
+            ggsave(cfg$memory_output, build_memory_plot(res, cfg),
+                   width = 10, height = 5.5, dpi = 300)
+            cat(sprintf("Gráfico da memoria salvo com sucesso em: %s\n", cfg$memory_output))
+        }
+        if (nzchar(cfg$memory_combined)) {
+            ggsave(cfg$memory_combined, build_combined_plot(res, cfg),
+                   width = 10, height = 5.5, dpi = 300)
+            cat(sprintf("Gráfico combinado salvo com sucesso em: %s\n", cfg$memory_combined))
+        }
+    }
 }
 
 if (!interactive()) main(commandArgs(trailingOnly = TRUE))
