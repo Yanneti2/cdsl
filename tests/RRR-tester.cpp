@@ -25,12 +25,12 @@ int main(void) {
             }
         }
         auto start = std::chrono::high_resolution_clock::now();
-        RRR R(&B);
+        // RRR R(&B);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::nano> ns_time = (end - start);
         unsigned long long index = rand() % B.size();
         start = std::chrono::high_resolution_clock::now();
-        R.rank1(index);
+        // R.rank1(index);
         end = std::chrono::high_resolution_clock::now();
         ns_time = end - start;
         cout << size << ";" << ns_time.count() << "\n";

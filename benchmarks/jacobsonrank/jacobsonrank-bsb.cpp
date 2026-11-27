@@ -106,15 +106,15 @@ int main(int argc, char *argv[])
     }
     for (int i = 0; i < REPETITIONS; i++)
     {
-        for (size_t size = 1; size <= MAX_SIZE; size++)
+        for (size_t size = 64; size <= MAX_SIZE; size*=2)
         {
             size_t mem_rank_structure_0 = malloc_count_current();
 
-            BitVectorJ B(size, 0);
-            for (size_t i = 0; i < B.size() * (long double) dens / (double) WSIZE; i++) {
-                B.set1(i);
+            BitVectorJ* B = new BitVectorJ(size, 0);
+            for (size_t i = 0; i < B->size() * (long double) dens / (double) WSIZE; i++) {
+                B->set1(i);
             }
-            randomize_bitvector(B);
+            randomize_bitvector(*B);
 
             size_t mem_rank_structure_1 = malloc_count_current();
 
@@ -127,18 +127,17 @@ int main(int argc, char *argv[])
 
             if (c_time){
                 clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
-                B.init();                    
+                B->init();                    
                 clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
                 add_time(begin,stop,&total);
                 init_time = get_time(total);
             } else {
                 init_start = std::chrono::high_resolution_clock::now();
-                B.init();
+                B->init();
                 init_end = std::chrono::high_resolution_clock::now();
                 std::chrono::duration<double, nano> init_elapsed_time{init_end - init_start};
                 init_time = init_elapsed_time.count();
             }
-
             size_t mem_rank_structure_2 = malloc_count_current();
 
             std::chrono::high_resolution_clock::time_point ss_start;
@@ -149,13 +148,13 @@ int main(int argc, char *argv[])
             if (select0) {
                 if (c_time){
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
-                    B.build_select0();
+                    B->build_select0();
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
                     add_time(begin,stop,&total);
                     ss_time = get_time(total);
                 } else {
                     ss_start = std::chrono::high_resolution_clock::now();
-                    B.build_select0();
+                    B->build_select0();
                     ss_end = std::chrono::high_resolution_clock::now();
                     std::chrono::duration<double, nano> ss_elapsed_time{ss_end - ss_start};
                     ss_time = ss_elapsed_time.count();
@@ -163,13 +162,13 @@ int main(int argc, char *argv[])
             } else if (select1) {
                 if (c_time){
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
-                    B.build_select1();
+                    B->build_select1();
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
                     add_time(begin,stop,&total);
                     ss_time = get_time(total);
                 } else {
                     ss_start = std::chrono::high_resolution_clock::now();
-                    B.build_select1();
+                    B->build_select1();
                     ss_end = std::chrono::high_resolution_clock::now();
                     std::chrono::duration<double, nano> ss_elapsed_time{ss_end - ss_start};
                     ss_time = ss_elapsed_time.count();
@@ -181,9 +180,9 @@ int main(int argc, char *argv[])
 
             unsigned long long upper_bound = 1;
             if (select1) {
-                upper_bound = B.rank1(size);
+                upper_bound = B->rank1(size);
             } else if (select0) {
-                upper_bound = B.rank0(size);
+                upper_bound = B->rank0(size);
             } else {
                 upper_bound = size;
             }
@@ -205,69 +204,69 @@ int main(int argc, char *argv[])
             
             if (rank0) {
                 for (size_t i : warmup) {
-                    dont_kill_my_methods += B.rank0(i);
+                    dont_kill_my_methods += B->rank0(i);
                 }
                 if (c_time){
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
                     for (size_t i : idx) {
-                        dont_kill_my_methods += B.rank0(i);
+                        dont_kill_my_methods += B->rank0(i);
                     }    
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
                 } else {
                     start = std::chrono::high_resolution_clock::now();
                     for (size_t i : idx) {
-                        dont_kill_my_methods += B.rank0(i);
+                        dont_kill_my_methods += B->rank0(i);
                     }
                     end = std::chrono::high_resolution_clock::now();
                 }
             } else if (rank1) {
                 for (size_t i : warmup) {
-                    dont_kill_my_methods += B.rank1(i);
+                    dont_kill_my_methods += B->rank1(i);
                 }
                 if (c_time){
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
                     for (size_t i : idx) {
-                        dont_kill_my_methods += B.rank1(i);
+                        dont_kill_my_methods += B->rank1(i);
                     }
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
                 } else {
                     start = std::chrono::high_resolution_clock::now();
                     for (size_t i : idx) {
-                        dont_kill_my_methods += B.rank1(i);
+                        dont_kill_my_methods += B->rank1(i);
                     }
                     end = std::chrono::high_resolution_clock::now();
                 }
             } else if (select0) {
                 for (size_t i : warmup) {
-                    dont_kill_my_methods += B.select0(i);
+                    dont_kill_my_methods += B->select0(i);
                 }
                 if (c_time) {
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
                     for (size_t i : idx) {
-                        dont_kill_my_methods += B.select0(i);
+                        dont_kill_my_methods += B->select0(i);
                     }
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
                 } else {
                     start = std::chrono::high_resolution_clock::now();
                     for (size_t i : idx) {
-                        dont_kill_my_methods += B.select0(i);
+                        dont_kill_my_methods += B->select0(i);
                     }
                     end = std::chrono::high_resolution_clock::now();
                 }
             } else if (select1) {
                 for (size_t i : warmup) {
-                    dont_kill_my_methods += B.select1(i);
+                    dont_kill_my_methods += B->select1(i);
                 }
                 if (c_time){
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
                     for (size_t i : idx) {
-                        dont_kill_my_methods += B.select1(i);
+                        dont_kill_my_methods += B->select1(i);
                     }
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
                 } else {
                     start = std::chrono::high_resolution_clock::now();
                     for (size_t i : idx) {
-                        dont_kill_my_methods += B.select1(i);
+                        dont_kill_my_methods += B->select1(i);
                     }
                     end = std::chrono::high_resolution_clock::now();
                 }
@@ -296,6 +295,7 @@ int main(int argc, char *argv[])
                 << ";" << mem_rank_structure_2 - mem_rank_structure_1 << ";" << ss_time
                 << ";" << mem_rank_structure_3 - mem_rank_structure_2 << endl;
             }
+            delete B;
         }
     }
 }

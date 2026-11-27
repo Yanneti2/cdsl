@@ -10,6 +10,7 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -19,6 +20,8 @@ const size_t DSIZE = 100000;
 const size_t MAX_SIZE = 10000;
 
 const unsigned long long SEED = 1791409268;
+
+map<uint16_t, RRRtable> tables;
 
 void randomize_bitvector(BitVector &B) {
     for (size_t i = B.size(); i > 0; i--) {
@@ -37,7 +40,6 @@ void randomize_bitvector(BitVector &B) {
         }
     }
 }
-
 
 int main(int argc, char *argv[])
 {
@@ -79,17 +81,18 @@ int main(int argc, char *argv[])
              << "IMPLEMENTED/USED\n"
              << "=======================================================================\n\n";
     } else {
-        cout << "\"Size\";\"Time\";\"RS_Time\";\"RS_Memory\";\"SS_Memory\";\"SS_Time\"\n";
+        // cout << "\"Size\";\"Time\";\"RS_Time\";\"RS_Memory\";\"SS_Memory\";\"SS_Time\"\n";
+        cout << "\"Size\";\"Time\";\"RS_Time\";\"RS_Memory\"\n";
     }
     for (int rep = 0; rep < REPETITIONS; rep++)
     {
-        for (size_t size = 1; size <= MAX_SIZE; size++)
+        for (size_t size = 64; size <= MAX_SIZE; size*=2)
         {
-            BitVector B(size, 0);
-            for (size_t i = 0; i < B.size() * (long double) dens / 10000.0; i++) {
-                B.set1(i);
+            BitVector* B = new BitVector(size, 0);
+            for (size_t i = 0; i < B->size() * (long double) dens / 10000.0; i++) {
+                B->set1(i);
             }
-            randomize_bitvector(B);
+            randomize_bitvector(*B);
 
             std::chrono::high_resolution_clock::time_point start;
             std::chrono::high_resolution_clock::time_point end;
@@ -98,26 +101,35 @@ int main(int argc, char *argv[])
             struct timespec total = {0,0};
             long double rs_time;
 
+            uint16_t cur_k = RRR::chunk_size(B);
+            auto t = tables.find(cur_k);
+            if (t == tables.end())
+                t = tables.emplace(cur_k, RRRtable(cur_k)).first;
+            const RRRtable& cur_t = t->second;
+
+            // RRRtable* table = new RRRtable(RRR::chunk_size(B));
+
+            // optional<RRR> opt;
+            // if (c_time) {
+            //     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
+            //     opt.emplace(&B);
+            //     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+            //     add_time(begin,stop,&total);
+            //     rs_time = get_time(total);
+            // } else {
+            // opt.emplace(&B);
+
             size_t mem0 = malloc_count_current();
-
-            optional<RRR> opt;
-
-            if (c_time) {
-                clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
-                opt.emplace(&B);
-                clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
-                add_time(begin,stop,&total);
-                rs_time = get_time(total);
-            } else {
-                start = std::chrono::high_resolution_clock::now();
-                opt.emplace(&B);
-                end = std::chrono::high_resolution_clock::now();
-            }
-            RRR& R = *opt;
-
+            start = std::chrono::high_resolution_clock::now();
+            RRR* R = new RRR(B, &cur_t);
+            end = std::chrono::high_resolution_clock::now();
             size_t mem1 = malloc_count_current();
 
-            if (!c_time) rs_time = chrono::duration<double, nano>(end - start).count();
+            // }
+            // RRR& R = *opt;
+            // if (!c_time) 
+
+            rs_time = chrono::duration<double, nano>(end - start).count();
 
             size_t rs_mem = mem1 - mem0;
 
@@ -135,36 +147,36 @@ int main(int argc, char *argv[])
 
             if (rank0) {
                 for (size_t i : warmup)
-                    dont_kill_my_methods += R.rank0(i);
+                    dont_kill_my_methods += R->rank0(i);
                 if (c_time){
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
                     for (size_t i : idx)
-                        dont_kill_my_methods += R.rank0(i);
+                        dont_kill_my_methods += R->rank0(i);
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
                     add_time(begin,stop,&total);
                     time += get_time(total);
                 } else {
                     start = std::chrono::high_resolution_clock::now();
                     for (size_t i : idx)
-                        dont_kill_my_methods += R.rank0(i);
+                        dont_kill_my_methods += R->rank0(i);
                     end = std::chrono::high_resolution_clock::now();
                     time += chrono::duration<double, nano>(end - start).count();
                 }
             }
             else if (rank1) {
                 for (size_t i : warmup)
-                    dont_kill_my_methods += R.rank1(i);
+                    dont_kill_my_methods += R->rank1(i);
                 if (c_time){
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &begin);
                     for (size_t i : idx)
-                        dont_kill_my_methods += R.rank1(i);
+                        dont_kill_my_methods += R->rank1(i);
                     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
                     add_time(begin,stop,&total);
                     time += get_time(total);
                 } else {
                     start = std::chrono::high_resolution_clock::now();
                     for (size_t i : idx)
-                        dont_kill_my_methods += R.rank1(i);
+                        dont_kill_my_methods += R->rank1(i);
                     end = std::chrono::high_resolution_clock::now();
                     time += chrono::duration<double, nano>(end - start).count();
                 }
@@ -177,6 +189,8 @@ int main(int argc, char *argv[])
             } else {
                 cout << size << ";" << time / DSIZE<< ";" << rs_time << ";" << rs_mem << "\n";
             }
+            delete R;
+            delete B;
         }
     }
 }

@@ -6,6 +6,22 @@
 #ifndef RRRANK
 #define RRRANK
 
+struct RRRtable {
+    std::vector<std::vector<TYPE>> lookuptable;
+    std::vector<TYPE> pattern_to_class;
+
+    explicit RRRtable(uint16_t K_size){
+        // lookuptable[c][o] = o-th pattern of K_size bits with popcount c (RRR class/offset decoding).
+        pattern_to_class.assign(1ULL << K_size, 0);
+        lookuptable.assign(K_size + 1, std::vector<TYPE>());
+        for (TYPE p = 0; p < (1ULL << K_size); p++) {
+            unsigned c = std::__popcount(p);
+            pattern_to_class[p] = lookuptable[c].size();
+            lookuptable[c].push_back(p);
+        }
+    }
+};
+
 class RRR {
 private:
     unsigned long long block_size;
@@ -18,10 +34,16 @@ private:
     uint16_t K_per_block;
 
     uint16_t *offsets;
-    std::vector<std::vector<TYPE>> lookuptable;
+    const RRRtable* table;
 
 public:
-    RRR(BitVector *B, bool fixSizeToWordSize = false);
+    static uint16_t chunk_size(BitVector* B) {
+        unsigned long long n = B->size();    
+        unsigned long long lg = n > 1 ? (unsigned long long) ceil(log2(n)) : 1;
+        return lg / 2 > 0 ? lg / 2 : 1;
+    }
+
+    RRR(BitVector *B, const RRRtable *table);
     ~RRR();
     unsigned long long rank0(unsigned long long i);
     unsigned long long rank1(unsigned long long i);

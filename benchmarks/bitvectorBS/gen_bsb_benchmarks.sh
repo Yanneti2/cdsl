@@ -26,8 +26,8 @@ for density in d50 d30 d10 d5 d1 d.1 d99.9 d90 d95 d99; do
 
         echo "Running: $op - $density"
 
-        nice -n -20 "$BIN" "-$op" -d "${distributions[$density]}" -ct\
-            > "$OUT/bsb-bitvectorBS-$op-$density.csv" \
+        nice -n -20 "$BIN" "-$op" -d "${distributions[$density]}"\
+            > "$OUT/bsb-bitvectorBS-mem-$op-$density.csv" \
             2> stderr
 
     done
